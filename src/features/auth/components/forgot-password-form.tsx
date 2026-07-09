@@ -35,8 +35,8 @@ export function ForgotPasswordForm() {
         <ArrowLeft className="w-[32px] h-[32px]" />
       </button>
      
-        <div className="w-[100px] h-[100px] rounded-full bg-[#083F92]/10 flex items-center justify-center">
-          <KeyRound className="w-[50px] h-[50px] text-[#083F92]" />
+        <div className="w-[150px] h-[150px] rounded-full bg-[#083F92]/10 flex items-center justify-center">
+          <KeyRound className="w-[100px] h-[100px] text-[#083F92]" />
         </div>
    
 
@@ -62,7 +62,7 @@ export function ForgotPasswordForm() {
                 placeholder="designer@dignitestudios.com" 
                 type="email"
                 maxLength={254}
-                className="w-full h-full bg-white border border-[#3D3775] rounded-[24px] px-[16px] font-normal text-[14px] text-[#181818] placeholder:text-[#181818]"
+                className="w-full h-full bg-white border border-[#3D3775] rounded-[24px] px-[16px] font-normal text-[14px] text-[#181818] placeholder:text-[#a89f9f]"
                 {...register('email')} 
               />
             </div>

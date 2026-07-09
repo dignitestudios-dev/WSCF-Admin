@@ -93,7 +93,7 @@ export function CreateTournamentDialog({ open, onOpenChange }: CreateTournamentD
       <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent
           showCloseButton={false}
-          className="w-[589px]! max-w-[589px]! bg-white rounded-[12px] p-0 border-none shadow-2xl overflow-hidden"
+          className="w-[90vw]! sm:w-[589px]! max-w-[589px]! max-h-[90vh]! overflow-y-auto bg-white rounded-[12px] p-0 border-none shadow-2xl"
         >
           {/* Header */}
           <div className="flex items-start justify-between px-8 pt-8 pb-0">
@@ -176,14 +176,14 @@ export function CreateTournamentDialog({ open, onOpenChange }: CreateTournamentD
                 )}
               </div>
 
-              {/* Entry Fees */}
+               {/* Entry Fees */}
               <div className="flex flex-col gap-2">
                 <Label
                   className="font-poppins font-medium text-[14px] leading-[21px] text-[#181818] capitalize"
                 >
                   Entry Fees
                 </Label>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   {/* Amount Input */}
                   <div className="relative h-[44px] flex-1">
                     <Input
@@ -199,7 +199,7 @@ export function CreateTournamentDialog({ open, onOpenChange }: CreateTournamentD
                   <button
                     type="button"
                     onClick={handleToggleFree}
-                    className={`h-[44px] w-[189px] shrink-0 border rounded-[24px] flex items-center justify-between px-4 transition-colors ${
+                    className={`h-[44px] w-full sm:w-[189px] shrink-0 border rounded-[24px] flex items-center justify-between px-4 transition-colors ${
                       isFree ? 'border-[#083F92] bg-[#083F92]/5' : 'border-[#3D3775] bg-white'
                     }`}
                   >
@@ -217,9 +217,9 @@ export function CreateTournamentDialog({ open, onOpenChange }: CreateTournamentD
               </div>
 
               {/* Tournament Director + Host (Side by side) */}
-              <div className="flex items-start gap-[22px]">
+              <div className="flex flex-col sm:flex-row items-start gap-[22px]">
                 {/* Director */}
-                <div className="flex flex-col gap-2 flex-1">
+                <div className="flex flex-col gap-2 flex-1 w-full">
                   <Label
                     htmlFor="director"
                     className="font-poppins font-medium text-[14px] leading-[21px] text-[#181818] capitalize"
@@ -240,7 +240,7 @@ export function CreateTournamentDialog({ open, onOpenChange }: CreateTournamentD
                 </div>
 
                 {/* Host */}
-                <div className="flex flex-col gap-2 flex-1">
+                <div className="flex flex-col gap-2 flex-1 w-full">
                   <Label
                     htmlFor="host"
                     className="font-poppins font-medium text-[14px] leading-[21px] text-[#181818] capitalize"
@@ -330,9 +330,9 @@ export function CreateTournamentDialog({ open, onOpenChange }: CreateTournamentD
       <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
         <DialogContent
           showCloseButton={false}
-          className="w-[515px]! max-w-[515px]! h-[322px] bg-white rounded-[12px] p-0 border-none shadow-2xl flex flex-col items-center justify-center"
+          className="w-[90vw]! sm:w-[515px]! max-w-[515px]! h-auto py-8 bg-white rounded-[12px] p-10 border-none shadow-2xl flex flex-col items-center justify-center"
         >
-          <div className="flex flex-col items-center gap-6 w-[428px]">
+          <div className="flex flex-col items-center gap-6 w-full max-w-[90%]">
             {/* Circle with check */}
             <div className="w-[120px] h-[120px] rounded-full bg-[#083F92] flex items-center justify-center text-white relative shadow-md">
               <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-[50px] h-[50px]">

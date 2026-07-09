@@ -27,6 +27,7 @@ export function SearchInput({
         width: isFocused ? 350 : 310,
         boxShadow: isFocused ? '0 4px 20px -2px rgba(8, 63, 146, 0.15)' : '0 1px 3px rgba(0, 0, 0, 0.05)'
       }}
+      style={{ maxWidth: '100%' }}
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       className={cn(
         "relative h-[48px] flex items-center border border-[#083F92] rounded-[44px] pl-4 pr-1 bg-white transition-colors duration-250 shrink-0",

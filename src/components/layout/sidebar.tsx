@@ -14,7 +14,8 @@ import {
   FolderLock,
   UserPlus,
   LogOut,
-  Loader2
+  Loader2,
+  X
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -26,7 +27,11 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 
-export function Sidebar() {
+interface SidebarProps {
+  onClose?: () => void;
+}
+
+export function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
@@ -54,7 +59,18 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-[360px] bg-[#083F92] rounded-[24px] flex flex-col shrink-0 relative overflow-hidden shadow-xl text-white select-none">
+    <aside className="w-[360px] bg-[#083F92] h-screen rounded-r-[24px] rounded-l-none lg:h-full lg:rounded-[24px] flex flex-col shrink-0 relative overflow-hidden shadow-xl text-white select-none">
+
+      {/* Mobile Close Button */}
+      {onClose && (
+        <button 
+          onClick={onClose} 
+          className="absolute top-4 right-4 z-20 p-2 rounded-full bg-white/10 hover:bg-white/20 lg:hidden text-white cursor-pointer transition-colors outline-none"
+          aria-label="Close sidebar"
+        >
+          <X className="w-6 h-6" />
+        </button>
+      )}
 
       {/* Logo Container at Top Center */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[177px] h-[100px] bg-white rounded-b-[24px] flex items-center justify-center p-2 z-10 shadow-sm">
@@ -85,6 +101,7 @@ export function Sidebar() {
                 <Link
                   key={item.name}
                   href={item.href}
+                  onClick={() => onClose?.()}
                   className={`flex items-center gap-3 w-full h-[27px] transition-all duration-200 group relative ${isActive
                       ? 'font-semibold text-white'
                       : 'font-light text-white/80 hover:text-white'
@@ -118,7 +135,9 @@ export function Sidebar() {
                 return (
                   <button
                     key={item.name}
-                    onClick={() => setIsLogoutOpen(true)}
+                    onClick={() => {
+                      setIsLogoutOpen(true);
+                    }}
                     className="flex items-center gap-3 w-full h-[27px] text-left transition-all duration-200 group relative font-light text-white/80 hover:text-white bg-transparent border-0 p-0 cursor-pointer outline-none"
                   >
                     <Icon className="h-5 w-5 shrink-0" />
@@ -133,6 +152,7 @@ export function Sidebar() {
                 <Link
                   key={item.name}
                   href={item.href}
+                  onClick={() => onClose?.()}
                   className={`flex items-center gap-3 w-full h-[27px] transition-all duration-200 group relative ${isActive
                       ? 'font-semibold text-white'
                       : 'font-light text-white/80 hover:text-white'

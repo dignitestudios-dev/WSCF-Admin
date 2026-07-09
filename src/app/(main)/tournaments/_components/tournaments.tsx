@@ -60,19 +60,21 @@ export default function Tournaments() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
           
           {/* Left Title + Search pill bar */}
-          <div className="flex items-center gap-6 w-full max-w-[500px]">
-            <h1 className="font-poppins font-bold text-[42px] leading-[63px] text-[#151515] m-0 shrink-0">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full sm:max-w-[500px]">
+            <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#151515] m-0 shrink-0">
               Tournaments
             </h1>
             
             {/* Search Pill Input */}
-            <SearchInput value={searchQuery} onChangeValue={setSearchQuery} />
+            <div className="w-full sm:w-auto">
+              <SearchInput value={searchQuery} onChangeValue={setSearchQuery} />
+            </div>
           </div>
 
           {/* Right Button: Add Tournament */}
           <button
             onClick={() => setShowCreateDialog(true)}
-            className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shrink-0 shadow-sm"
+            className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shrink-0 shadow-sm w-full sm:w-auto justify-center cursor-pointer"
           >
             <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md">
               <Plus className="w-5 h-5" />
@@ -113,46 +115,46 @@ export default function Tournaments() {
               <Link 
                 key={t.id}
                 href={`/tournaments/${t.id}`}
-                className="w-full h-[107px] bg-white border border-[#083F92]/30 rounded-[12px] shadow-[0px_4px_4px_rgba(0,0,0,0.05)] hover:shadow-[0px_4px_4px_rgba(0,0,0,0.1)] transition-all duration-150 flex items-center justify-between px-6 cursor-pointer"
+                className="w-full min-h-[107px] py-4 md:py-0 bg-white border border-[#083F92]/30 rounded-[12px] shadow-[0px_4px_4px_rgba(0,0,0,0.05)] hover:shadow-[0px_4px_4px_rgba(0,0,0,0.1)] transition-all duration-150 flex flex-col md:flex-row md:items-center justify-between px-6 cursor-pointer gap-4"
               >
                 {/* Left Card Details */}
-                <div className="flex items-center gap-4 max-w-[85%]">
+                <div className="flex items-start md:items-center gap-4 w-full md:max-w-[85%]">
                   {/* Chess icon circle container */}
                   <div className="w-[40px] h-[40px] bg-[#083F92] text-white rounded-full flex items-center justify-center shrink-0">
                     <Crown className="w-5 h-5" />
                   </div>
 
                   {/* Text descriptions */}
-                  <div className="flex flex-col gap-2">
-                    <h2 className="font-poppins font-medium text-[18px] leading-[27px] text-[#083F92] truncate w-full">
+                  <div className="flex flex-col gap-2 min-w-0 flex-1">
+                    <h2 className="font-poppins font-medium text-[16px] md:text-[18px] leading-[24px] md:leading-[27px] text-[#083F92] truncate w-full">
                       {t.title}
                     </h2>
                     
                     {/* Inner items horizontal details row */}
-                    <div className="flex items-center gap-4 flex-wrap text-[#151515]/90">
+                    <div className="flex items-center gap-x-4 gap-y-2 flex-wrap text-[#151515]/90">
                       
                       {/* Location details */}
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <MapPin className="w-4 h-4 text-[#083F92]" />
-                        <span className="font-poppins font-normal text-[14px] leading-[21px]">{t.location}</span>
+                        <span className="font-poppins font-normal text-[13px] md:text-[14px]">{t.location}</span>
                       </div>
 
                       {/* Date details */}
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <Calendar className="w-4 h-4 text-[#083F92]" />
-                        <span className="font-poppins font-normal text-[14px] leading-[21px]">{t.date}</span>
+                        <span className="font-poppins font-normal text-[13px] md:text-[14px]">{t.date}</span>
                       </div>
 
                       {/* Seats details */}
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <Armchair className="w-4 h-4 text-[#083F92]" />
-                        <span className="font-poppins font-normal text-[14px] leading-[21px]">{t.seats}</span>
+                        <span className="font-poppins font-normal text-[13px] md:text-[14px]">{t.seats}</span>
                       </div>
 
                       {/* Price tag details */}
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <Tag className="w-4 h-4 text-[#083F92]" />
-                        <span className="font-poppins font-normal text-[14px] leading-[21px]">{t.price}</span>
+                        <span className="font-poppins font-normal text-[13px] md:text-[14px]">{t.price}</span>
                       </div>
 
                     </div>
@@ -160,7 +162,7 @@ export default function Tournaments() {
                 </div>
 
                 {/* Right Card Actions (Status Pill + Navigation Chevron) */}
-                <div className="flex items-center gap-6 shrink-0">
+                <div className="flex items-center justify-between md:justify-end gap-6 shrink-0 w-full md:w-auto border-t md:border-t-0 pt-3 md:pt-0 border-neutral-100">
                   {/* Status badge */}
                   <div className={`w-[89px] h-[38px] rounded-[8px] flex items-center justify-center font-poppins font-medium text-[13px] leading-[18px] ${
                     t.status === 'Completed'
@@ -171,7 +173,7 @@ export default function Tournaments() {
                   </div>
                   
                   {/* Action arrow icon */}
-                  <ArrowRight className="w-6 h-6 text-black/80 hover:translate-x-0.5 transition-transform" />
+                  <ArrowRight className="w-6 h-6 text-black/80 hover:translate-x-0.5 transition-transform hidden md:block" />
                 </div>
 
               </Link>

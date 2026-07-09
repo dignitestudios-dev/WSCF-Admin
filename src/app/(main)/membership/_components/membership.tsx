@@ -111,7 +111,7 @@ export default function Membership() {
         {/* Top Header & Export Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
           <div className="flex flex-col">
-            <h1 className="font-poppins font-bold text-[42px] leading-[63px] text-[#083F92] m-0">
+            <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0">
               Membership
             </h1>
             <p className="font-poppins font-medium text-[12px] leading-[18px] text-[#787878] m-0">
@@ -119,7 +119,7 @@ export default function Membership() {
             </p>
           </div>
 
-          <div className="flex items-center gap-4 flex-wrap md:flex-nowrap">
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
             {/* Search Input Box */}
             <SearchInput 
               value={searchQuery} 
@@ -130,7 +130,7 @@ export default function Membership() {
             />
 
             {/* Export CSV Button */}
-            <button className="flex items-center gap-2 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-[174px] justify-center shrink-0">
+            <button className="flex items-center gap-2 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-full md:w-[174px] justify-center shrink-0 cursor-pointer">
               <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md shrink-0">
                 <FileSpreadsheet className="w-5 h-5" />
               </div>
@@ -267,7 +267,7 @@ export default function Membership() {
         <Dialog open={!!notifyingMember} onOpenChange={(open) => !open && setNotifyingMember(null)}>
           <DialogContent 
             showCloseButton={true}
-            className="sm:max-w-[589px] w-[589px] h-[311px] bg-white rounded-[12px] p-8 gap-0 border border-[#DADADA]/40 shadow-2xl outline-none"
+            className="sm:max-w-[589px] w-[90vw] h-auto min-h-[311px] bg-white rounded-[12px] p-6 sm:p-8 gap-0 border border-[#DADADA]/40 shadow-2xl outline-none"
           >
             <DialogTitle className="font-general-sans font-semibold text-[32px] leading-[43px] text-[#181818] m-0 mb-6">
               Send Notification

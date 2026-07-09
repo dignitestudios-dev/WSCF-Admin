@@ -268,7 +268,7 @@ export default function ResultUploader() {
               {/* Light blue border-box matching spec: bg rgba(8,63,146,0.1), rounded 12px */}
               <div className="w-full bg-[#083F92]/10 rounded-[12px] p-6 flex flex-col gap-4">
                 {/* Location row */}
-                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-start md:items-center gap-1 md:gap-4 border-b border-[#083F92]/5 pb-2 md:pb-0 md:border-b-0">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-[#083F92] flex items-center justify-center text-white shrink-0">
                       <MapPin className="w-[16px] h-[16px]" />
@@ -277,14 +277,14 @@ export default function ResultUploader() {
                       Location
                     </span>
                   </div>
-                  <span className="font-general-sans font-medium text-[20px] leading-[27px] text-black">:</span>
-                  <span className="font-poppins font-bold text-[16px] md:text-[20px] leading-[30px] text-[#083F92]">
+                  <span className="hidden md:inline font-general-sans font-medium text-[20px] leading-[27px] text-black">:</span>
+                  <span className="font-poppins font-bold text-[16px] md:text-[20px] leading-[30px] text-[#083F92] pl-11 md:pl-0">
                     {selectedTournament.location}
                   </span>
                 </div>
 
                 {/* Entry fee row */}
-                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-start md:items-center gap-1 md:gap-4 border-b border-[#083F92]/5 pb-2 md:pb-0 md:border-b-0">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-[#083F92] flex items-center justify-center text-white shrink-0">
                       <DollarSign className="w-[16px] h-[16px]" />
@@ -293,14 +293,14 @@ export default function ResultUploader() {
                       Entry fee
                     </span>
                   </div>
-                  <span className="font-general-sans font-medium text-[20px] leading-[27px] text-black">:</span>
-                  <span className="font-poppins font-bold text-[16px] md:text-[20px] leading-[30px] text-[#083F92]">
+                  <span className="hidden md:inline font-general-sans font-medium text-[20px] leading-[27px] text-black">:</span>
+                  <span className="font-poppins font-bold text-[16px] md:text-[20px] leading-[30px] text-[#083F92] pl-11 md:pl-0">
                     {details.entryFee}
                   </span>
                 </div>
 
                 {/* Date of Tournament row */}
-                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-start md:items-center gap-1 md:gap-4 border-b border-[#083F92]/5 pb-2 md:pb-0 md:border-b-0">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-[#083F92] flex items-center justify-center text-white shrink-0">
                       <Calendar className="w-[16px] h-[16px]" />
@@ -309,14 +309,14 @@ export default function ResultUploader() {
                       Date of Tournament
                     </span>
                   </div>
-                  <span className="font-general-sans font-medium text-[20px] leading-[27px] text-black">:</span>
-                  <span className="font-poppins font-bold text-[16px] md:text-[20px] leading-[30px] text-[#083F92]">
+                  <span className="hidden md:inline font-general-sans font-medium text-[20px] leading-[27px] text-black">:</span>
+                  <span className="font-poppins font-bold text-[16px] md:text-[20px] leading-[30px] text-[#083F92] pl-11 md:pl-0">
                     {selectedTournament.date}
                   </span>
                 </div>
 
                 {/* Division row */}
-                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-start md:items-center gap-1 md:gap-4 border-b border-[#083F92]/5 pb-2 md:pb-0 md:border-b-0">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-[#083F92] flex items-center justify-center text-white shrink-0">
                       <Users className="w-[16px] h-[16px]" />
@@ -325,14 +325,14 @@ export default function ResultUploader() {
                       Division
                     </span>
                   </div>
-                  <span className="font-general-sans font-medium text-[20px] leading-[27px] text-black">:</span>
-                  <span className="font-poppins font-bold text-[16px] md:text-[20px] leading-[30px] text-[#083F92]">
+                  <span className="hidden md:inline font-general-sans font-medium text-[20px] leading-[27px] text-black">:</span>
+                  <span className="font-poppins font-bold text-[16px] md:text-[20px] leading-[30px] text-[#083F92] pl-11 md:pl-0">
                     {details.division}
                   </span>
                 </div>
 
                 {/* Tournament Id row */}
-                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-start md:items-center gap-1 md:gap-4 border-b border-[#083F92]/5 pb-2 md:pb-0 md:border-b-0">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-[#083F92] flex items-center justify-center text-white shrink-0">
                       <Shield className="w-[16px] h-[16px]" />
@@ -341,14 +341,14 @@ export default function ResultUploader() {
                       Tournament Id
                     </span>
                   </div>
-                  <span className="font-general-sans font-medium text-[20px] leading-[27px] text-black">:</span>
-                  <span className="font-poppins font-bold text-[16px] md:text-[20px] leading-[30px] text-[#083F92]">
+                  <span className="hidden md:inline font-general-sans font-medium text-[20px] leading-[27px] text-black">:</span>
+                  <span className="font-poppins font-bold text-[16px] md:text-[20px] leading-[30px] text-[#083F92] pl-11 md:pl-0">
                     {details.idString}
                   </span>
                 </div>
 
                 {/* Tournament Host row */}
-                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-start md:items-center gap-1 md:gap-4 border-b border-[#083F92]/5 pb-2 md:pb-0 md:border-b-0">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-[#083F92] flex items-center justify-center text-white shrink-0">
                       <User className="w-[16px] h-[16px]" />
@@ -357,14 +357,14 @@ export default function ResultUploader() {
                       Tournament Host
                     </span>
                   </div>
-                  <span className="font-general-sans font-medium text-[20px] leading-[27px] text-black">:</span>
-                  <span className="font-poppins font-bold text-[16px] md:text-[20px] leading-[30px] text-[#083F92]">
+                  <span className="hidden md:inline font-general-sans font-medium text-[20px] leading-[27px] text-black">:</span>
+                  <span className="font-poppins font-bold text-[16px] md:text-[20px] leading-[30px] text-[#083F92] pl-11 md:pl-0">
                     {details.host}
                   </span>
                 </div>
 
                 {/* Tournament Director row */}
-                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-start md:items-center gap-1 md:gap-4">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-[#083F92] flex items-center justify-center text-white shrink-0">
                       <User className="w-[16px] h-[16px]" />
@@ -373,8 +373,8 @@ export default function ResultUploader() {
                       Tournament Director
                     </span>
                   </div>
-                  <span className="font-general-sans font-medium text-[20px] leading-[27px] text-black">:</span>
-                  <span className="font-poppins font-bold text-[16px] md:text-[20px] leading-[30px] text-[#083F92]">
+                  <span className="hidden md:inline font-general-sans font-medium text-[20px] leading-[27px] text-black">:</span>
+                  <span className="font-poppins font-bold text-[16px] md:text-[20px] leading-[30px] text-[#083F92] pl-11 md:pl-0">
                     {details.director}
                   </span>
                 </div>
@@ -489,19 +489,21 @@ export default function ResultUploader() {
         {/* Top Title & Action Button Row */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
           <div className="flex flex-col">
-            <h1 className="font-poppins font-bold text-[42px] leading-[63px] text-[#083F92] m-0">
+            <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0">
               Upload Result
             </h1>
           </div>
 
-          <div className="flex items-center gap-4 flex-wrap md:flex-nowrap">
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
             {/* Search Input Box */}
-            <SearchInput value={searchQuery} onChangeValue={setSearchQuery} />
+            <div className="w-full sm:w-auto">
+              <SearchInput value={searchQuery} onChangeValue={setSearchQuery} />
+            </div>
 
             {/* Export CSV Button */}
             <button 
               onClick={handleExportCSV}
-              className="flex items-center gap-2 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-[174px] justify-center shrink-0 border-none cursor-pointer"
+              className="flex items-center gap-2 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-full sm:w-auto md:w-[174px] justify-center shrink-0 border-none cursor-pointer"
             >
               <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md shrink-0">
                 <FileSpreadsheet className="w-5 h-5" />
@@ -524,26 +526,26 @@ export default function ResultUploader() {
                   className="w-full bg-white border border-[#083F92] hover:border-[#083F92]/70 shadow-[0px_4px_12px_rgba(8,63,146,0.1)] hover:shadow-[0px_6px_16px_rgba(8,63_146,0.15)] rounded-[12px] p-5 flex flex-col gap-3 relative transition-all duration-200"
                 >
                   {/* Top Row: Icon + Title + Status Badge */}
-                  <div className="flex items-center justify-between gap-4 w-full">
-                    <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 w-full">
+                    <div className="flex items-center gap-3 min-w-0 w-full sm:w-auto">
                       {/* Chess icon in a dark blue circle */}
                       <div className="w-[40px] h-[40px] bg-[#083F92] rounded-full flex items-center justify-center text-white shrink-0 shadow-sm">
                         <Crown className="w-5 h-5" />
                       </div>
-                      <h2 className="font-poppins font-medium text-[18px] leading-[27px] text-[#151515] truncate">
+                      <h2 className="font-poppins font-medium sm:text-[18px] text-[15px] leading-[22px] sm:leading-[27px] text-[#151515] truncate flex-1">
                         {t.title}
                       </h2>
                     </div>
 
                     {/* Status Badge */}
                     {isUploaded ? (
-                      <div className="flex items-center px-4 py-2 bg-[#083F92] text-white rounded-[8px] gap-2 font-medium text-[13px] leading-[18px] shadow-sm shrink-0">
+                      <div className="flex items-center px-4 py-2 bg-[#083F92] text-white rounded-[8px] gap-2 font-medium text-[13px] leading-[18px] shadow-sm shrink-0 self-start sm:self-auto">
                         <span>Completed</span>
                         <div className="w-[2px] h-[14px] bg-white/40 shrink-0" />
                         <span>Uploaded</span>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-center px-4 py-2 bg-[#083F92] text-white rounded-[8px] font-medium text-[13px] leading-[18px] shadow-sm shrink-0">
+                      <div className="flex items-center justify-center px-4 py-2 bg-[#083F92] text-white rounded-[8px] font-medium text-[13px] leading-[18px] shadow-sm shrink-0 self-start sm:self-auto">
                         Completed
                       </div>
                     )}
@@ -551,7 +553,7 @@ export default function ResultUploader() {
 
                   {/* Bottom Row: Location + Date + Action Anchor */}
                   <div className="flex items-center justify-between border-t border-[#EEEEEE] pt-3 mt-1 gap-4 flex-wrap sm:flex-nowrap">
-                    <div className="flex items-center gap-6 text-[#151515]">
+                    <div className="flex items-center gap-4 sm:gap-6 text-[#151515] flex-wrap sm:flex-nowrap">
                       {/* Location details */}
                       <div className="flex items-center gap-2">
                         <MapPin className="w-4 h-4 text-[#083F92]" />
