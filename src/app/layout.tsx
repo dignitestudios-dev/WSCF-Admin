@@ -34,8 +34,8 @@ const generalSans = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Admin Management System",
-  description: "Admin panel using Next.js App Router",
+  title: "WSCF Chess Admin Panel",
+  description: "WSCF Chess Admin Panel",
 };
 
 export default function RootLayout({
