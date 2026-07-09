@@ -16,7 +16,7 @@ export function VerifyOtpForm() {
   const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
   const [hasError, setHasError] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
-  const [timer, setTimer] = useState(60);
+  const [timer, setTimer] = useState(0);
   const inputRefs = useRef<HTMLInputElement[]>([]);
 
   const { mutate: resendOtp, isPending: isResending } = useForgotPassword();
@@ -37,16 +37,19 @@ export function VerifyOtpForm() {
         const remaining = Math.max(0, Math.ceil((Number(expiresAt) - Date.now()) / 1000));
         setTimer(remaining);
       } else {
-        const target = Date.now() + 60000;
-        window.localStorage.setItem('otp-timer-expires', String(target));
-        setTimer(60);
+        setTimer(0);
       }
     }
   }, []);
 
   // Timer countdown effect
   useEffect(() => {
-    if (timer === 0) return;
+    if (timer === 0) {
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem('otp-timer-expires');
+      }
+      return;
+    }
     const interval = setInterval(() => {
       setTimer((prev) => prev - 1);
     }, 1000);
@@ -124,7 +127,7 @@ export function VerifyOtpForm() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const code = otp.join('');
-    
+
     if (code.length < 6) {
       setHasError(true);
       setIsShaking(true);
@@ -156,9 +159,9 @@ export function VerifyOtpForm() {
           animation: shake 0.4s ease-in-out;
         }
       `}</style>
-      
+
       {/* Back Button */}
-      <button 
+      <button
         type="button"
         onClick={() => router.push('/login')}
         className="absolute left-[-160px] top-[-60px] lg:left-[-120px] lg:top-[-40px] xl:left-[-180px] xl:top-[-60px] w-[50px] h-[50px] bg-[#083F92] hover:bg-[#083F92]/90 transition-colors rounded-[25px] flex items-center justify-center text-white cursor-pointer shadow-md"
@@ -168,7 +171,7 @@ export function VerifyOtpForm() {
 
       {/* Header Password Icon */}
       <div className=" rounded-full  flex items-center justify-center overflow-hidden">
-        <Image 
+        <Image
           src="/images/verify-otp.webp"
           alt="Verify OTP Icon"
           width={150}
@@ -190,7 +193,7 @@ export function VerifyOtpForm() {
       {/* Form */}
       <form onSubmit={onSubmit} className="flex flex-col items-center gap-[26px] w-full max-w-[421px]">
         <div className="flex flex-col items-center gap-[26px] w-full">
-          
+
           {/* OTP inputs container */}
           <div className={`flex justify-center gap-[11px] w-full max-w-[343px] h-[49px] ${isShaking ? 'shake-animation' : ''}`}>
             {otp.map((val, idx) => (
@@ -209,11 +212,10 @@ export function VerifyOtpForm() {
                   onKeyDown={(e) => handleKeyDown(idx, e)}
                   onPaste={handlePaste}
                   maxLength={1}
-                  className={`w-full h-full bg-white border rounded-[24px] text-center text-transparent caret-transparent focus:outline-none transition-colors selection:bg-transparent ${
-                    hasError 
-                      ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' 
+                  className={`w-full h-full bg-white border rounded-[24px] text-center text-transparent caret-transparent focus:outline-none transition-colors selection:bg-transparent ${hasError
+                      ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
                       : 'border-[#3D3775] focus:border-[#083F92] focus:ring-1 focus:ring-[#083F92]'
-                  }`}
+                    }`}
                 />
               </div>
             ))}
@@ -231,15 +233,15 @@ export function VerifyOtpForm() {
               </span>
             </Button>
 
-            <p className="w-full h-[22px] font-normal text-[16px] leading-[22px] text-center tracking-[0.01em] text-[#565656] m-0">
+            <p className="w-full h-[22px] text-nowrap font-normal text-[16px] leading-[22px] text-center tracking-[0.01em] text-[#565656] m-0">
               Didn't receive the code yet?{' '}
               {timer > 0 ? (
                 <span className="font-semibold text-neutral-400 cursor-not-allowed">
                   Resend in {timer}s
                 </span>
               ) : (
-                <span 
-                  onClick={handleResend} 
+                <span
+                  onClick={handleResend}
                   className={`font-semibold text-[#083F92] cursor-pointer hover:underline ${isResending ? 'opacity-50 pointer-events-none' : ''}`}
                 >
                   {isResending ? 'Resending...' : 'Resend'}

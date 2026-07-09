@@ -130,25 +130,25 @@ export default function TournamentDetail() {
                 { label: 'Tournament Host', value: tournamentDetails.tournamentHost, icon: User },
                 { label: 'Tournament Director', value: tournamentDetails.tournamentDirector, icon: Award }
               ].map((item, idx) => (
-                <div key={idx} className="flex items-center w-full h-[32px]">
+                <div key={idx} className="flex flex-col sm:flex-row sm:items-center w-full sm:h-[32px] gap-1 sm:gap-0 border-b border-[#083F92]/5 pb-2 sm:pb-0 sm:border-b-0">
                   
                   {/* Left Label column with Icon */}
-                  <div className="flex items-center gap-2.5 w-[280px] shrink-0">
+                  <div className="flex items-center gap-2.5 w-full sm:w-[280px] shrink-0">
                     <div className="w-[32px] h-[32px] bg-[#083F92] text-white rounded-full flex items-center justify-center shrink-0">
                       <item.icon className="w-4 h-4" />
                     </div>
-                    <span className="font-poppins font-medium text-[20px] leading-[30px] text-[#636363]">
+                    <span className="font-poppins font-medium text-[16px] sm:text-[20px] leading-[30px] text-[#636363]">
                       {item.label}
                     </span>
                   </div>
 
                   {/* Colon Separator */}
-                  <span className="font-sans font-medium text-[20px] leading-[27px] text-[#000000] w-[30px] shrink-0 text-center">
+                  <span className="hidden sm:inline font-sans font-medium text-[20px] leading-[27px] text-[#000000] w-[30px] shrink-0 text-center">
                     :
                   </span>
 
                   {/* Value column */}
-                  <span className="font-poppins font-bold text-[20px] leading-[30px] text-[#083F92] truncate">
+                  <span className="font-poppins font-bold text-[16px] sm:text-[20px] leading-[30px] text-[#083F92] truncate pl-11 sm:pl-0">
                     {item.value}
                   </span>
 
@@ -161,13 +161,13 @@ export default function TournamentDetail() {
           <div className="w-full bg-[#083F92]/10 rounded-[12px] p-6 flex flex-col gap-6 relative">
             
             {/* Header titles + CSV action button */}
-            <div className="flex items-center justify-between w-full border-b border-[#083F92]/10 pb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full border-b border-[#083F92]/10 pb-2 gap-4">
               <h2 className="font-poppins font-bold text-[24px] leading-[36px] text-[#083F92] m-0">
                 Registered Players ({registeredPlayers.length})
               </h2>
               
               {/* CSV Button */}
-              <button className="flex items-center gap-2 px-3 py-1.5 bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[42px] shrink-0 shadow-sm">
+              <button className="flex items-center gap-2 px-3 py-1.5 bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[42px] shrink-0 shadow-sm w-full sm:w-auto justify-center cursor-pointer">
                 <div className="w-[32px] h-[32px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md">
                   <FileSpreadsheet className="w-4 h-4" />
                 </div>
@@ -182,7 +182,7 @@ export default function TournamentDetail() {
               
               {/* Scrollable Table Area */}
               <div className="overflow-x-auto w-full">
-                <table className="w-full border-collapse">
+                <table className="w-full border-collapse min-w-[800px]">
                   
                   {/* Table Header */}
                   <thead>

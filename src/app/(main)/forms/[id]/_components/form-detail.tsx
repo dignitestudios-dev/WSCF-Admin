@@ -257,81 +257,85 @@ export default function FormDetail() {
 
         {/* Table Container */}
         <div className="w-full bg-[#FFFFFF] border border-[#DADADA] rounded-[24px] overflow-hidden flex flex-col shadow-xs mt-4">
-          {/* Table Header */}
-          <div 
-            className="w-full bg-[#083F92] border-4 border-[#F4F4F4] rounded-t-[20px] h-[54px] grid grid-cols-[260px_130px_150px_130px_100px_1fr] items-center px-6"
-          >
-            <span className="font-poppins font-bold text-[13px] leading-[20px] text-white">Filed Title</span>
-            <span className="font-poppins font-bold text-[13px] leading-[20px] text-white">Type</span>
-            <span className="font-poppins font-bold text-[13px] leading-[20px] text-white">Value</span>
-            <span className="font-poppins font-bold text-[13px] leading-[20px] text-white">Nature</span>
-            <span className="font-poppins font-bold text-[13px] leading-[20px] text-white">Length</span>
-            <span className="font-poppins font-bold text-[13px] leading-[20px] text-white text-right">Action</span>
-          </div>
-
-          {/* Table Rows */}
-          <div className="flex flex-col w-full">
-            {fields.length > 0 ? (
-              fields.map((field, index) => (
-                <div
-                  key={field.id}
-                  className={`w-full min-h-[52px] grid grid-cols-[260px_130px_150px_130px_100px_1fr] items-center px-6 border-b border-[#DADADA]/30 last:border-0 ${
-                    index % 2 === 1 ? 'bg-[#083F92]/10' : 'bg-white'
-                  }`}
-                >
-                  {/* Field Title */}
-                  <span className="font-poppins font-semibold text-[13px] leading-[20px] text-[#636363] py-2 truncate pr-4">
-                    {field.title}
-                  </span>
-
-                  {/* Type */}
-                  <span className="font-poppins font-semibold text-[13px] leading-[20px] text-[#636363]">
-                    {field.type}
-                  </span>
-
-                  {/* Value */}
-                  <span className="font-poppins font-semibold text-[13px] leading-[20px] text-[#636363] truncate pr-4">
-                    {field.value}
-                  </span>
-
-                  {/* Nature */}
-                  <span className="font-poppins font-semibold text-[13px] leading-[20px] text-[#636363]">
-                    {field.nature}
-                  </span>
-
-                  {/* Length */}
-                  <span className="font-poppins font-semibold text-[13px] leading-[20px] text-[#636363]">
-                    {field.length}
-                  </span>
-
-                  {/* Actions Column */}
-                  <div className="flex justify-end items-center gap-4">
-                    {/* Edit button */}
-                    <button
-                      onClick={() => handleOpenEditDialog(field)}
-                      className="w-[32px] h-[32px] bg-[#083F92]/10 hover:bg-[#083F92]/20 transition-colors rounded-full flex items-center justify-center text-[#083F92] cursor-pointer focus:outline-none"
-                      title="Edit Field"
-                    >
-                      <Pencil className="w-[15px] h-[15px]" />
-                    </button>
-
-                    {/* Delete button */}
-                    <button
-                      onClick={() => handleDeleteField(field)}
-                      className="w-[32px] h-[32px] bg-[#083F92]/10 hover:bg-destructive/10 transition-colors rounded-full flex items-center justify-center text-[#CE2D32] cursor-pointer focus:outline-none"
-                      title="Delete Field"
-                    >
-                      <Trash2 className="w-[15px] h-[15px]" />
-                    </button>
-                  </div>
-
-                </div>
-              ))
-            ) : (
-              <div className="w-full py-16 text-center text-[#787878] font-poppins bg-white">
-                No fields created for this form yet. Click "Add Field" to start building it.
+          <div className="overflow-x-auto w-full">
+            <div className="min-w-[800px] flex flex-col">
+              {/* Table Header */}
+              <div 
+                className="w-full bg-[#083F92] border-4 border-[#F4F4F4] rounded-t-[20px] h-[54px] grid grid-cols-[260px_130px_150px_130px_100px_1fr] items-center px-6"
+              >
+                <span className="font-poppins font-bold text-[13px] leading-[20px] text-white">Filed Title</span>
+                <span className="font-poppins font-bold text-[13px] leading-[20px] text-white">Type</span>
+                <span className="font-poppins font-bold text-[13px] leading-[20px] text-white">Value</span>
+                <span className="font-poppins font-bold text-[13px] leading-[20px] text-white">Nature</span>
+                <span className="font-poppins font-bold text-[13px] leading-[20px] text-white">Length</span>
+                <span className="font-poppins font-bold text-[13px] leading-[20px] text-white text-right">Action</span>
               </div>
-            )}
+
+              {/* Table Rows */}
+              <div className="flex flex-col w-full">
+                {fields.length > 0 ? (
+                  fields.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className={`w-full min-h-[52px] grid grid-cols-[260px_130px_150px_130px_100px_1fr] items-center px-6 border-b border-[#DADADA]/30 last:border-0 ${
+                        index % 2 === 1 ? 'bg-[#083F92]/10' : 'bg-white'
+                      }`}
+                    >
+                      {/* Field Title */}
+                      <span className="font-poppins font-semibold text-[13px] leading-[20px] text-[#636363] py-2 truncate pr-4">
+                        {field.title}
+                      </span>
+
+                      {/* Type */}
+                      <span className="font-poppins font-semibold text-[13px] leading-[20px] text-[#636363]">
+                        {field.type}
+                      </span>
+
+                      {/* Value */}
+                      <span className="font-poppins font-semibold text-[13px] leading-[20px] text-[#636363] truncate pr-4">
+                        {field.value}
+                      </span>
+
+                      {/* Nature */}
+                      <span className="font-poppins font-semibold text-[13px] leading-[20px] text-[#636363]">
+                        {field.nature}
+                      </span>
+
+                      {/* Length */}
+                      <span className="font-poppins font-semibold text-[13px] leading-[20px] text-[#636363]">
+                        {field.length}
+                      </span>
+
+                      {/* Actions Column */}
+                      <div className="flex justify-end items-center gap-4">
+                        {/* Edit button */}
+                        <button
+                          onClick={() => handleOpenEditDialog(field)}
+                          className="w-[32px] h-[32px] bg-[#083F92]/10 hover:bg-[#083F92]/20 transition-colors rounded-full flex items-center justify-center text-[#083F92] cursor-pointer focus:outline-none"
+                          title="Edit Field"
+                        >
+                          <Pencil className="w-[15px] h-[15px]" />
+                        </button>
+
+                        {/* Delete button */}
+                        <button
+                          onClick={() => handleDeleteField(field)}
+                          className="w-[32px] h-[32px] bg-[#083F92]/10 hover:bg-destructive/10 transition-colors rounded-full flex items-center justify-center text-[#CE2D32] cursor-pointer focus:outline-none"
+                          title="Delete Field"
+                        >
+                          <Trash2 className="w-[15px] h-[15px]" />
+                        </button>
+                      </div>
+
+                    </div>
+                  ))
+                ) : (
+                  <div className="w-full py-16 text-center text-[#787878] font-poppins bg-white">
+                    No fields created for this form yet. Click "Add Field" to start building it.
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -339,7 +343,7 @@ export default function FormDetail() {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent 
             showCloseButton={true}
-            className="sm:max-w-[580px] w-[580px] bg-white rounded-[12px] p-8 gap-0 border border-[#DADADA]/40 shadow-2xl outline-none"
+            className="sm:max-w-[580px] w-[90vw] bg-white rounded-[12px] p-6 sm:p-8 gap-0 border border-[#DADADA]/40 shadow-2xl outline-none"
           >
             <DialogTitle className="font-heading text-base leading-none font-semibold text-[32px]! text-[#181818] m-0 mb-6 font-general-sans">
               {editingField ? 'Edit Field' : 'Add Field'}

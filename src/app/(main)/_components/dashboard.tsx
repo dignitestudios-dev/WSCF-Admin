@@ -51,14 +51,14 @@ export default function Dashboard() {
       
       {/* Top Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
-        <h1 className="font-poppins font-semibold text-[44px] leading-[54px] tracking-[-0.019em] text-[#083F92] m-0">
+        <h1 className="font-poppins font-semibold sm:text-[44px] text-[28px] sm:leading-[54px] leading-[36px] tracking-[-0.019em] text-[#083F92] m-0">
           Dashboard
         </h1>
         
         {/* Actions Button Group */}
-        <div className="flex items-center gap-[12px] bg-[#083F92]/10 p-2.5 rounded-[100px] shadow-sm shrink-0">
+        <div className="flex items-center gap-[12px] bg-[#083F92]/10 p-2.5 rounded-[100px] shadow-sm shrink-0 max-w-full overflow-x-auto no-scrollbar">
           {/* Button 1: Already uploaded file */}
-          <button className="flex items-center gap-2 px-4 py-2 bg-transparent text-[#000000] hover:bg-black/5 rounded-[100px] transition-colors focus:outline-none">
+          <button className="flex items-center gap-2 px-4 py-2 bg-transparent text-[#000000] hover:bg-black/5 rounded-[100px] transition-colors focus:outline-none shrink-0">
             <div className="w-[32px] h-[32px] bg-[#083F92] rounded-full flex items-center justify-center text-white">
               <FileSpreadsheet className="w-4 h-4" />
             </div>
@@ -71,7 +71,7 @@ export default function Dashboard() {
           <div className="w-[2px] h-6 bg-[#083F92] shrink-0" />
           
           {/* Button 2: Import Master File */}
-          <button className="flex items-center gap-2 px-4 py-2 bg-transparent text-[#000000] hover:bg-black/5 rounded-[100px] transition-colors focus:outline-none">
+          <button className="flex items-center gap-2 px-4 py-2 bg-transparent text-[#000000] hover:bg-black/5 rounded-[100px] transition-colors focus:outline-none shrink-0">
             <div className="w-[32px] h-[32px] bg-[#083F92] rounded-full flex items-center justify-center text-white">
               <Plus className="w-5 h-5" />
             </div>
@@ -94,10 +94,10 @@ export default function Dashboard() {
         <div className="xl:col-span-6 flex flex-col gap-6 w-full">
           
           {/* Stats Cards Row */}
-          <div className="flex flex-row gap-6 w-full flex-wrap lg:flex-nowrap">
+          <div className="flex flex-row gap-6 w-full flex-wrap justify-center sm:justify-start lg:flex-nowrap">
             
             {/* Card 1: Total Users */}
-            <div className="w-[236.5px] h-[240px] bg-[#083F92]/10 rounded-[16px] relative shadow-sm group hover:shadow-md transition-all duration-200 shrink-0">
+            <div className="w-full sm:w-[236.5px] h-[240px] bg-[#083F92]/10 rounded-[16px] relative shadow-sm group hover:shadow-md transition-all duration-200 shrink-0">
               <span className="absolute left-[16px] top-[16px] font-poppins font-light text-[16px] leading-[24px] tracking-[-0.019em] text-[#000000]/70">
                 Total User's Count
               </span>
@@ -123,7 +123,7 @@ export default function Dashboard() {
             </div>
 
             {/* Card 2: Active Users */}
-            <div className="w-[236.5px] h-[240px] bg-[#083F92]/10 rounded-[16px] relative shadow-sm group hover:shadow-md transition-all duration-200 shrink-0">
+            <div className="w-full sm:w-[236.5px] h-[240px] bg-[#083F92]/10 rounded-[16px] relative shadow-sm group hover:shadow-md transition-all duration-200 shrink-0">
               <span className="absolute left-[16px] top-[16px] font-poppins font-light text-[16px] leading-[24px] tracking-[-0.019em] text-[#000000]/70">
                 Active User Count
               </span>
@@ -225,7 +225,7 @@ export default function Dashboard() {
             </div>
 
             {/* Bottom Chart Legends */}
-            <div className="flex justify-between items-center w-full max-w-[318px] mx-auto z-10 border-t border-white/10 pt-4 text-nowrap">
+            <div className="flex justify-between items-center w-full max-w-[318px] mx-auto z-10 border-t border-white/10 pt-4 flex-wrap gap-2 text-nowrap justify-center">
               <div className="flex items-center gap-1.5">
                 <div className="w-3 h-3 rounded-full bg-[#FFFFFF] shrink-0" />
                 <span className="font-poppins font-medium text-[13px] leading-[18px] text-white">
@@ -272,7 +272,7 @@ export default function Dashboard() {
               return (
                 <div 
                   key={t.id} 
-                  className={`w-full h-[72px] flex items-center justify-between px-4 py-3 rounded-[8px] transition-all duration-150 hover:shadow-sm cursor-pointer border border-[#083F92]/5 ${
+                  className={`w-full min-h-[72px] h-auto flex items-center justify-between px-4 py-3 rounded-[8px] transition-all duration-150 hover:shadow-sm cursor-pointer border border-[#083F92]/5 ${
                     isOdd ? 'bg-[#083F92]/5' : 'bg-white'
                   }`}
                 >
@@ -281,16 +281,16 @@ export default function Dashboard() {
                     <span className="font-poppins font-medium text-[13px] leading-[17px] tracking-[-0.03em] text-[#000000] truncate w-full">
                       {t.title}
                     </span>
-                    <div className="flex items-center gap-4 w-full">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 w-full">
                       {/* Date details */}
-                      <div className="flex items-center gap-1 text-[#000000]/70">
+                      <div className="flex items-center gap-1 text-[#000000]/70 shrink-0">
                         <Calendar className="w-3.5 h-3.5 text-[#083F92]" />
                         <span className="font-poppins font-light text-[11px] leading-[14px] tracking-[-0.02em]">
                           {t.date}
                         </span>
                       </div>
                       {/* Location details */}
-                      <div className="flex items-center gap-1 text-[#000000]/70 truncate max-w-[70%]">
+                      <div className="flex items-center gap-1 text-[#000000]/70 truncate max-w-full">
                         <MapPin className="w-3.5 h-3.5 text-[#083F92]" />
                         <span className="font-poppins font-light text-[11px] leading-[14px] truncate">
                           {t.location}

@@ -108,9 +108,9 @@ export default function Forms() {
       <div className="flex flex-col gap-6 w-full h-full font-sans select-none pb-12">
         
         {/* Top Header Section */}
-        <div className="flex justify-between items-center w-full">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
           <div className="flex flex-col">
-            <h1 className="font-poppins font-bold text-[42px] leading-[63px] text-[#083F92] m-0">
+            <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0">
               Form Management
             </h1>
           </div>
@@ -122,7 +122,7 @@ export default function Forms() {
               setDialogName('');
               setIsDialogOpen(true);
             }}
-            className="flex items-center gap-2 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-all focus:outline-none h-[72px] shadow-sm w-[147px] justify-center shrink-0 cursor-pointer"
+            className="flex items-center gap-2 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-all focus:outline-none h-[72px] shadow-sm w-full sm:w-[147px] justify-center shrink-0 cursor-pointer"
           >
             <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md shrink-0">
               <Plus className="w-5 h-5 stroke-[2.5]" />
@@ -140,22 +140,22 @@ export default function Forms() {
               <div 
                 key={form.id}
                 onClick={() => router.push(`/forms/${form.id}`)}
-                className="w-full h-[77px] flex items-center justify-between px-[28px] bg-[#083F92]/10 rounded-[12px] border border-transparent hover:border-[#083F92]/20 transition-all shadow-xs cursor-pointer"
+                className="w-full min-h-[77px] py-3 sm:py-0 flex items-center justify-between px-4 sm:px-[28px] bg-[#083F92]/10 rounded-[12px] border border-transparent hover:border-[#083F92]/20 transition-all shadow-xs cursor-pointer gap-2"
               >
                 {/* Form Title */}
-                <span className="font-poppins font-bold text-[22px] leading-[33px] text-[#000000]">
+                <span className="font-poppins font-bold sm:text-[22px] text-[16px] leading-[24px] sm:leading-[33px] text-[#000000] truncate max-w-[60%] sm:max-w-none">
                   {form.name}
                 </span>
 
                 {/* Actions group */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 sm:gap-4 shrink-0">
                   {/* Edit Button */}
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
                       handleEditClick(form);
                     }}
-                    className="w-[42px] h-[42px] bg-[#083F92] hover:bg-[#083F92]/90 transition-colors rounded-full flex items-center justify-center text-white cursor-pointer shadow-sm focus:outline-none"
+                    className="w-[36px] sm:w-[42px] h-[36px] sm:h-[42px] bg-[#083F92] hover:bg-[#083F92]/90 transition-colors rounded-full flex items-center justify-center text-white cursor-pointer shadow-sm focus:outline-none"
                     title="Edit Form"
                   >
                     <Pencil className="w-4 h-4 fill-white text-transparent" />
@@ -167,15 +167,15 @@ export default function Forms() {
                       e.stopPropagation();
                       handleDeleteClick(form);
                     }}
-                    className="w-[42px] h-[42px] bg-[#083F92] hover:bg-destructive/90 transition-colors rounded-full flex items-center justify-center text-white cursor-pointer shadow-sm focus:outline-none"
+                    className="w-[36px] sm:w-[42px] h-[36px] sm:h-[42px] bg-[#083F92] hover:bg-destructive/90 transition-colors rounded-full flex items-center justify-center text-white cursor-pointer shadow-sm focus:outline-none"
                     title="Delete Form"
                   >
                     <Trash2 className="w-4 h-4 fill-white text-transparent" />
                   </button>
 
                   {/* Navigation / Arrow Link */}
-                  <div className="flex items-center justify-center pl-2">
-                    <ArrowRight className="w-6 h-6 text-[#000000] stroke-[2]" />
+                  <div className="flex items-center justify-center pl-1 sm:pl-2">
+                    <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 text-[#000000] stroke-[2]" />
                   </div>
                 </div>
               </div>
@@ -191,7 +191,7 @@ export default function Forms() {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent 
             showCloseButton={true}
-            className="sm:max-w-[589px] w-[589px] h-[291px] bg-white rounded-[12px] p-8 gap-0 border border-[#DADADA]/40 shadow-2xl outline-none"
+            className="sm:max-w-[589px] w-[90vw] h-auto min-h-[291px] bg-white rounded-[12px] p-6 sm:p-8 gap-0 border border-[#DADADA]/40 shadow-2xl outline-none"
           >
             <DialogTitle className="font-general-sans font-semibold text-[32px] leading-[43px] text-[#181818] m-0 mb-6">
               Form Heading

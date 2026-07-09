@@ -56,17 +56,19 @@ export default function Users() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
         
         {/* Left Title + Search pill bar */}
-        <div className="flex items-center gap-6 w-full max-w-[500px]">
-          <h1 className="font-poppins font-bold text-[42px] leading-[63px] text-[#151515] m-0 shrink-0">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full sm:max-w-[500px]">
+          <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#151515] m-0 shrink-0">
             Users
           </h1>
           
           {/* Search Pill Input */}
-          <SearchInput value={searchQuery} onChangeValue={setSearchQuery} />
+          <div className="w-full sm:w-auto">
+            <SearchInput value={searchQuery} onChangeValue={setSearchQuery} />
+          </div>
         </div>
 
         {/* Right Button: Export As CVS */}
-        <button className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shrink-0 shadow-sm">
+        <button className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shrink-0 shadow-sm w-full sm:w-auto justify-center cursor-pointer">
           <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md">
             <FileSpreadsheet className="w-5 h-5" />
           </div>

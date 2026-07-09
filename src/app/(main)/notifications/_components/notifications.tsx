@@ -53,7 +53,7 @@ export default function Notifications() {
         
         {/* Page Title */}
         <div className="flex flex-col">
-          <h1 className="font-poppins font-bold text-[42px] leading-[63px] text-[#083F92] m-0">
+          <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0">
             Push Notifications
           </h1>
         </div>
