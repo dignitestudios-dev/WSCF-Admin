@@ -6,14 +6,21 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import { useForgotPassword } from '../hooks/use-forgot-password';
+import { useVerifyOtp } from '../hooks/use-verify-otp';
 
 export function VerifyOtpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || 'leo@admin.com';
-  const [otp, setOtp] = useState<string[]>(['', '', '', '', '']);
-  const [isPending, setIsPending] = useState(false);
+  const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
+  const [hasError, setHasError] = useState(false);
+  const [isShaking, setIsShaking] = useState(false);
+  const [timer, setTimer] = useState(60);
   const inputRefs = useRef<HTMLInputElement[]>([]);
+
+  const { mutate: resendOtp, isPending: isResending } = useForgotPassword();
+  const { mutate: verifyOtp, isPending } = useVerifyOtp();
 
   // Auto-focus first input on mount
   useEffect(() => {
@@ -22,7 +29,49 @@ export function VerifyOtpForm() {
     }
   }, []);
 
+  // Sync timer from localStorage on mount to prevent reset on refresh
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const expiresAt = window.localStorage.getItem('otp-timer-expires');
+      if (expiresAt) {
+        const remaining = Math.max(0, Math.ceil((Number(expiresAt) - Date.now()) / 1000));
+        setTimer(remaining);
+      } else {
+        const target = Date.now() + 60000;
+        window.localStorage.setItem('otp-timer-expires', String(target));
+        setTimer(60);
+      }
+    }
+  }, []);
+
+  // Timer countdown effect
+  useEffect(() => {
+    if (timer === 0) return;
+    const interval = setInterval(() => {
+      setTimer((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [timer]);
+
+  const handleResend = () => {
+    if (timer > 0 || isResending) return;
+    resendOtp(
+      { email },
+      {
+        onSuccess: () => {
+          setTimer(60);
+          setOtp(['', '', '', '', '', '']);
+          setHasError(false);
+          if (inputRefs.current[0]) {
+            inputRefs.current[0].focus();
+          }
+        },
+      }
+    );
+  };
+
   const handleChange = (index: number, value: string) => {
+    setHasError(false);
     // Only accept numeric inputs
     if (value !== '' && !/^\d+$/.test(value)) return;
 
@@ -32,7 +81,7 @@ export function VerifyOtpForm() {
     setOtp(newOtp);
 
     // If a digit was entered, move to the next input
-    if (value !== '' && index < 4 && inputRefs.current[index + 1]) {
+    if (value !== '' && index < 5 && inputRefs.current[index + 1]) {
       inputRefs.current[index + 1].focus();
     }
   };
@@ -51,19 +100,24 @@ export function VerifyOtpForm() {
   };
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    setHasError(false);
     e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').trim();
-    if (!/^\d{5}$/.test(pastedData)) {
-      toast.error('Please paste a valid 5-digit code.');
+    const pastedData = e.clipboardData.getData('text').trim().replace(/\D/g, '');
+    if (pastedData.length < 6) {
+      toast.error('Please paste a valid 6-digit code.');
       return;
     }
 
-    const newOtp = pastedData.split('');
+    const digits = pastedData.slice(0, 6).split('');
+    const newOtp = [...otp];
+    for (let i = 0; i < 6; i++) {
+      newOtp[i] = digits[i] || '';
+    }
     setOtp(newOtp);
 
     // Focus last input
-    if (inputRefs.current[4]) {
-      inputRefs.current[4].focus();
+    if (inputRefs.current[5]) {
+      inputRefs.current[5].focus();
     }
   };
 
@@ -71,26 +125,37 @@ export function VerifyOtpForm() {
     e.preventDefault();
     const code = otp.join('');
     
-    if (code.length < 5) {
-      toast.error('Please enter all 5 digits of the verification code.');
+    if (code.length < 6) {
+      setHasError(true);
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 400);
       return;
     }
 
-    setIsPending(true);
-    // Simulate API verification
-    setTimeout(() => {
-      setIsPending(false);
-      if (code === '52000') { // Mock success code based on the Figma sample values
-        toast.success('OTP verified successfully!');
-        router.push('/reset-password');
-      } else {
-        toast.error('Invalid verification code. Please try again.');
+    verifyOtp(
+      { email, otp: code },
+      {
+        onError: () => {
+          setHasError(true);
+          setIsShaking(true);
+          setTimeout(() => setIsShaking(false), 400);
+        },
       }
-    }, 1500);
+    );
   };
 
   return (
     <div className="w-[421px] flex flex-col items-center gap-[32px] relative">
+      <style>{`
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          15%, 45%, 75% { transform: translateX(-6px); }
+          30%, 60%, 90% { transform: translateX(6px); }
+        }
+        .shake-animation {
+          animation: shake 0.4s ease-in-out;
+        }
+      `}</style>
       
       {/* Back Button */}
       <button 
@@ -127,7 +192,7 @@ export function VerifyOtpForm() {
         <div className="flex flex-col items-center gap-[26px] w-full">
           
           {/* OTP inputs container */}
-          <div className="flex justify-center gap-[11px] w-full max-w-[284px] h-[49px]">
+          <div className={`flex justify-center gap-[11px] w-full max-w-[343px] h-[49px] ${isShaking ? 'shake-animation' : ''}`}>
             {otp.map((val, idx) => (
               <div key={idx} className="relative w-[48px] h-[49px]">
                 {/* Mask layer to show input or grey dot */}
@@ -142,9 +207,13 @@ export function VerifyOtpForm() {
                   value={val}
                   onChange={(e) => handleChange(idx, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(idx, e)}
-                  onPaste={idx === 0 ? handlePaste : undefined}
+                  onPaste={handlePaste}
                   maxLength={1}
-                  className="w-full h-full bg-white border border-[#3D3775] rounded-[24px] text-center text-transparent caret-transparent focus:outline-none focus:border-[#083F92] transition-colors focus:ring-1 focus:ring-[#083F92] selection:bg-transparent"
+                  className={`w-full h-full bg-white border rounded-[24px] text-center text-transparent caret-transparent focus:outline-none transition-colors selection:bg-transparent ${
+                    hasError 
+                      ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' 
+                      : 'border-[#3D3775] focus:border-[#083F92] focus:ring-1 focus:ring-[#083F92]'
+                  }`}
                 />
               </div>
             ))}
@@ -163,7 +232,19 @@ export function VerifyOtpForm() {
             </Button>
 
             <p className="w-full h-[22px] font-normal text-[16px] leading-[22px] text-center tracking-[0.01em] text-[#565656] m-0">
-              Didn't receive the code yet? <span className="font-semibold text-[#083F92] cursor-pointer hover:underline">Resend</span>
+              Didn't receive the code yet?{' '}
+              {timer > 0 ? (
+                <span className="font-semibold text-neutral-400 cursor-not-allowed">
+                  Resend in {timer}s
+                </span>
+              ) : (
+                <span 
+                  onClick={handleResend} 
+                  className={`font-semibold text-[#083F92] cursor-pointer hover:underline ${isResending ? 'opacity-50 pointer-events-none' : ''}`}
+                >
+                  {isResending ? 'Resending...' : 'Resend'}
+                </span>
+              )}
             </p>
           </div>
         </div>

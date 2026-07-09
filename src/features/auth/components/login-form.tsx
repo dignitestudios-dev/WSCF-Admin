@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, LoginFormData } from '../schema/login.schema';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useLogin } from '../hooks/use-login';
 
 import Link from 'next/link';
@@ -52,10 +52,10 @@ export function LoginForm() {
             <div className="relative w-full h-[44px]">
               <Input
                 id="email"
-                placeholder="designer@dignitestudios.com"
+                placeholder="joe@example.com"
                 type="email"
                 maxLength={254}
-                className="w-full h-full bg-white border border-[#3D3775] rounded-[24px] px-[16px] font-normal text-[14px] text-[#181818] placeholder:text-[#181818]"
+                className="w-full h-full bg-white border border-[#3D3775] rounded-[24px] px-[16px] font-normal text-[14px] text-[#181818] placeholder:text-[#b7b2b2]"
                 {...register('email')}
               />
             </div>
@@ -111,8 +111,9 @@ export function LoginForm() {
             <Button
               type="submit"
               disabled={isPending}
-              className="w-full h-[48px] bg-[#083F92] hover:bg-[#083F92]/90 rounded-[100px] flex justify-center items-center disabled:opacity-50"
+              className="w-full h-[48px] bg-[#083F92] hover:bg-[#083F92]/90 rounded-[100px] flex justify-center items-center disabled:opacity-50 gap-2"
             >
+              {isPending && <Loader2 className="h-4 w-4 animate-spin text-white" />}
               <span className="font-semibold text-[14px] leading-[19px] text-center capitalize text-white">
                 {isPending ? 'Logging In...' : 'Login'}
               </span>

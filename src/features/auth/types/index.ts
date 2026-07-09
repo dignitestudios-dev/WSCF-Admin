@@ -1,12 +1,18 @@
 export type User = {
-  id: string;
+  _id: string;
   email: string;
-  firstName: string;
-  lastName: string;
-  role: 'admin' | 'superadmin';
+  role: string;
+  status: string;
+  isEmailVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type AuthResponse = {
-  user: User;
-  token: string;
+  success: boolean;
+  message: string;
+  data: {
+    user: User;
+    token: string;
+  };
 };

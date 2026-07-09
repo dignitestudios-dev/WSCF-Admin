@@ -1,18 +1,17 @@
 'use client';
 
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Mail, KeyRound } from 'lucide-react';
-import { toast } from 'sonner';
+import { ArrowLeft, KeyRound, Loader2 } from 'lucide-react';
 import { forgotPasswordSchema, ForgotPasswordFormData } from '../schema/forgot-password.schema';
+import { useForgotPassword } from '../hooks/use-forgot-password';
 
 export function ForgotPasswordForm() {
   const router = useRouter();
-  const [isPending, setIsPending] = useState(false);
+  const { mutate: forgotPassword, isPending } = useForgotPassword();
 
   const { register, handleSubmit, formState: { errors } } = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
@@ -22,19 +21,12 @@ export function ForgotPasswordForm() {
   });
 
   const onSubmit = (data: ForgotPasswordFormData) => {
-    setIsPending(true);
-    // Simulate sending OTP code
-    setTimeout(() => {
-      setIsPending(false);
-      toast.success('Verification OTP code sent to your email.');
-      router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`);
-    }, 1500);
+    forgotPassword(data);
   };
 
   return (
     <div className="w-[421px] flex flex-col items-center gap-[32px] relative">
       
-      {/* Back Button */}
       <button 
         type="button"
         onClick={() => router.push('/login')}
@@ -42,15 +34,12 @@ export function ForgotPasswordForm() {
       >
         <ArrowLeft className="w-[32px] h-[32px]" />
       </button>
-
-      {/* Header Key Icon with beautiful modern styling */}
      
         <div className="w-[100px] h-[100px] rounded-full bg-[#083F92]/10 flex items-center justify-center">
           <KeyRound className="w-[50px] h-[50px] text-[#083F92]" />
         </div>
    
 
-      {/* Title Header */}
       <div className="flex flex-col justify-center items-center gap-[12px] w-[421px]">
         <h1 className="w-full h-[49px] font-semibold text-[36px] leading-[49px] text-center tracking-[-0.008em] capitalize text-[#083F92] m-0">
           Forgot Password
@@ -60,11 +49,9 @@ export function ForgotPasswordForm() {
         </p>
       </div>
 
-      {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col items-center gap-[26px] w-full max-w-[421px]">
         <div className="w-full max-w-[343px] flex flex-col gap-[26px]">
-          
-          {/* Email Input */}
+
           <div className="flex flex-col items-start gap-[8px] w-full">
             <label htmlFor="email" className="font-medium text-[14px] leading-[19px] capitalize text-[#181818]">
               Email address
@@ -86,13 +73,13 @@ export function ForgotPasswordForm() {
             )}
           </div>
 
-          {/* Action Button */}
           <div className="flex flex-col gap-2 w-full mt-[12px]">
             <Button 
               type="submit" 
               disabled={isPending}
-              className="w-full h-[48px] bg-[#083F92] hover:bg-[#083F92]/90 rounded-[24px] flex justify-center items-center disabled:opacity-50 shadow-[0px_4px_4px_rgba(61,55,117,0.25)]"
+              className="w-full h-[48px] bg-[#083F92] hover:bg-[#083F92]/90 rounded-[24px] flex justify-center items-center disabled:opacity-50 shadow-[0px_4px_4px_rgba(61,55,117,0.25)] gap-2"
             >
+              {isPending && <Loader2 className="h-4 w-4 animate-spin text-white" />}
               <span className="font-semibold text-[14px] leading-[19px] text-center capitalize text-white">
                 {isPending ? 'Sending...' : 'Send Code'}
               </span>
