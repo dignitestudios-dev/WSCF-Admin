@@ -1,6 +1,7 @@
 'use client';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface PaginationProps {
   currentPage: number;
@@ -30,20 +31,26 @@ export function Pagination({
       </button>
       
       {/* Page Numbers Block */}
-      <div className="flex items-center bg-[#083F92]/10 h-[38px] rounded-[88px] px-1 overflow-hidden shrink-0">
+      <div className="flex items-center bg-[#083F92]/10 h-[38px] rounded-[88px] px-1 shrink-0 relative">
         {pages.map((page) => {
           const isActive = page === currentPage;
           return (
             <button 
               key={page}
               onClick={() => onPageChange(page)}
-              className={`font-poppins font-bold text-[14px] transition-colors flex items-center justify-center ${
-                isActive 
-                  ? 'w-[32px] h-[32px] bg-[#083F92] text-white rounded-full mx-1' 
-                  : 'px-3 h-full text-[#636363] hover:text-[#083F92]'
+              className={`relative font-poppins font-bold text-[14px] flex items-center justify-center transition-colors mx-0.5 rounded-full w-[32px] h-[32px] ${
+                isActive ? 'text-white' : 'text-[#636363] hover:text-[#083F92]'
               }`}
             >
-              {page}
+              {isActive && (
+                <motion.div
+                  layoutId="activePaginationPill"
+                  className="absolute inset-0 bg-[#083F92] rounded-full"
+                  initial={false}
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                />
+              )}
+              <span className="relative z-10">{page}</span>
             </button>
           );
         })}

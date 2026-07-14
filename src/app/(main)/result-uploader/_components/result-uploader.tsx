@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { 
-  FileSpreadsheet, 
+import {
+  FileSpreadsheet,
   Search,
-  Calendar, 
-  MapPin, 
-  ArrowRight, 
-  Upload, 
-  X, 
-  Check, 
+  Calendar,
+  MapPin,
+  ArrowRight,
+  Upload,
+  X,
+  Check,
   Loader2,
   Crown,
   DollarSign,
@@ -98,40 +98,40 @@ export default function ResultUploader() {
   const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const [tournaments, setTournaments] = useState<Tournament[]>([
-    { 
-      id: '1', 
-      title: 'USCF-Rated Scholastic May Summer Tournament', 
-      location: 'Old Guard Games', 
-      date: 'June 20, 2026', 
-      status: 'ready' 
+    {
+      id: '1',
+      title: 'USCF-Rated Scholastic May Summer Tournament',
+      location: 'Old Guard Games',
+      date: 'June 20, 2026',
+      status: 'ready'
     },
-    { 
-      id: '2', 
-      title: 'Milwaukee Knights Club Championship', 
-      location: 'Old Guard Games', 
-      date: 'June 22, 2026', 
-      status: 'ready' 
+    {
+      id: '2',
+      title: 'Milwaukee Knights Club Championship',
+      location: 'Old Guard Games',
+      date: 'June 22, 2026',
+      status: 'ready'
     },
-    { 
-      id: '3', 
-      title: 'USCF-Rated Scholastic April Summer Tournament', 
-      location: 'Old Guard Games', 
-      date: 'April 18, 2026', 
-      status: 'uploaded' 
+    {
+      id: '3',
+      title: 'USCF-Rated Scholastic April Summer Tournament',
+      location: 'Old Guard Games',
+      date: 'April 18, 2026',
+      status: 'uploaded'
     },
-    { 
-      id: '4', 
-      title: 'Old Guard Games Anniversary Blitz', 
-      location: 'Old Guard Games', 
-      date: 'May 24, 2026', 
-      status: 'ready' 
+    {
+      id: '4',
+      title: 'Old Guard Games Anniversary Blitz',
+      location: 'Old Guard Games',
+      date: 'May 24, 2026',
+      status: 'ready'
     },
-    { 
-      id: '5', 
-      title: 'Spring Open Chess Championship', 
-      location: 'Old Guard Games', 
-      date: 'May 10, 2026', 
-      status: 'uploaded' 
+    {
+      id: '5',
+      title: 'Spring Open Chess Championship',
+      location: 'Old Guard Games',
+      date: 'May 10, 2026',
+      status: 'uploaded'
     }
   ]);
 
@@ -162,7 +162,7 @@ export default function ResultUploader() {
 
   // Filter list
   const filteredTournaments = useMemo(() => {
-    return tournaments.filter(t => 
+    return tournaments.filter(t =>
       t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.date.toLowerCase().includes(searchQuery.toLowerCase())
@@ -187,7 +187,7 @@ export default function ResultUploader() {
               },
             }));
             setUploadingSlot(null);
-            
+
             // Mark tournament as uploaded in the listing
             setTournaments((prevTournaments) =>
               prevTournaments.map((t) =>
@@ -206,7 +206,7 @@ export default function ResultUploader() {
   const handleRemoveFile = (slotIndex: number) => {
     setUploadedFiles((prevFiles) => {
       const updated = { ...prevFiles, [slotIndex]: null };
-      
+
       // If all files are null, we revert the tournament status to 'ready'
       const hasAnyFile = Object.values(updated).some((f) => f !== null);
       if (!hasAnyFile && selectedTournament) {
@@ -242,7 +242,7 @@ export default function ResultUploader() {
         <div className="flex flex-col gap-6 w-full h-full font-sans select-none pb-12">
           {/* Back Button */}
           <div className="flex items-center">
-            <button 
+            <button
               onClick={() => setSelectedTournament(null)}
               className="flex items-center gap-2 font-poppins font-semibold text-[18px] text-[#083F92] hover:opacity-80 transition-opacity bg-transparent border-none p-0 cursor-pointer outline-none"
             >
@@ -258,7 +258,7 @@ export default function ResultUploader() {
 
           {/* White Card Wrapper (bg: #FFFFFF, rounded: 24px) */}
           <div className="w-full bg-white rounded-[24px] p-6 md:p-8 flex flex-col gap-6 border border-[#DADADA]/30 shadow-[0px_4px_12px_rgba(8,63,146,0.05)]">
-            
+
             {/* Tournament Details Section Card */}
             <div className="flex flex-col gap-6 relative">
               <h2 className="font-poppins font-bold text-[24px] leading-[36px] text-[#083F92] m-0">
@@ -395,19 +395,18 @@ export default function ResultUploader() {
                     const isThisUploading = uploadingSlot === idx;
 
                     return (
-                      <div 
+                      <div
                         key={idx}
-                        className={`relative aspect-[140/122] rounded-[19.2px] border flex flex-col items-center justify-center p-3 text-center transition-all bg-white overflow-hidden group select-none ${
-                          file 
-                            ? 'border-green-500 shadow-sm' 
-                            : isThisUploading
+                        className={`relative aspect-[140/122] rounded-[19.2px] border flex flex-col items-center justify-center p-3 text-center transition-all bg-white overflow-hidden group select-none ${file
+                          ? 'border-green-500 shadow-sm'
+                          : isThisUploading
                             ? 'border-[#083F92]/40 bg-[#083F92]/5'
                             : 'border-[#C9C9C9] hover:border-[#083F92] hover:shadow-[0px_4px_12px_rgba(8,63,146,0.1)] cursor-pointer'
-                        }`}
+                          }`}
                       >
                         {/* Hidden File Input */}
                         {!file && !isThisUploading && (
-                          <input 
+                          <input
                             type="file"
                             accept=".pdf,.csv,.xlsx,.txt"
                             className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
@@ -427,7 +426,7 @@ export default function ResultUploader() {
                               {uploadProgress}%
                             </span>
                             <div className="w-4/5 bg-[#EEEEEE] h-[4px] rounded-full overflow-hidden">
-                              <div 
+                              <div
                                 className="bg-[#083F92] h-full rounded-full transition-all duration-150"
                                 style={{ width: `${uploadProgress}%` }}
                               />
@@ -485,7 +484,7 @@ export default function ResultUploader() {
   return (
     <PageTransition>
       <div className="flex flex-col gap-6 w-full h-full font-sans select-none pb-12">
-        
+
         {/* Top Title & Action Button Row */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
           <div className="flex flex-col">
@@ -501,7 +500,7 @@ export default function ResultUploader() {
             </div>
 
             {/* Export CSV Button */}
-            <button 
+            <button
               onClick={handleExportCSV}
               className="flex items-center gap-2 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-full sm:w-auto md:w-[174px] justify-center shrink-0 border-none cursor-pointer"
             >
@@ -521,8 +520,8 @@ export default function ResultUploader() {
             filteredTournaments.map((t) => {
               const isUploaded = t.status === 'uploaded';
               return (
-                <div 
-                  key={t.id} 
+                <div
+                  key={t.id}
                   className="w-full bg-white border border-[#083F92] hover:border-[#083F92]/70 shadow-[0px_4px_12px_rgba(8,63,146,0.1)] hover:shadow-[0px_6px_16px_rgba(8,63_146,0.15)] rounded-[12px] p-5 flex flex-col gap-3 relative transition-all duration-200"
                 >
                   {/* Top Row: Icon + Title + Status Badge */}
@@ -571,11 +570,10 @@ export default function ResultUploader() {
                     </div>
 
                     {/* Action trigger */}
-                    <button 
+                    <button
                       onClick={() => setSelectedTournament(t)}
-                      className={`flex items-center gap-2 font-poppins font-semibold text-[13px] leading-[18px] transition-all group shrink-0 bg-transparent border-none cursor-pointer outline-none ${
-                        isUploaded ? 'text-[#083F92] hover:opacity-80' : 'text-[#000000] hover:text-[#083F92]'
-                      }`}
+                      className={`flex items-center gap-2 font-poppins font-semibold text-[13px] leading-[18px] transition-all group shrink-0 bg-transparent border-none cursor-pointer outline-none ${isUploaded ? 'text-[#083F92] hover:opacity-80' : 'text-[#000000] hover:text-[#083F92]'
+                        }`}
                     >
                       <span className="group-hover:underline">
                         {isUploaded ? 'File Uploaded' : 'Ready to upload result'}

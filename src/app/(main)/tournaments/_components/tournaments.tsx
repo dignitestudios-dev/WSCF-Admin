@@ -15,42 +15,29 @@ import { PageTransition } from '@/components/animations/page-transition';
 import { CreateTournamentDialog } from '@/features/tournaments/components/create-tournament-dialog';
 import Link from 'next/link';
 import { Pagination } from '@/components/ui/pagination';
-
-interface TournamentItem {
-  id: number;
-  title: string;
-  location: string;
-  date: string;
-  seats: string;
-  price: string;
-  status: 'Upcoming' | 'Completed';
-}
+import { Skeleton } from '@/components/ui/skeleton';
+import { useTournaments } from '@/features/tournaments/hooks/use-tournaments';
 
 export default function Tournaments() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'All' | 'Active' | 'Completed'>('All');
-  const [currentPage, setCurrentPage] = useState(2); // Matches Figma page 2 selection
+  const [activeTab, setActiveTab] = useState<'All' | 'upcoming' | 'completed'>('All');
+  const [currentPage, setCurrentPage] = useState(1); 
+  const itemsPerPage = 10;
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
-  const tournaments: TournamentItem[] = [
-    { id: 1, title: 'USCF-Rated Scholastic May Summer Tournament', location: 'Old Guard Games', date: 'June 20, 2026', seats: '8/24', price: '$40', status: 'Upcoming' },
-    { id: 2, title: 'USCF-Rated Scholastic May Summer Tournament', location: 'Old Guard Games', date: 'June 20, 2026', seats: '8/24', price: '$40', status: 'Upcoming' },
-    { id: 3, title: 'USCF-Rated Scholastic May Summer Tournament', location: 'Old Guard Games', date: 'June 20, 2026', seats: '8/24', price: '$40', status: 'Upcoming' },
-    { id: 4, title: 'USCF-Rated Scholastic May Summer Tournament', location: 'Old Guard Games', date: 'June 20, 2026', seats: '8/24', price: '$40', status: 'Completed' },
-    { id: 5, title: 'USCF-Rated Scholastic June Challenge', location: 'Old Guard Games', date: 'June 20, 2026', seats: '8/24', price: '$40', status: 'Upcoming' },
-    { id: 6, title: 'USCF-Rated Scholastic April Blitz', location: 'Old Guard Games', date: 'June 20, 2026', seats: '8/24', price: '$40', status: 'Completed' },
-  ];
+  const statusParam = activeTab === 'All' ? undefined : activeTab;
+  const { data: tournamentsData, isLoading, isFetching } = useTournaments(currentPage, itemsPerPage, searchQuery, statusParam);
 
-  // Filtering based on search query and status tabs
-  const filteredTournaments = tournaments.filter(t => {
-    const matchesSearch = t.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          t.location.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    if (activeTab === 'All') return matchesSearch;
-    if (activeTab === 'Active') return matchesSearch && t.status === 'Upcoming';
-    if (activeTab === 'Completed') return matchesSearch && t.status === 'Completed';
-    return matchesSearch;
-  });
+  const tournaments = tournamentsData?.data?.tournaments || [];
+  const totalPages = tournamentsData?.pagination?.totalPages || 1;
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
 
   return (
     <PageTransition>
@@ -61,7 +48,7 @@ export default function Tournaments() {
           
           {/* Left Title + Search pill bar */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full sm:max-w-[500px]">
-            <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#151515] m-0 shrink-0">
+            <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0 shrink-0">
               Tournaments
             </h1>
             
@@ -88,13 +75,13 @@ export default function Tournaments() {
 
         {/* Status Filter Tab Pills */}
         <div className="flex items-center gap-2 w-full max-w-[325px] h-[50px] mt-2">
-          {(['All', 'Active', 'Completed'] as const).map((tab) => {
+          {(['All', 'upcoming', 'completed'] as const).map((tab) => {
             const isActive = activeTab === tab;
             return (
               <button
                 key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`w-[103px] h-[50px] rounded-[100px] border-4 border-[#F4F4F4] font-poppins font-semibold text-[14px] leading-[19px] flex items-center justify-center transition-all duration-150 ${
+                onClick={() => { setActiveTab(tab); setCurrentPage(1); }}
+                className={`w-[103px] h-[50px] rounded-[100px] border-4 border-[#F4F4F4] font-poppins font-semibold text-[14px] leading-[19px] flex items-center justify-center transition-all duration-150 capitalize ${
                   isActive 
                     ? 'bg-[#083F92] text-white border-transparent' 
                     : 'bg-white text-black hover:bg-black/5'
@@ -111,81 +98,107 @@ export default function Tournaments() {
           
           {/* Tournament List Stack */}
           <div className="flex flex-col gap-3 w-full">
-            {filteredTournaments.map((t) => (
-              <Link 
-                key={t.id}
-                href={`/tournaments/${t.id}`}
-                className="w-full min-h-[107px] py-4 md:py-0 bg-white border border-[#083F92]/30 rounded-[12px] shadow-[0px_4px_4px_rgba(0,0,0,0.05)] hover:shadow-[0px_4px_4px_rgba(0,0,0,0.1)] transition-all duration-150 flex flex-col md:flex-row md:items-center justify-between px-6 cursor-pointer gap-4"
-              >
-                {/* Left Card Details */}
-                <div className="flex items-start md:items-center gap-4 w-full md:max-w-[85%]">
-                  {/* Chess icon circle container */}
-                  <div className="w-[40px] h-[40px] bg-[#083F92] text-white rounded-full flex items-center justify-center shrink-0">
-                    <Crown className="w-5 h-5" />
-                  </div>
-
-                  {/* Text descriptions */}
-                  <div className="flex flex-col gap-2 min-w-0 flex-1">
-                    <h2 className="font-poppins font-medium text-[16px] md:text-[18px] leading-[24px] md:leading-[27px] text-[#083F92] truncate w-full">
-                      {t.title}
-                    </h2>
-                    
-                    {/* Inner items horizontal details row */}
-                    <div className="flex items-center gap-x-4 gap-y-2 flex-wrap text-[#151515]/90">
-                      
-                      {/* Location details */}
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <MapPin className="w-4 h-4 text-[#083F92]" />
-                        <span className="font-poppins font-normal text-[13px] md:text-[14px]">{t.location}</span>
+            {isLoading || isFetching ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <div key={`skeleton-${i}`} className="w-full min-h-[107px] py-4 md:py-0 bg-white border border-[#083F92]/30 rounded-[12px] flex flex-col md:flex-row md:items-center justify-between px-6 gap-4">
+                  <div className="flex items-center gap-4 w-full md:max-w-[85%]">
+                    <Skeleton className="w-[40px] h-[40px] rounded-full shrink-0" />
+                    <div className="flex flex-col gap-2 w-full">
+                      <Skeleton className="h-5 w-1/3" />
+                      <div className="flex gap-4">
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-4 w-12" />
                       </div>
-
-                      {/* Date details */}
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <Calendar className="w-4 h-4 text-[#083F92]" />
-                        <span className="font-poppins font-normal text-[13px] md:text-[14px]">{t.date}</span>
-                      </div>
-
-                      {/* Seats details */}
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <Armchair className="w-4 h-4 text-[#083F92]" />
-                        <span className="font-poppins font-normal text-[13px] md:text-[14px]">{t.seats}</span>
-                      </div>
-
-                      {/* Price tag details */}
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <Tag className="w-4 h-4 text-[#083F92]" />
-                        <span className="font-poppins font-normal text-[13px] md:text-[14px]">{t.price}</span>
-                      </div>
-
                     </div>
                   </div>
+                  <Skeleton className="w-[89px] h-[38px] rounded-[8px]" />
                 </div>
+              ))
+            ) : tournaments.length > 0 ? (
+              tournaments.map((t) => (
+                <Link 
+                  key={t._id}
+                  href={`/tournaments/${t._id}`}
+                  className="w-full min-h-[107px] py-4 md:py-0 bg-white border border-[#083F92]/30 rounded-[12px] shadow-[0px_4px_4px_rgba(0,0,0,0.05)] hover:shadow-[0px_4px_4px_rgba(0,0,0,0.1)] transition-all duration-150 flex flex-col md:flex-row md:items-center justify-between px-6 cursor-pointer gap-4"
+                >
+                  {/* Left Card Details */}
+                  <div className="flex items-start md:items-center gap-4 w-full md:max-w-[85%]">
+                    {/* Chess icon circle container */}
+                    <div className="w-[40px] h-[40px] bg-[#083F92] text-white rounded-full flex items-center justify-center shrink-0">
+                      <Crown className="w-5 h-5" />
+                    </div>
 
-                {/* Right Card Actions (Status Pill + Navigation Chevron) */}
-                <div className="flex items-center justify-between md:justify-end gap-6 shrink-0 w-full md:w-auto border-t md:border-t-0 pt-3 md:pt-0 border-neutral-100">
-                  {/* Status badge */}
-                  <div className={`w-[89px] h-[38px] rounded-[8px] flex items-center justify-center font-poppins font-medium text-[13px] leading-[18px] ${
-                    t.status === 'Completed'
-                      ? 'bg-[#083F92] text-white shadow-sm'
-                      : 'bg-[#083F92]/10 text-[#083F92]'
-                  }`}>
-                    {t.status}
+                    {/* Text descriptions */}
+                    <div className="flex flex-col gap-2 min-w-0 flex-1">
+                      <h2 className="font-poppins font-medium text-[16px] md:text-[18px] leading-[24px] md:leading-[27px] text-[#083F92] truncate w-full">
+                        {t.title}
+                      </h2>
+                      
+                      {/* Inner items horizontal details row */}
+                      <div className="flex items-center gap-x-4 gap-y-2 flex-wrap text-[#151515]/90">
+                        
+                        {/* Location details */}
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <MapPin className="w-4 h-4 text-[#083F92]" />
+                          <span className="font-poppins font-normal text-[13px] md:text-[14px]">{t.location}</span>
+                        </div>
+
+                        {/* Date details */}
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <Calendar className="w-4 h-4 text-[#083F92]" />
+                          <span className="font-poppins font-normal text-[13px] md:text-[14px]">{formatDate(t.date)}</span>
+                        </div>
+
+                        {/* Seats details */}
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <Armchair className="w-4 h-4 text-[#083F92]" />
+                          <span className="font-poppins font-normal text-[13px] md:text-[14px]">N/A</span>
+                        </div>
+
+                        {/* Price tag details */}
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <Tag className="w-4 h-4 text-[#083F92]" />
+                          <span className="font-poppins font-normal text-[13px] md:text-[14px]">${t.entryFee}</span>
+                        </div>
+
+                      </div>
+                    </div>
                   </div>
-                  
-                  {/* Action arrow icon */}
-                  <ArrowRight className="w-6 h-6 text-black/80 hover:translate-x-0.5 transition-transform hidden md:block" />
-                </div>
 
-              </Link>
-            ))}
+                  {/* Right Card Actions (Status Pill + Navigation Chevron) */}
+                  <div className="flex items-center justify-between md:justify-end gap-6 shrink-0 w-full md:w-auto border-t md:border-t-0 pt-3 md:pt-0 border-neutral-100">
+                    {/* Status badge */}
+                    <div className={`w-[89px] h-[38px] rounded-[8px] flex items-center justify-center font-poppins font-medium text-[13px] leading-[18px] capitalize ${
+                      t.status === 'completed'
+                        ? 'bg-[#083F92] text-white shadow-sm'
+                        : 'bg-[#083F92]/10 text-[#083F92]'
+                    }`}>
+                      {t.status}
+                    </div>
+                    
+                    {/* Action arrow icon */}
+                    <ArrowRight className="w-6 h-6 text-black/80 hover:translate-x-0.5 transition-transform hidden md:block" />
+                  </div>
+
+                </Link>
+              ))
+            ) : (
+              <div className="w-full py-16 text-center text-[#787878] font-poppins bg-[#083F92]/5 rounded-[12px] border border-dashed border-[#083F92]/20">
+                No tournaments found. Click "Add Tournament" to create one.
+              </div>
+            )}
           </div>
 
           {/* Floating Pagination Bar (Bottom Right) */}
-          <Pagination 
-            currentPage={currentPage}
-            onPageChange={setCurrentPage}
-            className="absolute right-[24px] bottom-[16px]"
-          />
+          {totalPages > 1 && (
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              className="absolute right-[24px] bottom-[16px]"
+            />
+          )}
 
         </div>
 

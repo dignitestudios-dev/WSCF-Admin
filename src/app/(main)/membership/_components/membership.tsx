@@ -110,25 +110,31 @@ export default function Membership() {
         
         {/* Top Header & Export Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
-          <div className="flex flex-col">
-            <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0">
-              Membership
-            </h1>
-            <p className="font-poppins font-medium text-[12px] leading-[18px] text-[#787878] m-0">
-              Every Membership will Expire on 31st August
-            </p>
+          
+          {/* Left Title + Search pill bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full sm:max-w-[700px]">
+            <div className="flex flex-col shrink-0">
+              <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0">
+                Membership
+              </h1>
+              <p className="font-poppins font-medium text-[12px] leading-[18px] text-[#787878] m-0">
+                Every Membership will Expire on 31st August
+              </p>
+            </div>
+            
+            {/* Search Pill Input */}
+            <div className="w-full sm:w-auto">
+              <SearchInput 
+                value={searchQuery} 
+                onChangeValue={(val) => {
+                  setSearchQuery(val);
+                  setCurrentPage(1);
+                }} 
+              />
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-            {/* Search Input Box */}
-            <SearchInput 
-              value={searchQuery} 
-              onChangeValue={(val) => {
-                setSearchQuery(val);
-                setCurrentPage(1);
-              }} 
-            />
-
             {/* Export CSV Button */}
             <button className="flex items-center gap-2 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-full md:w-[174px] justify-center shrink-0 cursor-pointer">
               <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md shrink-0">

@@ -1,25 +1,32 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, X } from 'lucide-react';
+import { Minus, Plus, X } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { tournamentSchema, TournamentFormData } from '../schema/tournament.schema';
+import { useCreateTournament } from '../hooks/use-create-tournament';
+import { useUpdateTournament } from '../hooks/use-update-tournament';
 
 interface CreateTournamentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialData?: any;
 }
 
-export function CreateTournamentDialog({ open, onOpenChange }: CreateTournamentDialogProps) {
+export function CreateTournamentDialog({ open, onOpenChange, initialData }: CreateTournamentDialogProps) {
   const [divisions, setDivisions] = useState<string[]>([]);
   const [divisionInput, setDivisionInput] = useState('');
   const [isFree, setIsFree] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  const { mutate: createTournament, isPending: isCreating } = useCreateTournament();
+  const { mutate: updateTournament, isPending: isUpdating } = useUpdateTournament();
+  const isPending = isCreating || isUpdating;
 
   const {
     register,
@@ -41,6 +48,40 @@ export function CreateTournamentDialog({ open, onOpenChange }: CreateTournamentD
       divisions: [],
     },
   });
+
+  useEffect(() => {
+    if (open && initialData) {
+      const initDivisions = initialData.customDropdownOptions?.find((opt: any) => opt.fieldId)?.values || [];
+      setDivisions(initDivisions);
+      setIsFree(initialData.isPaid === false);
+
+      const formattedDate = initialData.date ? new Date(initialData.date).toISOString().split('T')[0] : '';
+
+      reset({
+        title: initialData.title || '',
+        date: formattedDate,
+        location: initialData.location || '',
+        entryFee: initialData.entryFee?.toString() || '',
+        isFree: initialData.isPaid === false,
+        director: initialData.tournamentDirector || '',
+        host: initialData.tournamentHost || '',
+        divisions: initDivisions,
+      });
+    } else if (open && !initialData) {
+      reset({
+        title: '',
+        date: '',
+        location: '',
+        entryFee: '',
+        isFree: false,
+        director: '',
+        host: '',
+        divisions: [],
+      });
+      setDivisions([]);
+      setIsFree(false);
+    }
+  }, [open, initialData, reset]);
 
   const handleAddDivision = () => {
     const trimmed = divisionInput.trim();
@@ -64,20 +105,39 @@ export function CreateTournamentDialog({ open, onOpenChange }: CreateTournamentD
     if (next) setValue('entryFee', '');
   };
 
-  const onSubmit = async (data: TournamentFormData) => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    console.log('Tournament data:', { ...data, divisions });
-    
-    // Reset form states & close creation dialog
-    reset();
-    setDivisions([]);
-    setDivisionInput('');
-    setIsFree(false);
-    onOpenChange(false);
+  const onSubmit = (data: TournamentFormData) => {
+    const payload = {
+      title: data.title,
+      date: new Date(data.date).toISOString(),
+      location: data.location,
+      entryFee: data.isFree ? 0 : (parseFloat(data.entryFee || '0') || 0),
+      isPaid: !data.isFree,
+      tournamentDirector: data.director,
+      tournamentHost: data.host,
+      customDropdownOptions: divisions.length > 0 ? [
+        {
+          fieldId: 'division',
+          values: divisions
+        }
+      ] : []
+    };
 
-    // Show success dialog
-    setShowSuccess(true);
+    const actionOptions = {
+      onSuccess: () => {
+        reset();
+        setDivisions([]);
+        setDivisionInput('');
+        setIsFree(false);
+        onOpenChange(false);
+        setShowSuccess(true);
+      }
+    };
+
+    if (initialData?._id) {
+      updateTournament({ id: initialData._id, data: payload }, actionOptions);
+    } else {
+      createTournament(payload, actionOptions);
+    }
   };
 
   const handleClose = () => {
@@ -93,12 +153,12 @@ export function CreateTournamentDialog({ open, onOpenChange }: CreateTournamentD
       <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent
           showCloseButton={false}
-          className="w-[90vw]! sm:w-[589px]! max-w-[589px]! max-h-[90vh]! overflow-y-auto bg-white rounded-[12px] p-0 border-none shadow-2xl"
+          className="w-[90vw]! sm:w-[589px]! max-w-[589px]! max-h-[90vh]! overflow-y-auto no-scrollbar bg-white rounded-[12px] p-0 border-none shadow-2xl"
         >
           {/* Header */}
           <div className="flex items-start justify-between px-8 pt-8 pb-0">
             <h2 className="font-poppins font-semibold text-[32px] leading-[43px] text-[#181818]">
-              Create Tournament
+              {initialData ? 'Edit Tournament' : 'Create Tournament'}
             </h2>
             <button
               onClick={handleClose}
@@ -270,39 +330,39 @@ export function CreateTournamentDialog({ open, onOpenChange }: CreateTournamentD
                 </Label>
 
                 {/* Division Input Row */}
-                <div className="relative h-[44px] flex items-center">
+                <div className="relative h-[44px] flex items-center w-full bg-white border border-[#3D3775] rounded-[24px] overflow-hidden">
                   <Input
                     placeholder="Write divisions!"
                     value={divisionInput}
                     onChange={(e) => setDivisionInput(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddDivision(); } }}
-                    className="h-full w-full bg-white border border-[#3D3775] rounded-[24px] pl-4 pr-[56px] font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
+                    className="h-full flex-1 bg-transparent border-none pl-4 pr-[80px] font-general-sans text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]"
                   />
-                  {/* Add circle button */}
+                  {/* Add circle button (Figma Ellipse 9290 + Icon) */}
                   <button
                     type="button"
                     onClick={handleAddDivision}
-                    className="absolute right-0 w-[52px] h-[52px] rounded-full bg-[#083F92] text-white flex items-center justify-center hover:bg-[#083F92]/90 transition-colors shadow-md shrink-0"
+                    className="absolute right-0 top-1/2 -translate-y-1/2 w-[92px] h-[92px] bg-[#083F92] rounded-full flex items-center justify-center hover:bg-[#083F92]/95 transition-colors shrink-0 z-10 focus:outline-none"
                   >
-                    <Plus className="w-5 h-5" />
+                    <Plus className="w-[28px] h-[28px] text-white stroke-[2.5]" />
                   </button>
                 </div>
 
                 {/* Division tags */}
                 {divisions.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-1">
+                  <div className="flex flex-wrap gap-2 mt-2">
                     {divisions.map((div, i) => (
                       <div
                         key={i}
-                        className="flex items-center gap-2 h-[44px] px-4 bg-white border border-[#3D3775] rounded-[24px]"
+                        className="flex items-center gap-3 h-[44px] px-4 pr-2.5 bg-white border border-[#3D3775] rounded-[24px]"
                       >
-                        <span className="font-poppins font-medium text-[14px] text-[#181818]">{div}</span>
+                        <span className="font-general-sans font-medium text-[14px] text-[#181818]">{div}</span>
                         <button
                           type="button"
                           onClick={() => handleRemoveDivision(i)}
-                          className="w-[24px] h-[24px] rounded-full bg-[#083F92]/10 flex items-center justify-center text-[#083F92] hover:bg-[#083F92]/20 transition-colors ml-1"
+                          className="w-[24px] h-[24px] rounded-full bg-[#083F92] flex items-center justify-center text-white hover:opacity-90 transition-opacity focus:outline-none"
                         >
-                          <X className="w-3 h-3" />
+                          <Minus className="w-[14px] h-[14px] stroke-[3]" />
                         </button>
                       </div>
                     ))}
@@ -315,11 +375,11 @@ export function CreateTournamentDialog({ open, onOpenChange }: CreateTournamentD
             {/* Submit Button */}
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isPending || isSubmitting}
               className="w-full h-[48px] bg-[#083F92] hover:bg-[#083F92]/90 rounded-[12px] mt-8 disabled:opacity-50 shadow-md"
             >
               <span className="font-poppins font-semibold text-[14px] leading-[19px] text-white capitalize">
-                {isSubmitting ? 'Creating...' : 'Create'}
+                {isPending || isSubmitting ? 'Saving...' : (initialData ? 'Update' : 'Create')}
               </span>
             </Button>
           </form>
@@ -343,10 +403,10 @@ export function CreateTournamentDialog({ open, onOpenChange }: CreateTournamentD
             {/* Header texts */}
             <div className="flex flex-col items-center gap-2 w-full text-center">
               <h2 className="text-[32px] leading-[43px] font-semibold font-poppins text-[#181818] tracking-[-0.008em] capitalize m-0">
-                Created Successfully!
+                {initialData ? 'Updated Successfully!' : 'Created Successfully!'}
               </h2>
               <p className="text-[18px] leading-[28px] font-normal font-poppins text-[#565656] tracking-[-0.014em] m-0">
-                New Tournament has been added to you upcoming list!
+                {initialData ? 'Tournament has been updated!' : 'New Tournament has been added to you upcoming list!'}
               </p>
             </div>
           </div>

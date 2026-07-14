@@ -7,11 +7,17 @@ import {
   ChevronLeft, 
   ChevronRight,
 } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { PageTransition } from '@/components/animations/page-transition';
 import { CreateTeamForm } from '@/features/teams/components/create-team-form';
 import { TeamFormData } from '@/features/teams/schema/team.schema';
 import { toast } from 'sonner';
 import { ConfirmDeleteDialog } from '@/components/ui/alert-dialog';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useTeams } from '@/features/teams/hooks/use-teams';
+import { useCreateTeam } from '@/features/teams/hooks/use-create-team';
+import { useDeleteTeam } from '@/features/teams/hooks/use-delete-team';
 
 interface TeamItem {
   id: string;
@@ -19,21 +25,19 @@ interface TeamItem {
   code: string;
 }
 
+const getPaginationRange = (current: number, total: number) => {
+  if (total <= 3) return Array.from({ length: total }, (_, i) => i + 1);
+  if (current === 1) return [1, 2, 3];
+  if (current === total) return [total - 2, total - 1, total];
+  return [current - 1, current, current + 1];
+};
+
 export default function CreateTeam() {
+  const router = useRouter();
+  
   // Confirmation state
   const [teamToDelete, setTeamToDelete] = useState<TeamItem | null>(null);
   const [requestToReject, setRequestToReject] = useState<TeamItem | null>(null);
-
-  // State for Created Teams
-  const [createdTeams, setCreatedTeams] = useState<TeamItem[]>([
-    { id: 't1', name: 'Milwaukee Knights School', code: '00000001' },
-    { id: 't2', name: 'Milwaukee Knights School', code: '00000002' },
-    { id: 't3', name: 'Milwaukee Knights School', code: '00000003' },
-    { id: 't4', name: 'Milwaukee Knights School', code: '00000004' },
-    { id: 't5', name: 'Milwaukee Knights School', code: '00000005' },
-    { id: 't6', name: 'Milwaukee Knights School', code: '00000006' },
-    { id: 't7', name: 'Milwaukee Knights School', code: '00000007' },
-  ]);
 
   // State for Create Team Requests
   const [teamRequests, setTeamRequests] = useState<TeamItem[]>([
@@ -51,13 +55,27 @@ export default function CreateTeam() {
   const [requestsPage, setRequestsPage] = useState(1);
   const itemsPerPage = 5; // 5 items per page matches standard row limits
 
-  // Pagination for Created Teams
-  const paginatedCreatedTeams = useMemo(() => {
-    const start = (createdTeamsPage - 1) * itemsPerPage;
-    return createdTeams.slice(start, start + itemsPerPage);
-  }, [createdTeams, createdTeamsPage]);
+  // TanStack Query & Mutation hooks
+  const { data: teamsData, isLoading: loading, isFetching } = useTeams(createdTeamsPage, itemsPerPage);
+  const { mutateAsync: createTeam, isPending: isCreating } = useCreateTeam();
+  const { mutateAsync: deleteTeam, isPending: isDeleting } = useDeleteTeam();
 
-  const totalCreatedTeamsPages = Math.max(1, Math.ceil(createdTeams.length / itemsPerPage));
+  // Map API response to UI items
+  const createdTeams = useMemo(() => {
+    if (!teamsData?.data?.teams) return [];
+    return teamsData.data.teams.map((t) => ({
+      id: t._id,
+      name: t.name,
+      code: t.teamCode || t._id.substring(0, 8).toUpperCase(),
+    }));
+  }, [teamsData]);
+
+  const totalCreatedTeamsPages = useMemo(() => {
+    return teamsData?.pagination?.totalPages || 1;
+  }, [teamsData]);
+
+  // Since we fetch paginated teams from the backend, we display the current page's teams directly
+  const paginatedCreatedTeams = createdTeams;
 
   // Pagination for Requests
   const paginatedRequests = useMemo(() => {
@@ -68,45 +86,46 @@ export default function CreateTeam() {
   const totalRequestsPages = Math.max(1, Math.ceil(teamRequests.length / itemsPerPage));
 
   // Handlers
-  const handleCreateTeam = (data: TeamFormData) => {
-    // Check if code already exists in created teams
-    if (createdTeams.some(t => t.code === data.teamCode)) {
-      toast.error(`Team code ${data.teamCode} is already assigned to a team`);
-      return;
+  const handleCreateTeam = async (data: TeamFormData) => {
+    try {
+      await createTeam({
+        name: data.teamName,
+        teamCode: data.teamCode
+      });
+      // React query automatically refetches on mutation success
+    } catch (e) {
+      // Error handling is managed by the mutation hook onError callback
+      throw e;
     }
-
-    const newTeam: TeamItem = {
-      id: `t_${Date.now()}`,
-      name: data.teamName,
-      code: data.teamCode
-    };
-
-    setCreatedTeams([newTeam, ...createdTeams]);
-    toast.success(`Team "${data.teamName}" created successfully`);
   };
 
   const handleDeleteCreatedTeam = (team: TeamItem) => {
     setTeamToDelete(team);
   };
 
-  const executeDeleteTeam = () => {
+  const executeDeleteTeam = async () => {
     if (teamToDelete) {
-      setCreatedTeams(createdTeams.filter(t => t.id !== teamToDelete.id));
-      toast.success(`Team "${teamToDelete.name}" deleted`);
-      setTeamToDelete(null);
+      try {
+        await deleteTeam(teamToDelete.id);
+        setTeamToDelete(null);
+        // React query automatically refetches on mutation success
+      } catch {
+        // Error handling is managed by the mutation hook onError callback
+      }
     }
   };
 
-  const handleApproveRequest = (request: TeamItem) => {
-    // Add to created teams (if code not already taken)
-    if (createdTeams.some(t => t.code === request.code)) {
-      toast.error(`Cannot approve: Team code ${request.code} is already taken`);
-      return;
+  const handleApproveRequest = async (request: TeamItem) => {
+    try {
+      await createTeam({
+        name: request.name,
+        teamCode: request.code,
+      });
+      setTeamRequests(teamRequests.filter(r => r.id !== request.id));
+      // React query automatically refetches on mutation success
+    } catch {
+      // Error handling is managed by the mutation hook onError callback
     }
-
-    setCreatedTeams([request, ...createdTeams]);
-    setTeamRequests(teamRequests.filter(r => r.id !== request.id));
-    toast.success(`Approved team request for "${request.name}"`);
   };
 
   const handleRejectRequest = (request: TeamItem) => {
@@ -133,7 +152,7 @@ export default function CreateTeam() {
             <h2 className="font-poppins font-bold text-[24px] leading-[36px] text-[#083F92] m-0">
               Create Team
             </h2>
-            <CreateTeamForm onSubmitSuccess={handleCreateTeam} />
+            <CreateTeamForm onSubmitSuccess={handleCreateTeam} isLoading={isCreating} />
           </div>
 
           {/* Right Column: Created Teams Card */}
@@ -143,7 +162,7 @@ export default function CreateTeam() {
             </h2>
 
             <div className="w-full bg-white border border-[#DADADA] rounded-[24px] shadow-sm flex flex-col justify-between overflow-hidden min-h-[384px] h-[384px] relative pb-16">
-              <div className="overflow-x-auto w-full">
+              <div className="w-full">
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="bg-[#083F92] text-white text-left h-[50px] font-poppins font-semibold text-[13px]">
@@ -153,21 +172,37 @@ export default function CreateTeam() {
                     </tr>
                   </thead>
                   <tbody>
-                    {paginatedCreatedTeams.length > 0 ? (
+                    {isFetching || loading ? (
+                      Array.from({ length: 5 }).map((_, i) => (
+                        <tr key={`skeleton-${i}`} className="h-[50px] border-b border-[#EEEEEE] bg-white">
+                          <td className="px-6 py-3"><Skeleton className="h-4 w-3/4 max-w-[200px]" /></td>
+                          <td className="px-6 py-3"><Skeleton className="h-4 w-24" /></td>
+                          <td className="px-6 py-3"><Skeleton className="h-8 w-8 rounded-full float-right" /></td>
+                        </tr>
+                      ))
+                    ) : paginatedCreatedTeams.length > 0 ? (
                       paginatedCreatedTeams.map((team, idx) => {
                         const isEven = idx % 2 !== 0;
                         return (
                           <tr 
                             key={team.id}
-                            className={`h-[50px] font-poppins text-[13px] text-[#000000] border-b border-[#EEEEEE] last:border-b-0 ${
+                            onClick={() => router.push(`/create-team/${team.id}`)}
+                            className={`h-[50px] font-poppins text-[13px] text-[#000000] border-b border-[#EEEEEE] last:border-b-0 cursor-pointer hover:bg-[#083F92]/15 transition-colors ${
                               isEven ? 'bg-[#083F92]/10' : 'bg-white'
                             }`}
                           >
-                            <td className="px-6 py-3 truncate max-w-[240px] font-medium">{team.name}</td>
+                            <td className="px-6 py-3 truncate max-w-[240px] font-medium">
+                              <span className="text-[#083F92] font-medium">
+                                {team.name}
+                              </span>
+                            </td>
                             <td className="px-6 py-3 font-medium select-text">{team.code}</td>
                             <td className="px-6 py-3 text-right">
                               <button
-                                onClick={() => handleDeleteCreatedTeam(team)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteCreatedTeam(team);
+                                }}
                                 className="w-[32px] h-[32px] bg-[#083F92]/10 hover:bg-destructive/15 rounded-full flex items-center justify-center cursor-pointer transition-colors shadow-xs"
                                 title="Delete Team"
                               >
@@ -200,8 +235,7 @@ export default function CreateTeam() {
                   </button>
                   
                   <div className="flex items-center bg-[#083F92]/10 rounded-full h-[32px]">
-                    {Array.from({ length: totalCreatedTeamsPages }).map((_, i) => {
-                      const page = i + 1;
+                    {getPaginationRange(createdTeamsPage, totalCreatedTeamsPages).map((page) => {
                       const isActive = createdTeamsPage === page;
                       return (
                         <button
@@ -237,11 +271,11 @@ export default function CreateTeam() {
         {/* Bottom Section: Create Team Requests Card */}
         <div className="flex flex-col gap-4 w-full mt-4">
           <h2 className="font-poppins font-bold text-[24px] leading-[36px] text-[#083F92] m-0">
-            Create Team Requests
+             Team Requests
           </h2>
 
           <div className="w-full bg-white border border-[#DADADA] rounded-[24px] shadow-sm flex flex-col justify-between overflow-hidden min-h-[384px] h-[384px] relative pb-16">
-            <div className="overflow-x-auto w-full">
+            <div className="w-full">
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="bg-[#083F92] text-white text-left h-[50px] font-poppins font-semibold text-[13px]">
@@ -310,8 +344,7 @@ export default function CreateTeam() {
                 </button>
                 
                 <div className="flex items-center bg-[#083F92]/10 rounded-full h-[32px]">
-                  {Array.from({ length: totalRequestsPages }).map((_, i) => {
-                    const page = i + 1;
+                  {getPaginationRange(requestsPage, totalRequestsPages).map((page) => {
                     const isActive = requestsPage === page;
                     return (
                       <button
@@ -347,6 +380,7 @@ export default function CreateTeam() {
           title="Delete Team"
           description={teamToDelete ? `Are you sure you want to delete the team "${teamToDelete.name}"? This action cannot be undone.` : ''}
           onConfirm={executeDeleteTeam}
+          isLoading={isDeleting}
         />
 
         <ConfirmDeleteDialog
