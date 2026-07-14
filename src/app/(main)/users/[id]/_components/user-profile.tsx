@@ -2,14 +2,14 @@
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { 
-  ChevronLeft, 
-  Edit3, 
-  Trash2, 
-  MapPin, 
-  Calendar, 
-  Armchair, 
-  Tag, 
+import {
+  ChevronLeft,
+  Edit,
+  Trash2,
+  MapPin,
+  Calendar,
+  Armchair,
+  Tag,
   ArrowRight,
   Crown,
   Trophy,
@@ -22,6 +22,8 @@ import {
 import Image from 'next/image';
 import { PageTransition } from '@/components/animations/page-transition';
 import Link from 'next/link';
+import { useUserDetails } from '@/features/users/hooks/use-users';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface TournamentItem {
   id: number;
@@ -36,28 +38,34 @@ interface TournamentItem {
 export default function UserProfile() {
   const params = useParams();
   const router = useRouter();
+  const id = params?.id as string;
   const [activeTab, setActiveTab] = useState<'basic' | 'tournaments'>('basic');
   const [tournamentFilter, setTournamentFilter] = useState<'Upcoming' | 'Completed'>('Upcoming');
 
+  const { data, isLoading } = useUserDetails(id);
+  const apiData = data?.data;
+  const user = apiData?.user;
+  const profile = apiData?.playerProfile;
+
   const userData = {
-    name: "Leo Denzin",
-    email: "Denzin@gmail.com",
-    userId: "00000001",
-    grade: "7th",
-    team: "Milwaukee Knights Chess Club",
-    rating: "13456",
-    city: "Milwaukee, Wisconsin",
+    name: user?.name || "Loading...",
+    email: user?.email || "...",
+    userId: user?._id?.substring(0, 8).toUpperCase() || "...",
+    grade: profile?.grade || "N/A",
+    team: "Milwaukee Knights Chess Club", // Keeping static placeholder as requested
+    rating: profile?.rating?.toString() || "0",
+    city: profile?.city || "N/A",
     avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face",
     performance: {
-      totalTournaments: "12",
-      totalWins: "05",
-      quickestWin: "2.5mins",
-      currentRating: "1234"
+      totalTournaments: profile?.totalTournaments?.toString() || "0",
+      totalWins: profile?.totalWins?.toString() || "0",
+      quickestWin: "N/A",
+      currentRating: profile?.rating?.toString() || "0"
     },
     parentDetail: {
-      name: "Jennifer Carter",
-      contact: "+1 (414) 555-7821",
-      email: "ethan.carter@email.com"
+      name: profile?.parents?.mother?.name || profile?.parents?.father?.name || "N/A",
+      contact: profile?.parents?.mother?.phone || profile?.parents?.father?.phone || "N/A",
+      email: profile?.parents?.mother?.email || profile?.parents?.father?.email || "N/A"
     }
   };
 
@@ -74,12 +82,12 @@ export default function UserProfile() {
   return (
     <PageTransition>
       <div className="flex flex-col gap-6 w-full h-full font-sans select-none pb-12">
-        
+
         {/* Top Header Row */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full pt-4">
           {/* Back button */}
-          <button 
-            onClick={() => router.push('/users')}
+          <button
+            onClick={() => router.back()}
             className="flex items-center gap-2 text-[#083F92] hover:opacity-80 transition-opacity focus:outline-none"
           >
             <ChevronLeft className="w-5 h-5 stroke-[3]" />
@@ -91,7 +99,7 @@ export default function UserProfile() {
             {/* Edit Button */}
             <button className="flex items-center gap-2 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-[105px] justify-center shrink-0 cursor-pointer">
               <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md shrink-0">
-                <Edit3 className="w-4 h-4 text-white fill-current" />
+                <Edit className="w-4 h-4 text-white" />
               </div>
               <span className="font-poppins font-medium text-[14px] leading-[20px] tracking-[-0.019em]">
                 Edit
@@ -104,7 +112,7 @@ export default function UserProfile() {
             {/* Delete Button */}
             <button className="flex items-center gap-2 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-destructive/10 text-[#CE2D32] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-[124px] justify-center shrink-0 cursor-pointer">
               <div className="w-[42px] h-[42px] bg-[#CE2D32] rounded-full flex items-center justify-center text-white relative shadow-md shrink-0">
-                <Trash2 className="w-4 h-4 text-white fill-current" />
+                <Trash2 className="w-4 h-4 text-white" />
               </div>
               <span className="font-poppins font-medium text-[14px] leading-[20px] tracking-[-0.019em]">
                 Delete
@@ -115,34 +123,47 @@ export default function UserProfile() {
 
         {/* Outer Banner and Details Container */}
         <div className="w-full bg-[#083F92] rounded-[20px] shadow-md flex flex-col relative min-h-[600px] mt-16">
-          
+
           {/* Blue Top Profile Header Area */}
           <div className="w-full px-6 md:px-12 pt-4 pb-10 flex flex-col md:flex-row gap-6 items-center relative z-10">
             {/* Avatar Circle */}
             <div className="absolute left-1/2 -translate-x-1/2 md:left-12 md:-translate-x-0 w-[150px] h-[150px] rounded-full overflow-hidden border-[6px] border-[#EFEEF9] shrink-0 shadow-lg -top-[75px] bg-[#D9D9D9] z-30">
-              <Image 
-                src={userData.avatar}
-                alt={userData.name}
-                fill
-                className="object-cover"
-              />
+              {isLoading ? (
+                <Skeleton className="w-full h-full rounded-full bg-[#083F92]/10" />
+              ) : (
+                <Image
+                  src={userData.avatar}
+                  alt={userData.name}
+                  fill
+                  className="object-cover"
+                />
+              )}
             </div>
 
             {/* Profile text details & stats grid */}
             <div className="flex flex-col gap-6 flex-1 w-full text-white">
               {/* Title & Email */}
               <div className="flex flex-col items-center md:items-start md:ml-[170px] mt-[65px] md:mt-0 gap-1 text-center md:text-left">
-                <h1 className="font-poppins font-semibold text-[32px] leading-[38px] text-white m-0">
-                  {userData.name}
-                </h1>
-                <span className="font-poppins font-normal text-[14px] leading-[21px] text-[#DBDBDB]">
-                  {userData.email}
-                </span>
+                {isLoading ? (
+                  <>
+                    <Skeleton className="h-9 w-[200px] bg-white/20" />
+                    <Skeleton className="h-5 w-[150px] bg-white/20 mt-1" />
+                  </>
+                ) : (
+                  <>
+                    <h1 className="font-poppins font-semibold text-[32px] leading-[38px] text-white m-0">
+                      {userData.name}
+                    </h1>
+                    <span className="font-poppins font-normal text-[14px] leading-[21px] text-[#DBDBDB]">
+                      {userData.email}
+                    </span>
+                  </>
+                )}
               </div>
 
               {/* Metadata stats row */}
               <div className="grid grid-cols-2 md:flex md:flex-wrap md:items-center justify-between gap-6 w-full mt-2 select-text ml-0 md:ml-2">
-                
+
                 {/* Stats block - User ID */}
                 <div className="flex flex-col items-center md:items-start text-center md:text-left">
                   <span className="font-poppins font-normal text-[12px] leading-[18px] text-white/70">UserID</span>
@@ -191,26 +212,24 @@ export default function UserProfile() {
 
           {/* White Bottom Content Tab Panel Area (Overlaps Banner) */}
           <div className="w-full bg-white rounded-t-[24px] rounded-b-[20px] flex-1 min-h-[300px] z-20 flex flex-col p-8 gap-8 shadow-inner">
-            
+
             {/* Tab switch button capsule */}
             <div className="flex items-center w-full max-w-[251px] h-[50px] bg-[#083F92]/10 rounded-[100px] shrink-0">
               <button
                 onClick={() => setActiveTab('basic')}
-                className={`flex-1 h-full font-poppins text-[14px] leading-[21px] rounded-[100px] flex items-center justify-center transition-all ${
-                  activeTab === 'basic' 
-                    ? 'bg-[#083F92] text-white font-semibold border-[4px] border-white ' 
-                    : 'text-black font-normal hover:bg-black/5'
-                }`}
+                className={`flex-1 h-full font-poppins text-[14px] leading-[21px] rounded-[100px] flex items-center justify-center transition-all ${activeTab === 'basic'
+                  ? 'bg-[#083F92] text-white font-semibold border-[4px] border-white '
+                  : 'text-black font-normal hover:bg-black/5'
+                  }`}
               >
                 Basic Detail
               </button>
               <button
                 onClick={() => setActiveTab('tournaments')}
-                className={`flex-1 h-full font-poppins text-[14px] leading-[21px] rounded-[100px] flex items-center justify-center transition-all ${
-                  activeTab === 'tournaments' 
-                    ? 'bg-[#083F92] text-white font-semibold border-[4px] border-white ' 
-                    : 'text-black font-normal hover:bg-black/5'
-                }`}
+                className={`flex-1 h-full font-poppins text-[14px] leading-[21px] rounded-[100px] flex items-center justify-center transition-all ${activeTab === 'tournaments'
+                  ? 'bg-[#083F92] text-white font-semibold border-[4px] border-white '
+                  : 'text-black font-normal hover:bg-black/5'
+                  }`}
               >
                 Tournaments
               </button>
@@ -222,7 +241,7 @@ export default function UserProfile() {
             {/* TAB CONTENTS */}
             {activeTab === 'basic' ? (
               <div className="flex flex-col gap-8 w-full">
-                
+
                 {/* Performance stats section */}
                 <div className="flex flex-col gap-4 w-full">
                   <h3 className="font-poppins font-medium text-[24px] leading-[32px] text-[#292D32] m-0">
@@ -231,7 +250,7 @@ export default function UserProfile() {
 
                   {/* Horizontal stats block */}
                   <div className="flex flex-wrap items-center gap-6 w-full mt-2">
-                    
+
                     {/* Stat Item - Total Tournaments */}
                     <div className="flex items-center gap-3">
                       <div className="w-[32px] h-[32px] bg-[#083F92] text-white rounded-full flex items-center justify-center shrink-0">
@@ -299,7 +318,7 @@ export default function UserProfile() {
 
                   {/* Details stats block */}
                   <div className="flex flex-wrap items-center gap-6 w-full mt-2">
-                    
+
                     {/* Parent detail item - Name */}
                     <div className="flex items-center gap-3">
                       <div className="w-[32px] h-[32px] bg-[#083F92] text-white rounded-full flex items-center justify-center shrink-0">
@@ -354,11 +373,10 @@ export default function UserProfile() {
                       <button
                         key={filterVal}
                         onClick={() => setTournamentFilter(filterVal)}
-                        className={`px-6 h-[44px] rounded-[100px] border-4 border-[#F4F4F4] font-poppins font-semibold text-[14px] leading-[19px] flex items-center justify-center transition-all ${
-                          isActive 
-                            ? 'bg-[#083F92] text-white border-transparent' 
-                            : 'bg-white text-black hover:bg-black/5'
-                        }`}
+                        className={`px-6 h-[44px] rounded-[100px] border-4 border-[#F4F4F4] font-poppins font-semibold text-[14px] leading-[19px] flex items-center justify-center transition-all ${isActive
+                          ? 'bg-[#083F92] text-white border-transparent'
+                          : 'bg-white text-black hover:bg-black/5'
+                          }`}
                       >
                         {filterVal}
                       </button>
@@ -369,7 +387,7 @@ export default function UserProfile() {
                 {/* Sub Tournaments cards stack */}
                 <div className="flex flex-col gap-3 w-full">
                   {filteredTournaments.map((t) => (
-                    <Link 
+                    <Link
                       key={t.id}
                       href={`/tournaments/${t.id}`}
                       className="w-full min-h-[107px] py-4 md:py-0 bg-white border border-[#083F92]/30 rounded-[12px] shadow-[0px_4px_4px_rgba(0,0,0,0.05)] hover:shadow-[0px_4px_4px_rgba(0,0,0,0.1)] transition-all duration-150 flex flex-col md:flex-row md:items-center justify-between px-6 cursor-pointer gap-4"
@@ -403,14 +421,13 @@ export default function UserProfile() {
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Action & Badge details */}
                       <div className="flex items-center justify-between md:justify-end gap-6 shrink-0 w-full md:w-auto border-t md:border-t-0 pt-3 md:pt-0 border-neutral-100">
-                        <div className={`w-[89px] h-[38px] rounded-[8px] flex items-center justify-center font-poppins font-medium text-[13px] leading-[18px] ${
-                          t.status === 'Completed'
-                            ? 'bg-[#083F92] text-white shadow-sm'
-                            : 'bg-[#083F92]/10 text-[#083F92]'
-                        }`}>
+                        <div className={`w-[89px] h-[38px] rounded-[8px] flex items-center justify-center font-poppins font-medium text-[13px] leading-[18px] ${t.status === 'Completed'
+                          ? 'bg-[#083F92] text-white shadow-sm'
+                          : 'bg-[#083F92]/10 text-[#083F92]'
+                          }`}>
                           {t.status}
                         </div>
                         <ArrowRight className="w-6 h-6 text-black/80 hover:translate-x-0.5 transition-transform hidden md:block" />

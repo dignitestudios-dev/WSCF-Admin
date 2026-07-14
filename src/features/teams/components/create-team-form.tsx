@@ -7,21 +7,27 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 interface CreateTeamFormProps {
-  onSubmitSuccess: (data: TeamFormData) => void;
+  onSubmitSuccess: (data: TeamFormData) => Promise<void> | void;
+  isLoading?: boolean;
 }
 
-export function CreateTeamForm({ onSubmitSuccess }: CreateTeamFormProps) {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<TeamFormData>({
+export function CreateTeamForm({ onSubmitSuccess, isLoading = false }: CreateTeamFormProps) {
+  const { register, handleSubmit , reset, watch, formState: { errors } } = useForm<TeamFormData>({
     resolver: zodResolver(teamSchema),
+    mode:"onChange",
     defaultValues: {
       teamName: '',
       teamCode: '',
     },
   });
 
-  const onSubmit = (data: TeamFormData) => {
-    onSubmitSuccess(data);
-    reset();
+  const onSubmit = async (data: TeamFormData) => {
+    try {
+      await onSubmitSuccess(data);
+      reset({ teamName: '', teamCode: '' });
+    } catch (error) {
+      // Allow parent's mutation handler to throw and catch the error, so we don't reset the form on failure.
+    }
   };
 
   return (
@@ -41,8 +47,10 @@ export function CreateTeamForm({ onSubmitSuccess }: CreateTeamFormProps) {
               id="teamName"
               placeholder="Title"
               type="text"
+              value={watch('teamName')}
               maxLength={100}
-              className="w-full h-full bg-white border border-[#3D3775] rounded-[24px] px-[16px] font-poppins font-normal text-[14px] text-[#181818] placeholder:text-[#565656]/50 focus:outline-none"
+              disabled={isLoading}
+              className="w-full h-full bg-white border border-[#3D3775] rounded-[24px] px-[16px] font-poppins font-normal text-[14px] text-[#181818] placeholder:text-[#565656]/50 focus:outline-none disabled:opacity-60"
               {...register('teamName')}
             />
           </div>
@@ -63,8 +71,10 @@ export function CreateTeamForm({ onSubmitSuccess }: CreateTeamFormProps) {
               id="teamCode"
               placeholder="Title"
               type="text"
+              value={watch('teamCode')}
               maxLength={15}
-              className="w-full h-full bg-white border border-[#3D3775] rounded-[24px] px-[16px] font-poppins font-normal text-[14px] text-[#181818] placeholder:text-[#565656]/50 focus:outline-none"
+              disabled={isLoading}
+              className="w-full h-full bg-white border border-[#3D3775] rounded-[24px] px-[16px] font-poppins font-normal text-[14px] text-[#181818] placeholder:text-[#565656]/50 focus:outline-none disabled:opacity-60"
               {...register('teamCode')}
             />
           </div>
@@ -81,10 +91,11 @@ export function CreateTeamForm({ onSubmitSuccess }: CreateTeamFormProps) {
       <div className="w-full mt-6">
         <Button
           type="submit"
-          className="w-full h-[48px] bg-[#083F92] hover:bg-[#083F92]/95 rounded-[100px] flex justify-center items-center cursor-pointer transition-colors shadow-sm focus:outline-none"
+          disabled={isLoading}
+          className="w-full h-[48px] bg-[#083F92] hover:bg-[#083F92]/95 rounded-[100px] flex justify-center items-center cursor-pointer transition-colors shadow-sm focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <span className="font-general-sans font-semibold text-[14px] leading-[19px] text-center capitalize text-white">
-            Create
+            {isLoading ? 'Creating...' : 'Create'}
           </span>
         </Button>
       </div>

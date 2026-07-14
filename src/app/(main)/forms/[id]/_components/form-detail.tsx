@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { 
-  Plus, 
-  Pencil, 
-  Trash2, 
+import {
+  Plus,
+  Pencil,
+  Trash2,
   ChevronLeft
 } from 'lucide-react';
 import { PageTransition } from '@/components/animations/page-transition';
@@ -208,12 +208,12 @@ export default function FormDetail() {
   return (
     <PageTransition>
       <div className="flex flex-col gap-6 w-full h-full font-sans select-none pb-12">
-        
+
         {/* Top Navigation / Action Bar */}
         <div className="flex justify-between items-center w-full pt-4">
           {/* Back button */}
-          <button 
-            onClick={() => router.push('/forms')}
+          <button
+            onClick={() => router.back()}
             className="flex items-center gap-2 text-[#083F92] hover:opacity-80 transition-opacity focus:outline-none cursor-pointer"
           >
             <ChevronLeft className="w-6 h-6 stroke-[3]" />
@@ -222,9 +222,9 @@ export default function FormDetail() {
 
           {/* Action buttons (Delete Form & Add Field) */}
           <div className="flex items-center gap-4 text-nowrap">
-            
+
             {/* Delete entire Form circular button */}
-            <button 
+            <button
               onClick={handleDeleteForm}
               className="w-[42px] h-[42px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#CE2D32] rounded-full flex items-center justify-center transition-colors cursor-pointer focus:outline-none shadow-xs"
               title="Delete Form"
@@ -233,7 +233,7 @@ export default function FormDetail() {
             </button>
 
             {/* Add Field Button */}
-            <button 
+            <button
               onClick={handleOpenAddDialog}
               className="flex items-center gap-2 px-[15px] py-[5px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[42px] shadow-xs cursor-pointer"
             >
@@ -260,7 +260,7 @@ export default function FormDetail() {
           <div className="overflow-x-auto w-full">
             <div className="min-w-[800px] flex flex-col">
               {/* Table Header */}
-              <div 
+              <div
                 className="w-full bg-[#083F92] border-4 border-[#F4F4F4] rounded-t-[20px] h-[54px] grid grid-cols-[260px_130px_150px_130px_100px_1fr] items-center px-6"
               >
                 <span className="font-poppins font-bold text-[13px] leading-[20px] text-white">Filed Title</span>
@@ -277,9 +277,8 @@ export default function FormDetail() {
                   fields.map((field, index) => (
                     <div
                       key={field.id}
-                      className={`w-full min-h-[52px] grid grid-cols-[260px_130px_150px_130px_100px_1fr] items-center px-6 border-b border-[#DADADA]/30 last:border-0 ${
-                        index % 2 === 1 ? 'bg-[#083F92]/10' : 'bg-white'
-                      }`}
+                      className={`w-full min-h-[52px] grid grid-cols-[260px_130px_150px_130px_100px_1fr] items-center px-6 border-b border-[#DADADA]/30 last:border-0 ${index % 2 === 1 ? 'bg-[#083F92]/10' : 'bg-white'
+                        }`}
                     >
                       {/* Field Title */}
                       <span className="font-poppins font-semibold text-[13px] leading-[20px] text-[#636363] py-2 truncate pr-4">
@@ -341,21 +340,21 @@ export default function FormDetail() {
 
         {/* Add/Edit Field Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent 
+          <DialogContent
             showCloseButton={true}
             className="sm:max-w-[580px] w-[90vw] bg-white rounded-[12px] p-6 sm:p-8 gap-0 border border-[#DADADA]/40 shadow-2xl outline-none"
           >
             <DialogTitle className="font-heading text-base leading-none font-semibold text-[32px]! text-[#181818] m-0 mb-6 font-general-sans">
               {editingField ? 'Edit Field' : 'Add Field'}
             </DialogTitle>
-            
+
             <form onSubmit={handleDialogSubmit} className="flex flex-col gap-5 w-full">
               {/* Field Title */}
               <div className="flex flex-col gap-2 w-full">
                 <label className="font-general-sans font-medium text-[14px] leading-[19px] text-[#181818]">
                   Field Title
                 </label>
-                <Input 
+                <Input
                   type="text"
                   placeholder="e.g. First Name"
                   value={title}
@@ -408,7 +407,7 @@ export default function FormDetail() {
                   <label className="font-general-sans font-medium text-[14px] leading-[19px] text-[#181818]">
                     Value (Dropdown Options)
                   </label>
-                  <Input 
+                  <Input
                     type="text"
                     placeholder={type === 'Dropdown' ? 'Comma-separated options' : 'Null'}
                     value={value}
@@ -423,7 +422,7 @@ export default function FormDetail() {
                   <label className="font-general-sans font-medium text-[14px] leading-[19px] text-[#181818]">
                     Max Length
                   </label>
-                  <Input 
+                  <Input
                     type="number"
                     placeholder="e.g. 30"
                     value={length}

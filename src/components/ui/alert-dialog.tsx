@@ -155,6 +155,7 @@ interface ConfirmDeleteDialogProps {
   onConfirm: () => void
   confirmText?: string
   cancelText?: string
+  isLoading?: boolean
 }
 
 function ConfirmDeleteDialog({
@@ -165,17 +166,27 @@ function ConfirmDeleteDialog({
   onConfirm,
   confirmText = "Delete",
   cancelText = "Cancel",
+  isLoading = false,
 }: ConfirmDeleteDialogProps) {
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog open={open} onOpenChange={(isOpen) => {
+      if (isLoading) return;
+      onOpenChange(isOpen);
+    }}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{cancelText}</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>{confirmText}</AlertDialogAction>
+          <AlertDialogCancel disabled={isLoading}>{cancelText}</AlertDialogCancel>
+          <Button 
+            disabled={isLoading}
+            variant="destructive"
+            onClick={onConfirm}
+          >
+            {isLoading ? "Deleting..." : confirmText}
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
