@@ -12,6 +12,7 @@ import { SearchInput } from '@/components/ui/search-input';
 import Link from 'next/link';
 import { Pagination } from '@/components/ui/pagination';
 import { PageTransition } from '@/components/animations/page-transition';
+import { useDebounce } from '@/hooks/use-debounce';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
@@ -30,6 +31,7 @@ interface Member {
 
 export default function Membership() {
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortField, setSortField] = useState<'status' | 'lastActive' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -58,12 +60,12 @@ export default function Membership() {
   // Search filtering
   const filteredMembers = useMemo(() => {
     return membersList.filter(member => 
-      member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      member.userId.includes(searchQuery) ||
-      member.purchaseDate.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      member.status.text.toLowerCase().includes(searchQuery.toLowerCase())
+      member.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+      member.userId.includes(debouncedSearchQuery) ||
+      member.purchaseDate.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+      member.status.text.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [debouncedSearchQuery]);
 
   // Sorting
   const sortedMembers = useMemo(() => {

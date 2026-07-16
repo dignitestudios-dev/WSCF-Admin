@@ -11,6 +11,7 @@ import {
   Crown
 } from 'lucide-react';
 import { SearchInput } from '@/components/ui/search-input';
+import { useDebounce } from '@/hooks/use-debounce';
 import { PageTransition } from '@/components/animations/page-transition';
 import { CreateTournamentDialog } from '@/features/tournaments/components/create-tournament-dialog';
 import Link from 'next/link';
@@ -20,16 +21,17 @@ import { useTournaments } from '@/features/tournaments/hooks/use-tournaments';
 
 export default function Tournaments() {
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [activeTab, setActiveTab] = useState<'All' | 'upcoming' | 'completed'>('All');
   const [currentPage, setCurrentPage] = useState(1); 
   const itemsPerPage = 10;
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   const statusParam = activeTab === 'All' ? undefined : activeTab;
-  const { data: tournamentsData, isLoading, isFetching } = useTournaments(currentPage, itemsPerPage, searchQuery, statusParam);
+  const { data: tournamentsData, isLoading, isFetching } = useTournaments(currentPage, itemsPerPage, debouncedSearchQuery, statusParam);
 
   const tournaments = tournamentsData?.data?.tournaments || [];
   const totalPages = tournamentsData?.pagination?.totalPages || 1;
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('en-US', {
