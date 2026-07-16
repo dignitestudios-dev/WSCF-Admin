@@ -6,6 +6,7 @@ import {
   FileSpreadsheet
 } from 'lucide-react';
 import { SearchInput } from '@/components/ui/search-input';
+import { useDebounce } from '@/hooks/use-debounce';
 import Link from 'next/link';
 import { PageTransition } from '@/components/animations/page-transition';
 import { Pagination } from '@/components/ui/pagination';
@@ -23,10 +24,11 @@ interface UserRow {
 
 export default function Users() {
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const { data: usersData, isLoading } = useUsers(currentPage, itemsPerPage, searchQuery);
+  const { data: usersData, isLoading } = useUsers(currentPage, itemsPerPage, debouncedSearchQuery);
   const users = usersData?.data?.users || [];
   const totalPages = usersData?.pagination?.totalPages || 1;
 

@@ -12,6 +12,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { PageTransition } from '@/components/animations/page-transition';
 import { Pagination } from '@/components/ui/pagination';
 import { SearchInput } from '@/components/ui/search-input';
+import { useDebounce } from '@/hooks/use-debounce';
 import { useTeamDetails } from '@/features/teams/hooks/use-team-details';
 import { useTeamMembers } from '@/features/teams/hooks/use-team-members';
 import { useAddTeamMember } from '@/features/teams/hooks/use-add-team-member';
@@ -40,6 +41,7 @@ export default function TeamDetails() {
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   // Fetch dynamic team details
   const { data: teamData, isLoading: teamLoading } = useTeamDetails(id);
@@ -51,11 +53,12 @@ export default function TeamDetails() {
   const [selectedUserId, setSelectedUserId] = useState('');
   const [selectedUserName, setSelectedUserName] = useState('');
   const [userSearchQuery, setUserSearchQuery] = useState('');
+  const debouncedUserSearchQuery = useDebounce(userSearchQuery, 500);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [userPage, setUserPage] = useState(1);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const { data: usersData, isLoading: usersLoading } = useUsers(userPage, 10, userSearchQuery);
+  const { data: usersData, isLoading: usersLoading } = useUsers(userPage, 10, debouncedUserSearchQuery);
   const usersList = usersData?.data?.users || [];
   const userTotalPages = usersData?.pagination?.totalPages || 1;
 
@@ -78,7 +81,7 @@ export default function TeamDetails() {
   const itemsPerPage = 10;
 
   // TanStack hooks for team members
-  const { data: membersData, isLoading: membersLoading } = useTeamMembers(id, currentPage, itemsPerPage, searchQuery);
+  const { data: membersData, isLoading: membersLoading } = useTeamMembers(id, currentPage, itemsPerPage, debouncedSearchQuery);
   const { mutateAsync: addTeamMember, isPending: isAddingMember } = useAddTeamMember(id);
 
   // Map backend members response to table rows

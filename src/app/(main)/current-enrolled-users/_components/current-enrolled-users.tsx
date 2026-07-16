@@ -8,6 +8,7 @@ import {
 import { SearchInput } from '@/components/ui/search-input';
 import Link from 'next/link';
 import { Pagination } from '@/components/ui/pagination';
+import { useDebounce } from '@/hooks/use-debounce';
 
 interface EnrolledUser {
   userId: string;
@@ -20,6 +21,7 @@ interface EnrolledUser {
 
 export default function CurrentEnrolledUsers() {
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [currentPage, setCurrentPage] = useState(2);
 
   const enrolledUsers: EnrolledUser[] = [
@@ -35,10 +37,10 @@ export default function CurrentEnrolledUsers() {
   ];
 
   const filteredUsers = enrolledUsers.filter(user => 
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.userId.includes(searchQuery) ||
-    user.team.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.tournament.toLowerCase().includes(searchQuery.toLowerCase())
+    user.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+    user.userId.includes(debouncedSearchQuery) ||
+    user.team.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+    user.tournament.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
   );
 
   return (

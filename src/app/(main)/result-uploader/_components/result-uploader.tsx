@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { SearchInput } from '@/components/ui/search-input';
 import { PageTransition } from '@/components/animations/page-transition';
+import { useDebounce } from '@/hooks/use-debounce';
 import { toast } from 'sonner';
 
 interface Tournament {
@@ -85,6 +86,7 @@ const getTournamentDetails = (tournament: Tournament) => {
 
 export default function ResultUploader() {
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<Record<number, { name: string; size: string } | null>>({
     0: null,
@@ -163,11 +165,11 @@ export default function ResultUploader() {
   // Filter list
   const filteredTournaments = useMemo(() => {
     return tournaments.filter(t =>
-      t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.date.toLowerCase().includes(searchQuery.toLowerCase())
+      t.title.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+      t.location.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+      t.date.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
     );
-  }, [tournaments, searchQuery]);
+  }, [tournaments, debouncedSearchQuery]);
 
   // Handle file uploader slot change
   const handleSlotFileChange = (slotIndex: number, file: File) => {
