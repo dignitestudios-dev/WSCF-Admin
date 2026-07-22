@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getCookie } from './cookie';
 
-const BASE_URL =  'https://v7kxs63n-3050.inc1.devtunnels.ms/';
+const BASE_URL =  'https://416zwbs6-3050.inc1.devtunnels.ms/';
 
 export const axiosInstance = axios.create({
   baseURL: BASE_URL,
