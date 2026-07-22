@@ -87,7 +87,7 @@ export default function Forms() {
       fieldType,
       nature,
       minLength: Number(minLength),
-      options: fieldType === 'dropdown' ? optionsArray : [],
+      options: fieldType === 'dropdown' && !isTournamentSpecific ? optionsArray : [],
       isTournamentSpecific: fieldType === 'dropdown' ? isTournamentSpecific : false,
     };
 
@@ -215,7 +215,7 @@ export default function Forms() {
               {/* Field Name */}
               <div className="flex flex-col gap-[8px] w-full">
                 <label className="font-general-sans font-medium text-[14px] leading-[19px] text-[#181818] capitalize">
-                  Field Name
+                  Field Name <span className="text-red-500">*</span>
                 </label>
                 <div className="relative h-[44px]">
                   <Input
@@ -233,17 +233,17 @@ export default function Forms() {
                 {/* Field Type */}
                 <div className="flex flex-col gap-[8px]">
                   <label className="font-general-sans font-medium text-[14px] leading-[19px] text-[#181818] capitalize">
-                    Type
+                    Type <span className="text-red-500">*</span>
                   </label>
                   <Select value={fieldType} onValueChange={(val) => val && setFieldType(val)}>
-                    <SelectTrigger className="!h-[44px] w-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus:ring-0 focus:ring-offset-0 [&>svg]:hidden">
+                    <SelectTrigger className="!h-[44px] w-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus:ring-0 focus:ring-offset-0">
                       <SelectValue placeholder="Select type">{fieldType.charAt(0).toUpperCase() + fieldType.slice(1)}</SelectValue>
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-[#3D3775] rounded-[12px]">
-                      <SelectItem value="text">Text</SelectItem>
-                      <SelectItem value="number">Number</SelectItem>
-                      <SelectItem value="dropdown">Dropdown</SelectItem>
-                      <SelectItem value="email">Email</SelectItem>
+                    <SelectContent className="bg-white border-[#3D3775] rounded-[12px] z-[100] shadow-xl p-2">
+                      <SelectItem value="text" className="cursor-pointer focus:bg-[#083F92]/10 focus:text-[#083F92] rounded-[8px] py-2.5 mb-1 last:mb-0">Text</SelectItem>
+                      <SelectItem value="number" className="cursor-pointer focus:bg-[#083F92]/10 focus:text-[#083F92] rounded-[8px] py-2.5 mb-1 last:mb-0">Number</SelectItem>
+                      <SelectItem value="dropdown" className="cursor-pointer focus:bg-[#083F92]/10 focus:text-[#083F92] rounded-[8px] py-2.5 mb-1 last:mb-0">Dropdown</SelectItem>
+                      <SelectItem value="email" className="cursor-pointer focus:bg-[#083F92]/10 focus:text-[#083F92] rounded-[8px] py-2.5 mb-1 last:mb-0">Email</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -251,15 +251,15 @@ export default function Forms() {
                 {/* Nature */}
                 <div className="flex flex-col gap-[8px]">
                   <label className="font-general-sans font-medium text-[14px] leading-[19px] text-[#181818] capitalize">
-                    Nature
+                    Nature <span className="text-red-500">*</span>
                   </label>
                   <Select value={nature} onValueChange={(val) => val && setNature(val)}>
-                    <SelectTrigger className="!h-[44px] w-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus:ring-0 focus:ring-offset-0 [&>svg]:hidden">
+                    <SelectTrigger className="!h-[44px] w-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus:ring-0 focus:ring-offset-0">
                       <SelectValue placeholder="Select nature">{nature.charAt(0).toUpperCase() + nature.slice(1)}</SelectValue>
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-[#3D3775] rounded-[12px]">
-                      <SelectItem value="mandatory">Mandatory</SelectItem>
-                      <SelectItem value="optional">Optional</SelectItem>
+                    <SelectContent className="bg-white border-[#3D3775] rounded-[12px] z-[100] shadow-xl p-2">
+                      <SelectItem value="mandatory" className="cursor-pointer focus:bg-[#083F92]/10 focus:text-[#083F92] rounded-[8px] py-2.5 mb-1 last:mb-0">Mandatory</SelectItem>
+                      <SelectItem value="optional" className="cursor-pointer focus:bg-[#083F92]/10 focus:text-[#083F92] rounded-[8px] py-2.5 mb-1 last:mb-0">Optional</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -270,7 +270,7 @@ export default function Forms() {
                 {/* Min Length */}
                 <div className="flex flex-col gap-[8px]">
                   <label className="font-general-sans font-medium text-[14px] leading-[19px] text-[#181818] capitalize">
-                    Min Length
+                    Min Length <span className="text-red-500">*</span>
                   </label>
                   <div className="relative h-[44px]">
                     <Input
@@ -287,26 +287,26 @@ export default function Forms() {
                 {fieldType === 'dropdown' && (
                   <div className="flex flex-col gap-[8px]">
                     <label className="font-general-sans font-medium text-[14px] leading-[19px] text-[#181818] capitalize">
-                      Tournament Specific
+                      Tournament Specific <span className="text-red-500">*</span>
                     </label>
                     <Select value={isTournamentSpecific ? 'true' : 'false'} onValueChange={(val) => setIsTournamentSpecific(val === 'true')}>
-                      <SelectTrigger className="!h-[44px] w-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus:ring-0 focus:ring-offset-0 [&>svg]:hidden">
+                      <SelectTrigger className="!h-[44px] w-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus:ring-0 focus:ring-offset-0">
                         <SelectValue placeholder="Tournament Specific">{isTournamentSpecific ? 'Yes' : 'No'}</SelectValue>
                       </SelectTrigger>
-                      <SelectContent className="bg-white border-[#3D3775] rounded-[12px]">
-                        <SelectItem value="false">No</SelectItem>
-                        <SelectItem value="true">Yes</SelectItem>
+                      <SelectContent className="bg-white border-[#3D3775] rounded-[12px] z-[100] shadow-xl p-2">
+                        <SelectItem value="false" className="cursor-pointer focus:bg-[#083F92]/10 focus:text-[#083F92] rounded-[8px] py-2.5 mb-1 last:mb-0">No</SelectItem>
+                        <SelectItem value="true" className="cursor-pointer focus:bg-[#083F92]/10 focus:text-[#083F92] rounded-[8px] py-2.5 mb-1 last:mb-0">Yes</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 )}
               </div>
 
-              {/* Options (if dropdown) */}
-              {fieldType === 'dropdown' && (
+              {/* Options (if dropdown and not tournament specific) */}
+              {fieldType === 'dropdown' && !isTournamentSpecific && (
                 <div className="flex flex-col gap-[8px] w-full">
                   <label className="font-general-sans font-medium text-[14px] leading-[19px] text-[#181818] capitalize">
-                    Options (comma-separated)
+                    Options (comma-separated) <span className="text-red-500">*</span>
                   </label>
                   <div className="relative h-[44px]">
                     <Input

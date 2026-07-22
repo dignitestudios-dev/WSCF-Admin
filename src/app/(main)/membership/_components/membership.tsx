@@ -15,6 +15,17 @@ import { PageTransition } from '@/components/animations/page-transition';
 import { useDebounce } from '@/hooks/use-debounce';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { useMemberships, useExportMemberships } from '@/features/memberships/hooks/use-memberships';
+import { useSendIndividualNotification } from '@/features/notifications/hooks/use-send-notification';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+
+const notificationSchema = z.object({
+  message: z.string().min(4, "Notification text must be at least 4 characters").max(200, "Notification text must not exceed 200 characters"),
+});
+type NotificationFormData = z.infer<typeof notificationSchema>;
 
 interface Member {
   userId: string;
@@ -36,66 +47,78 @@ export default function Membership() {
   const [sortField, setSortField] = useState<'status' | 'lastActive' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   
+  const itemsPerPage = 10;
+  const { data: membershipsData, isLoading } = useMemberships(currentPage, itemsPerPage, debouncedSearchQuery);
+  const members = membershipsData?.data || [];
+  const totalPages = membershipsData?.pagination?.totalPages || 1;
+
+  const { mutateAsync: exportMemberships, isPending: isExporting } = useExportMemberships();
+
+  const handleExport = async () => {
+    try {
+      const blob = await exportMemberships();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `memberships_export_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Memberships exported successfully');
+    } catch (error) {
+      toast.error('Failed to export memberships');
+    }
+  };
+
+  const { mutateAsync: sendIndividualNotification, isPending: isSendingNotification } = useSendIndividualNotification();
+
   // Send Notification modal state
-  const [notifyingMember, setNotifyingMember] = useState<Member | null>(null);
-  const [notificationText, setNotificationText] = useState('');
+  const [notifyingMember, setNotifyingMember] = useState<any>(null);
 
-  const membersList: Member[] = [
-    { userId: '00000001', name: 'Ethan Carter', purchaseDate: 'Jan-07-2026', status: { type: 'active', text: '🟢 120d Left', daysLeft: 120 }, lastActive: '2d ago', lastActiveDays: 2 },
-    { userId: '00000002', name: 'Olivia Brown', purchaseDate: 'Jan-07-2026', status: { type: 'warning', text: '🟡 5d Left', daysLeft: 5 }, lastActive: '12d ago', lastActiveDays: 12 },
-    { userId: '00000003', name: 'Lucas White', purchaseDate: 'Fab-07-2026', status: { type: 'active', text: '🟢 120d Left', daysLeft: 120 }, lastActive: '20d ago', lastActiveDays: 20 },
-    { userId: '00000004', name: 'Sophia Green', purchaseDate: 'Fab-02-2026', status: { type: 'expired', text: '🔴 Expired', daysLeft: -1 }, lastActive: '20d ago', lastActiveDays: 20 },
-    { userId: '00000005', name: 'Mason Johnson', purchaseDate: 'Fab-05-2026', status: { type: 'expired', text: '🔴 Expired', daysLeft: -1 }, lastActive: '2d ago', lastActiveDays: 2 },
-    { userId: '00000006', name: 'Ava Martinez', purchaseDate: 'Mar-05-2026', status: { type: 'active', text: '🟢 40d Left', daysLeft: 40 }, lastActive: '2hr ago', lastActiveDays: 0.08 },
-    { userId: '00000007', name: 'James Wilson', purchaseDate: 'Mar-08-2026', status: { type: 'active', text: '🟢 120d Left', daysLeft: 120 }, lastActive: '2hr ago', lastActiveDays: 0.08 },
-    { userId: '00000008', name: 'Isabella Davis', purchaseDate: 'Apr-08-2026', status: { type: 'warning', text: '🟡 7d Left', daysLeft: 7 }, lastActive: '36min ago', lastActiveDays: 0.025 },
-    { userId: '00000009', name: 'James Wilson', purchaseDate: 'Apr-08-2026', status: { type: 'warning', text: '🟡 7d Left', daysLeft: 7 }, lastActive: 'Active now', lastActiveDays: 0 },
-    { userId: '00000010', name: 'Liam Smith', purchaseDate: 'Jun-15-2026', status: { type: 'warning', text: '🟡 15d Left', daysLeft: 15 }, lastActive: '5d ago', lastActiveDays: 5 },
-    { userId: '00000011', name: 'Amelia Clark', purchaseDate: 'May-10-2026', status: { type: 'active', text: '🟢 30d Left', daysLeft: 30 }, lastActive: '1h ago', lastActiveDays: 0.04 },
-    { userId: '00000012', name: 'Ella Johnson', purchaseDate: 'Jul-20-2026', status: { type: 'active', text: '🟢 50d Left', daysLeft: 50 }, lastActive: '3d ago', lastActiveDays: 3 },
-    { userId: '00000013', name: 'Lucas Brown', purchaseDate: 'Aug-12-2026', status: { type: 'warning', text: '🟡 20d Left', daysLeft: 20 }, lastActive: '1d ago', lastActiveDays: 1 },
-    { userId: '00000014', name: 'Sophia Wilson', purchaseDate: 'Sep-10-2026', status: { type: 'active', text: '🟢 25d Left', daysLeft: 25 }, lastActive: '2d ago', lastActiveDays: 2 },
-  ];
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<NotificationFormData>({
+    resolver: zodResolver(notificationSchema),
+    defaultValues: { message: '' },
+  });
 
-  // Search filtering
-  const filteredMembers = useMemo(() => {
-    return membersList.filter(member => 
-      member.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-      member.userId.includes(debouncedSearchQuery) ||
-      member.purchaseDate.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-      member.status.text.toLowerCase().includes(debouncedSearchQuery.toLowerCase())
-    );
-  }, [debouncedSearchQuery]);
+  const messageValue = watch('message');
+
+  const onNotifySubmit = async (data: NotificationFormData) => {
+    try {
+      await sendIndividualNotification({
+        userId: notifyingMember.userId,
+        email: "", // Not provided in membership API, backend should handle via userId
+        message: data.message.trim()
+      });
+      setNotifyingMember(null);
+      reset({ message: '' });
+    } catch (e) {
+      // error handled in hook
+    }
+  };
 
   // Sorting
   const sortedMembers = useMemo(() => {
-    if (!sortField) return filteredMembers;
+    if (!sortField) return members;
 
-    return [...filteredMembers].sort((a, b) => {
+    return [...members].sort((a, b) => {
       let comparison = 0;
       if (sortField === 'status') {
-        const daysA = a.status.daysLeft ?? 9999;
-        const daysB = b.status.daysLeft ?? 9999;
-        comparison = daysA - daysB;
-      } else if (sortField === 'lastActive') {
-        comparison = a.lastActiveDays - b.lastActiveDays;
+        comparison = (a.status || '').localeCompare(b.status || '');
       }
 
       return sortDirection === 'asc' ? comparison : -comparison;
     });
-  }, [filteredMembers, sortField, sortDirection]);
+  }, [members, sortField, sortDirection]);
 
-  // Pagination (5 members per page, total 3 pages for 14 members)
-  const itemsPerPage = 5;
-  const totalPages = Math.max(1, Math.ceil(sortedMembers.length / itemsPerPage));
-  
-  // Adjust current page if search filters list to fewer items
-  const activePage = Math.min(currentPage, totalPages);
-
-  const displayedMembers = useMemo(() => {
-    const startIdx = (activePage - 1) * itemsPerPage;
-    return sortedMembers.slice(startIdx, startIdx + itemsPerPage);
-  }, [sortedMembers, activePage, itemsPerPage]);
+  // Use sortedMembers for display directly
+  const displayedMembers = sortedMembers;
 
   const handleSort = (field: 'status' | 'lastActive') => {
     if (sortField === field) {
@@ -132,18 +155,24 @@ export default function Membership() {
                   setSearchQuery(val);
                   setCurrentPage(1);
                 }} 
+                disabled={isLoading}
+                containerClassName={isLoading ? 'opacity-50 pointer-events-none' : ''}
               />
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
             {/* Export CSV Button */}
-            <button className="flex items-center gap-2 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-full md:w-[174px] justify-center shrink-0 cursor-pointer">
+            <button 
+              onClick={handleExport}
+              disabled={isExporting}
+              className="flex items-center gap-2 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-full md:w-[174px] justify-center shrink-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md shrink-0">
                 <FileSpreadsheet className="w-5 h-5" />
               </div>
               <span className="font-poppins font-medium text-[14px] leading-[20px] tracking-[-0.019em]">
-                Export As CSV
+                {isExporting ? 'Exporting...' : 'Export As CSV'}
               </span>
             </button>
           </div>
@@ -178,49 +207,45 @@ export default function Membership() {
                     </div>
                   </th>
 
-                  {/* Last Active Heading with Sorting */}
-                  <th className="px-6 py-3 font-semibold w-[150px]">
-                    <div 
-                      onClick={() => handleSort('lastActive')}
-                      className="flex items-center gap-1.5 cursor-pointer hover:opacity-85 justify-center"
-                    >
-                      <span>Last Active</span>
-                      {sortField === 'lastActive' ? (
-                        sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-                      ) : (
-                        <ChevronsUpDown className="w-4 h-4 text-white/50" />
-                      )}
-                    </div>
-                  </th>
-
                   <th className="px-6 py-3 font-semibold text-right w-[150px]">Action</th>
                 </tr>
               </thead>
 
               {/* Table Body */}
               <tbody>
-                {displayedMembers.length > 0 ? (
-                  displayedMembers.map((member, idx) => {
+                {isLoading ? (
+                  Array.from({ length: 5 }).map((_, idx) => (
+                    <tr key={idx} className="h-[68px] border-b border-[#EEEEEE] bg-white">
+                      <td className="px-6 py-3"><Skeleton className="h-4 w-[100px]" /></td>
+                      <td className="px-6 py-3"><Skeleton className="h-4 w-[150px]" /></td>
+                      <td className="px-6 py-3"><Skeleton className="h-4 w-[120px]" /></td>
+                      <td className="px-6 py-3"><Skeleton className="h-4 w-[100px]" /></td>
+                      <td className="px-6 py-3"><Skeleton className="h-4 w-[100px] float-right" /></td>
+                    </tr>
+                  ))
+                ) : displayedMembers.length > 0 ? (
+                  displayedMembers.map((member: any, idx: number) => {
                     const isAltRow = idx % 2 === 1;
-                    const isExpired = member.status.type === 'expired';
+                    const isExpired = member.status === 'expired';
+                    const displayStatus = member.status === 'active' ? '🟢 Active' : member.status === 'expired' ? '🔴 Expired' : `🟡 ${member.status}`;
+                    const displayDate = member.purchaseDate ? new Date(member.purchaseDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) : '';
 
                     return (
                       <tr 
-                        key={member.userId} 
+                        key={member._id} 
                         className={`h-[68px] border-b border-[#EEEEEE] last:border-b-0 font-poppins font-semibold text-[13px] text-[#636363] transition-colors ${
                           isAltRow ? 'bg-[#F4F4F4]' : 'bg-white'
                         }`}
                       >
-                        <td className="px-6 py-3 font-semibold select-text">{member.userId}</td>
+                        <td className="px-6 py-3 font-semibold select-text">{member.membershipId}</td>
                         <td className="px-6 py-3 font-bold text-[#636363] select-text">{member.name}</td>
-                        <td className="px-6 py-3 font-semibold text-[#636363] select-text">{member.purchaseDate}</td>
-                        <td className="px-6 py-3 font-semibold select-text">{member.status.text}</td>
-                        <td className="px-6 py-3 font-semibold select-text text-center">{member.lastActive}</td>
+                        <td className="px-6 py-3 font-semibold text-[#636363] select-text">{displayDate}</td>
+                        <td className="px-6 py-3 font-semibold select-text">{displayStatus}</td>
                         
                         <td className="px-6 py-3 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             <Link 
-                              href={`/users/${parseInt(member.userId)}`}
+                              href={`/users/${member.userId}`}
                               className="font-semibold tracking-[-0.02em] underline text-[#636363] hover:text-[#083F92] transition-colors"
                             >
                               View Profile
@@ -234,7 +259,7 @@ export default function Membership() {
                               <button 
                                 onClick={() => {
                                   setNotifyingMember(member);
-                                  setNotificationText('');
+                                  reset({ message: '' });
                                 }}
                                 className="font-semibold tracking-[-0.02em] underline text-[#636363] hover:text-[#083F92] transition-colors"
                               >
@@ -248,7 +273,7 @@ export default function Membership() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-[#787878] font-poppins">
+                    <td colSpan={5} className="py-12 text-center text-[#787878] font-poppins">
                       No membership records found matching your search.
                     </td>
                   </tr>
@@ -264,7 +289,7 @@ export default function Membership() {
         {totalPages > 1 && (
           <div className="flex justify-end items-center w-full mt-4">
             <Pagination 
-              currentPage={activePage}
+              currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={setCurrentPage}
             />
@@ -281,41 +306,37 @@ export default function Membership() {
               Send Notification
             </DialogTitle>
             
-            <div className="flex flex-col gap-[22px] w-full">
+            <form onSubmit={handleSubmit(onNotifySubmit)} className="flex flex-col gap-[22px] w-full">
               <div className="flex flex-col gap-[8px] w-full">
                 <div className="flex justify-between items-center w-full">
                   <label className="font-general-sans font-medium text-[14px] leading-[19px] text-[#181818] capitalize">
-                    Notification Text
+                    Notification Text <span className="text-red-500">*</span>
                   </label>
                   <span className="font-general-sans text-[12px] text-[#808080]">
-                    {notificationText.length}/200
+                    {(messageValue || '').length}/200
                   </span>
                 </div>
                 <textarea
-                  placeholder="Write heading here"
-                  value={notificationText}
+                  placeholder="Write text here"
                   maxLength={200}
-                  onChange={(e) => setNotificationText(e.target.value)}
-                  className="w-full h-[90px] bg-white border border-[#3D3775] rounded-[12px] p-4 font-general-sans font-normal text-[14px] leading-[19px] text-[#181818] placeholder:text-[#808080] outline-none resize-none focus:ring-1 focus:ring-[#3D3775]"
+                  className={`w-full h-[90px] bg-white border ${errors.message ? 'border-red-500' : 'border-[#3D3775]'} rounded-[12px] p-4 font-general-sans font-normal text-[14px] leading-[19px] text-[#181818] placeholder:text-[#808080] outline-none resize-none focus:ring-1 ${errors.message ? 'focus:ring-red-500' : 'focus:ring-[#3D3775]'}`}
+                  {...register('message')}
                 />
+                {errors.message && (
+                  <p className="text-red-500 text-[12px] mt-[-4px]">{errors.message.message}</p>
+                )}
               </div>
 
               <button
-                onClick={() => {
-                  if (notificationText.trim().length < 4) {
-                    toast.error("Notification text must be at least 4 characters");
-                    return;
-                  }
-                  toast.success(`Notification sent to ${notifyingMember?.name || 'user'}`);
-                  setNotifyingMember(null);
-                }}
-                className="w-full h-[48px] bg-[#083F92] hover:bg-[#083F92]/90 rounded-[100px] flex items-center justify-center cursor-pointer transition-colors shadow-sm focus:outline-none"
+                type="submit"
+                disabled={isSendingNotification}
+                className="w-full h-[48px] bg-[#083F92] hover:bg-[#083F92]/90 rounded-[100px] flex items-center justify-center cursor-pointer transition-colors shadow-sm focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span className="font-general-sans font-semibold text-[14px] leading-[19px] text-white text-center capitalize">
-                  Send
+                  {isSendingNotification ? 'Sending...' : 'Send'}
                 </span>
               </button>
-            </div>
+            </form>
           </DialogContent>
         </Dialog>
 

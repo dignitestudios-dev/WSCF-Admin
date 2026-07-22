@@ -12,6 +12,7 @@ import { PageTransition } from '@/components/animations/page-transition';
 import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUsers } from '@/features/users/hooks/use-users';
+import { userService } from '@/features/users/services/user.service';
 
 interface UserRow {
   userId: string;
@@ -27,13 +28,34 @@ export default function Users() {
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [isExporting, setIsExporting] = useState(false);
 
   const { data: usersData, isLoading } = useUsers(currentPage, itemsPerPage, debouncedSearchQuery);
+  console.log(usersData, "usersData")
   const users = usersData?.data?.users || [];
-  const totalPages = usersData?.pagination?.totalPages || 1;
+  const totalPages = usersData?.data?.pagination?.totalPages || 1;
+
+  const handleExport = async () => {
+    try {
+      setIsExporting(true);
+      const blob = await userService.exportUsers();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'users.csv';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Failed to export users:', error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const mappedUsers = users.map((user: any) => ({
-    userId: user._id.substring(0, 8).toUpperCase(),
+    userId: user.playerProfile?.membershipId || user._id.substring(0, 8).toUpperCase(),
     originalId: user._id, // Used for Link
     name: user.name,
     grade: user.playerProfile?.grade || 'N/A',
@@ -61,13 +83,17 @@ export default function Users() {
             </div>
           </div>
 
-          {/* Right Button: Export As CVS */}
-          <button className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shrink-0 shadow-sm w-full sm:w-auto justify-center cursor-pointer">
+          {/* Right Button: Export As CSV */}
+          <button 
+            onClick={handleExport}
+            disabled={isExporting}
+            className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shrink-0 shadow-sm w-full sm:w-auto justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md">
               <FileSpreadsheet className="w-5 h-5" />
             </div>
             <span className="font-poppins font-medium text-[14px] leading-[20px] tracking-[-0.019em] pr-2">
-              Export As CVS
+              {isExporting ? 'Exporting...' : 'Export As CSV'}
             </span>
           </button>
 
@@ -132,7 +158,7 @@ export default function Users() {
                         className={`h-[50px] border-b border-[#DADADA]/30 font-poppins text-[13px] text-[#636363] ${isEven ? 'bg-[#083F92]/10' : 'bg-white'
                           }`}
                       >
-                        <td className="px-6 py-3 font-semibold">{user.userId}</td>
+                        <td className="px-6 py-3 font-semibold text-nowrap">{user.userId}</td>
                         <td className={`px-6 py-3 ${isEven ? 'font-bold' : 'font-semibold'}`}>
                           {user.name}
                         </td>
@@ -141,7 +167,11 @@ export default function Users() {
                         </td>
                         <td className="px-6 py-3 font-semibold tracking-[-0.02em]">{user.team}</td>
                         <td className="px-6 py-3 font-semibold">{user.teamCode}</td>
-                        <td className="px-6 py-3 font-semibold tracking-[-0.02em]">{user.city}</td>
+                        <td className="px-6 py-3 font-semibold tracking-[-0.02em]">
+                          <div className="line-clamp-2" title={user.city}>
+                            {user.city}
+                          </div>
+                        </td>
                         <td className="px-6 py-3 text-right">
                           <Link
                             href={`/users/${user.originalId}`}

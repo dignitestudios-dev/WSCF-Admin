@@ -13,13 +13,13 @@ export interface UsersResponse {
   success: boolean;
   message: string;
   data: {
-    users: User[];
-  };
-  pagination: {
-    totalItems: number;
-    currentPage: number;
-    itemsPerPage: number;
-    totalPages: number;
+    users: any[];
+    pagination: {
+      totalItems: number;
+      currentPage: number;
+      itemsPerPage: number;
+      totalPages: number;
+    };
   };
 }
 
@@ -75,6 +75,12 @@ export const userService = {
   },
   getUserDetails: async (id: string): Promise<UserDetailsResponse> => {
     const response = await axiosInstance.get<UserDetailsResponse>(`/user/${id}`);
+    return response.data;
+  },
+  exportUsers: async (): Promise<Blob> => {
+    const response = await axiosInstance.get(`/user/export`, {
+      responseType: 'blob'
+    });
     return response.data;
   },
 };

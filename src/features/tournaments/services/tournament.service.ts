@@ -73,4 +73,11 @@ export const tournamentService = {
     });
     return response.data;
   },
+
+  getUserHistory: async (userId: string, status: string, page: number, limit: number): Promise<any> => {
+    const response = await axiosInstance.get(`/tournament/user-history/${userId}`, {
+      params: { status, page, limit }
+    });
+    return response.data;
+  },
 };

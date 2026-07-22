@@ -352,7 +352,7 @@ export default function FormDetail() {
               {/* Field Title */}
               <div className="flex flex-col gap-2 w-full">
                 <label className="font-general-sans font-medium text-[14px] leading-[19px] text-[#181818]">
-                  Field Title
+                  Field Title <span className="text-red-500">*</span>
                 </label>
                 <Input
                   type="text"
@@ -370,7 +370,7 @@ export default function FormDetail() {
                 {/* Field Type */}
                 <div className="flex flex-col gap-2 w-full">
                   <label className="font-general-sans font-medium text-[14px] leading-[19px] text-[#181818]">
-                    Field Type
+                    Field Type <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={type}
@@ -387,7 +387,7 @@ export default function FormDetail() {
                 {/* Nature */}
                 <div className="flex flex-col gap-2 w-full">
                   <label className="font-general-sans font-medium text-[14px] leading-[19px] text-[#181818]">
-                    Nature
+                    Nature <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={nature}
@@ -405,7 +405,7 @@ export default function FormDetail() {
                 {/* Field Value (Dropdown options or Null) */}
                 <div className="flex flex-col gap-2 w-full">
                   <label className="font-general-sans font-medium text-[14px] leading-[19px] text-[#181818]">
-                    Value (Dropdown Options)
+                    Value (Dropdown Options) <span className="text-red-500">*</span>
                   </label>
                   <Input
                     type="text"
@@ -420,7 +420,7 @@ export default function FormDetail() {
                 {/* Max Length */}
                 <div className="flex flex-col gap-2 w-full">
                   <label className="font-general-sans font-medium text-[14px] leading-[19px] text-[#181818]">
-                    Max Length
+                    Max Length <span className="text-red-500">*</span>
                   </label>
                   <Input
                     type="number"
