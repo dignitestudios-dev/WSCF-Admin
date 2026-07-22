@@ -60,7 +60,7 @@ export default function TeamDetails() {
 
   const { data: usersData, isLoading: usersLoading } = useUsers(userPage, 10, debouncedUserSearchQuery);
   const usersList = usersData?.data?.users || [];
-  const userTotalPages = usersData?.pagination?.totalPages || 1;
+  const userTotalPages = usersData?.data?.pagination?.totalPages || 1;
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -90,6 +90,7 @@ export default function TeamDetails() {
     return membersData.data.members.map((member: any) => ({
       userId: member.userId?._id || member._id.substring(0, 8).toUpperCase(),
       name: member.name || member.userId?.name || 'Unknown',
+      memberId: member?.membershipId || 'Unknown',
       grade: member.grade || '7th',
       team: `${teamName} Chess Club`,
       teamCode: teamCode,
@@ -207,7 +208,12 @@ export default function TeamDetails() {
 
           {/* Search Pill Input */}
           <div className="w-full sm:w-[300px]">
-            <SearchInput value={searchQuery} onChangeValue={setSearchQuery} />
+            <SearchInput 
+              value={searchQuery} 
+              onChangeValue={setSearchQuery} 
+              disabled={membersLoading}
+              containerClassName={membersLoading ? 'opacity-50 pointer-events-none' : ''}
+            />
           </div>
         </div>
 
@@ -225,22 +231,6 @@ export default function TeamDetails() {
                       className="flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity font-semibold"
                     >
                       Grade <ChevronsUpDown className="w-4 h-4" />
-                    </button>
-                  </th>
-                  <th className="px-6 py-3 font-semibold w-[230px]">
-                    <button
-                      onClick={() => handleSort('team')}
-                      className="flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity font-semibold"
-                    >
-                      Team <ChevronsUpDown className="w-4 h-4" />
-                    </button>
-                  </th>
-                  <th className="px-6 py-3 font-semibold w-[110px]">
-                    <button
-                      onClick={() => handleSort('teamCode')}
-                      className="flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity font-semibold"
-                    >
-                      Team Code <ChevronsUpDown className="w-4 h-4" />
                     </button>
                   </th>
                   <th className="px-6 py-3 font-semibold w-[170px]">
@@ -261,8 +251,6 @@ export default function TeamDetails() {
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[80px]" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[120px]" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[40px]" /></td>
-                      <td className="px-6 py-3"><Skeleton className="h-4 w-[160px]" /></td>
-                      <td className="px-6 py-3"><Skeleton className="h-4 w-[80px]" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[120px]" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[80px] float-right" /></td>
                     </tr>
@@ -276,11 +264,9 @@ export default function TeamDetails() {
                         className={`h-[50px] border-b border-[#DADADA]/30 font-poppins text-[13px] text-[#636363] ${isEven ? 'bg-[#083F92]/10' : 'bg-white'
                           }`}
                       >
-                        <td className="px-6 py-3 font-semibold">{member.userId}</td>
+                        <td className="px-6 py-3 font-semibold">{member.memberId}</td>
                         <td className={`px-6 py-3 ${isEven ? 'font-bold' : 'font-semibold'}`}>{member.name}</td>
                         <td className={`px-6 py-3 ${isEven ? 'font-bold' : 'font-semibold'}`}>{member.grade}</td>
-                        <td className="px-6 py-3 font-semibold tracking-[-0.02em]">{member.team}</td>
-                        <td className="px-6 py-3 font-semibold">{member.teamCode}</td>
                         <td className="px-6 py-3 font-semibold tracking-[-0.02em]">{member.city}</td>
                         <td className="px-6 py-3 text-right">
                           <Link
@@ -295,7 +281,7 @@ export default function TeamDetails() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={7} className="text-center py-16 text-[#787878] font-poppins">
+                    <td colSpan={5} className="text-center py-16 text-[#787878] font-poppins">
                       No team members found.
                     </td>
                   </tr>

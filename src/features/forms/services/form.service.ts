@@ -33,8 +33,12 @@ export interface CreateFormFieldRequest {
 export interface UpdateFormFieldRequest extends Partial<CreateFormFieldRequest> {}
 
 export const formService = {
-  getFormFields: async (): Promise<FormFieldsResponse> => {
-    const { data } = await axiosInstance.get<FormFieldsResponse>('/tournament/form-fields');
+  getFormFields: async (isTournamentSpecific?: boolean): Promise<FormFieldsResponse> => {
+    const params: any = {};
+    if (isTournamentSpecific !== undefined) {
+      params.isTournamentSpecific = isTournamentSpecific;
+    }
+    const { data } = await axiosInstance.get<FormFieldsResponse>('/tournament/form-fields', { params });
     return data;
   },
 
