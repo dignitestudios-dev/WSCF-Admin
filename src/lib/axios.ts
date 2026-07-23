@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getCookie } from './cookie';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.wisconsinscholasticchess.org/';
 
 export const axiosInstance = axios.create({
   baseURL: BASE_URL,
