@@ -233,12 +233,12 @@ export default function TournamentDetail() {
                   {/* Table Header */}
                   <thead>
                     <tr className="bg-[#083F92] text-white text-left h-[50px] font-poppins font-semibold text-[13px]">
-                      <th className="px-6 py-3 font-semibold w-[120px]">UserId</th>
+                      <th className="px-6 py-3 font-semibold w-[120px]">User ID</th>
                       <th className="px-6 py-3 font-semibold w-[120px]">Name</th>
                       <th className="px-6 py-3 font-semibold w-[80px]">Grade</th>
-                      <th className="px-6 py-3 font-semibold w-[200px]">Team</th>
+                      {/* <th className="px-6 py-3 font-semibold w-[200px]">Team</th> */}
                       <th className="px-6 py-3 font-semibold w-[70px]">Rating</th>
-                      <th className="px-6 py-3 font-semibold w-[170px]">City</th>
+                      {/* <th className="px-6 py-3 font-semibold w-[170px]">City</th> */}
                       <th className="px-6 py-3 font-semibold text-right w-[126px]">Action</th>
                     </tr>
                   </thead>
@@ -267,12 +267,12 @@ export default function TournamentDetail() {
                             className={`h-[50px] border-b border-[#DADADA]/30 font-poppins text-[13px] text-[#636363] ${isEven ? 'bg-[#083F92]/10' : 'bg-white'
                               }`}
                           >
-                            <td className="px-6 py-3 font-semibold">{userId ? userId.substring(0, 8).toUpperCase() : 'N/A'}</td>
+                            <td className="px-6 py-3 font-semibold">{player.playerProfile?.membershipId || 'N/A'}</td>
                             <td className="px-6 py-3 font-semibold text-black">{player.user?.name || 'N/A'}</td>
                             <td className="px-6 py-3 font-semibold text-black">{player.playerProfile?.grade || 'N/A'}</td>
-                            <td className="px-6 py-3 font-semibold text-black tracking-[-0.02em]">{player.team?.name || 'N/A'}</td>
+                            {/* <td className="px-6 py-3 font-semibold text-black tracking-[-0.02em]">{player.team?.name || 'N/A'}</td> */}
                             <td className="px-6 py-3 font-semibold text-black">{player.playerProfile?.rating || '0'}</td>
-                            <td className="px-6 py-3 font-semibold text-black tracking-[-0.02em]">{player.playerProfile?.city || 'N/A'}</td>
+                            {/* <td className="px-6 py-3 font-semibold text-black tracking-[-0.02em]">{player.playerProfile?.city || 'N/A'}</td> */}
                             <td className="px-6 py-3 text-right">
                               {userId ? (
                                 <Link

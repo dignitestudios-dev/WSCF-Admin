@@ -187,13 +187,13 @@ export default function UserProfile() {
                 </div>
 
                 {/* Divider Line & Stats block - Team */}
-                <div className="flex items-center md:items-start gap-0 md:gap-3 justify-center md:justify-start">
+                {/* <div className="flex items-center md:items-start gap-0 md:gap-3 justify-center md:justify-start">
                   <div className="hidden md:block w-[4px] h-[18px] bg-white rounded-full shrink-0" />
                   <div className="flex flex-col items-center md:items-start text-center md:text-left">
                     <span className="font-poppins font-normal text-[12px] leading-[18px] text-white/70">Team</span>
                     <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em]">{userData.team}</span>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Divider Line & Stats block - Rating */}
                 <div className="flex items-center md:items-start gap-0 md:gap-3 justify-center md:justify-start">
@@ -402,7 +402,7 @@ export default function UserProfile() {
                     historyList.map((t: any) => (
                       <Link
                         key={t._id}
-                        href={`/tournaments/${t._id}`}
+                        href={`/tournaments/${t.tournament?._id || t._id}`}
                         className="w-full min-h-[107px] py-4 md:py-0 bg-white border border-[#083F92]/30 rounded-[12px] shadow-[0px_4px_4px_rgba(0,0,0,0.05)] hover:shadow-[0px_4px_4px_rgba(0,0,0,0.1)] transition-all duration-150 flex flex-col md:flex-row md:items-center justify-between px-6 cursor-pointer gap-4"
                       >
                         <div className="flex items-start md:items-center gap-4 w-full md:max-w-[85%]">
@@ -412,27 +412,27 @@ export default function UserProfile() {
                           </div>
                           <div className="flex flex-col gap-2 min-w-0 flex-1">
                             <h2 className="font-poppins font-medium text-[16px] md:text-[18px] leading-[24px] md:leading-[27px] text-[#083F92] truncate w-full">
-                              {t.title || 'Unknown Tournament'}
+                              {t.tournament?.title || 'Unknown Tournament'}
                             </h2>
                             <div className="flex items-center gap-x-4 gap-y-2 flex-wrap text-[#151515]/90">
                               <div className="flex items-center gap-1.5 shrink-0">
                                 <MapPin className="w-4 h-4 text-[#083F92]" />
-                                <span className="font-poppins font-normal text-[13px] md:text-[14px]">{t.location || 'N/A'}</span>
+                                <span className="font-poppins font-normal text-[13px] md:text-[14px] truncate max-w-[200px]" title={t.tournament?.location}>{t.tournament?.location || 'N/A'}</span>
                               </div>
                               <div className="flex items-center gap-1.5 shrink-0">
                                 <Calendar className="w-4 h-4 text-[#083F92]" />
                                 <span className="font-poppins font-normal text-[13px] md:text-[14px]">
-                                  {t.date ? new Date(t.date).toLocaleDateString() : 'N/A'}
+                                  {t.tournament?.date ? new Date(t.tournament.date).toLocaleDateString() : 'N/A'}
                                 </span>
                               </div>
-                              <div className="flex items-center gap-1.5 shrink-0">
+                              {/* <div className="flex items-center gap-1.5 shrink-0">
                                 <Armchair className="w-4 h-4 text-[#083F92]" />
-                                <span className="font-poppins font-normal text-[13px] md:text-[14px]">{t.seats || 'N/A'}</span>
-                              </div>
-                              <div className="flex items-center gap-1.5 shrink-0">
+                                <span className="font-poppins font-normal text-[13px] md:text-[14px]">{t.tournament?.seats || 'N/A'}</span>
+                              </div> */}
+                              {/* <div className="flex items-center gap-1.5 shrink-0">
                                 <Tag className="w-4 h-4 text-[#083F92]" />
-                                <span className="font-poppins font-normal text-[13px] md:text-[14px]">{t.entryFee ? `$${t.entryFee}` : 'N/A'}</span>
-                              </div>
+                                <span className="font-poppins font-normal text-[13px] md:text-[14px]">{t.tournament?.entryFee ? `$${t.tournament.entryFee}` : 'N/A'}</span>
+                              </div> */}
                             </div>
                           </div>
                         </div>
