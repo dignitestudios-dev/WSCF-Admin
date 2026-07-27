@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { PageTransition } from '@/components/animations/page-transition';
-import { RadialBarChart, RadialBar, Label, PolarRadiusAxis } from "recharts";
+import { PieChart, Pie, Cell, Label } from "recharts";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { useDashboardKPIs } from '@/features/dashboard/hooks/use-dashboard-kpis';
 // import { useTournaments } from '@/features/tournaments/hooks/use-tournaments';
@@ -43,14 +43,11 @@ export default function Dashboard() {
 
   const totalTournaments = kpis ? kpis.tournaments.upcoming + kpis.tournaments.ongoing + kpis.tournaments.completed : 180;
 
-  const chartData = [
-    {
-      name: "Tournaments",
-      completed: kpis?.tournaments.completed ?? 124,
-      inProgress: kpis?.tournaments.ongoing ?? 32,
-      upcoming: kpis?.tournaments.upcoming ?? 24
-    }
-  ];
+  const pieData = [
+    { name: "completed", value: kpis?.tournaments.completed ?? 124, fill: "var(--color-completed)" },
+    { name: "inProgress", value: kpis?.tournaments.ongoing ?? 32, fill: "var(--color-inProgress)" },
+    { name: "upcoming", value: kpis?.tournaments.upcoming ?? 24, fill: "var(--color-upcoming)" }
+  ].filter(d => d.value > 0);
 
   return (
     <PageTransition>
@@ -172,23 +169,30 @@ export default function Dashboard() {
               </span>
 
               {/* Shadcn Stacked Radial Chart */}
-              <div className="flex flex-col items-center justify-center relative w-full h-[244px] z-10 mt-4">
+              <div className="flex flex-col items-center justify-center relative w-full h-[150px] z-10 mt-8 mb-4">
                 <ChartContainer
                   config={chartConfig}
-                  className="mx-auto aspect-square w-full max-w-[250px]"
+                  className="mx-auto w-full max-w-[300px] h-[150px]"
                 >
-                  <RadialBarChart
-                    data={chartData}
-                    startAngle={180}
-                    endAngle={0}
-                    innerRadius={80}
-                    outerRadius={130}
-                  >
+                  <PieChart>
                     <ChartTooltip
                       cursor={false}
                       content={<ChartTooltipContent hideLabel />}
                     />
-                    <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
+                    <Pie
+                      data={pieData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="100%"
+                      innerRadius={85}
+                      outerRadius={140}
+                      startAngle={180}
+                      endAngle={0}
+                      stroke="none"
+                      cornerRadius={5}
+                      paddingAngle={2}
+                    >
                       <Label
                         content={({ viewBox }) => {
                           if (viewBox && "cx" in viewBox && "cy" in viewBox) {
@@ -196,14 +200,14 @@ export default function Dashboard() {
                               <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle">
                                 <tspan
                                   x={viewBox.cx}
-                                  y={(viewBox.cy || 0) - 16}
+                                  y={(viewBox.cy || 0) + 40}
                                   className="fill-white text-[44px] font-poppins font-semibold tracking-[-0.05em]"
                                 >
                                   {totalTournaments}
                                 </tspan>
                                 <tspan
                                   x={viewBox.cx}
-                                  y={(viewBox.cy || 0) + 20}
+                                  y={(viewBox.cy || 0) + 70}
                                   className="fill-white/80 font-poppins font-light text-[12px] tracking-[-0.02em]"
                                 >
                                   Total Tournaments
@@ -213,29 +217,11 @@ export default function Dashboard() {
                           }
                         }}
                       />
-                    </PolarRadiusAxis>
-                    <RadialBar
-                      dataKey="completed"
-                      stackId="a"
-                      cornerRadius={5}
-                      fill="var(--color-completed)"
-                      className="stroke-transparent stroke-2"
-                    />
-                    <RadialBar
-                      dataKey="inProgress"
-                      fill="var(--color-inProgress)"
-                      stackId="a"
-                      cornerRadius={5}
-                      className="stroke-transparent stroke-2"
-                    />
-                    <RadialBar
-                      dataKey="upcoming"
-                      fill="var(--color-upcoming)"
-                      stackId="a"
-                      cornerRadius={5}
-                      className="stroke-transparent stroke-2"
-                    />
-                  </RadialBarChart>
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                    </Pie>
+                  </PieChart>
                 </ChartContainer>
               </div>
 
@@ -286,6 +272,10 @@ export default function Dashboard() {
                 Array.from({ length: 6 }).map((_, i) => (
                   <Skeleton key={i} className="w-full h-[72px] rounded-[8px]" />
                 ))
+              ) : tournaments.length === 0 ? (
+                <div className="w-full h-full flex flex-col items-center justify-center text-[#083F92]/70 font-poppins text-[14px] min-h-[200px] border border-dashed border-[#083F92]/20 rounded-[8px] bg-[#083F92]/5">
+                  No upcoming tournaments scheduled.
+                </div>
               ) : tournaments.map((t, index) => {
                 const isOdd = index % 2 === 0;
                 const displayDate = t.date ? new Date(t.date).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' }) : '';

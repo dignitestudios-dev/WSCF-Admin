@@ -57,8 +57,10 @@ export const tournamentService = {
     return response.data;
   },
 
-  getTournamentParticipants: async (id: string, page: number, limit: number): Promise<any> => {
-    const response = await axiosInstance.get(`/tournament/${id}/participants`, { params: { page, limit } });
+  getTournamentParticipants: async (id: string, page: number, limit: number, search?: string): Promise<any> => {
+    const params: any = { page, limit };
+    if (search) params.search = search;
+    const response = await axiosInstance.get(`/tournament/${id}/participants`, { params });
     return response.data;
   },
 

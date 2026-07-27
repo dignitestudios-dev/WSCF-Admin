@@ -117,7 +117,7 @@ export default function TournamentDetail() {
               <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
               <span className="font-poppins font-medium text-[18px] leading-[27px]">Back</span>
             </button>
-            <h1 className="font-poppins font-bold text-[24px] leading-[36px] text-[#083F92] m-0">
+            <h1 className="font-poppins font-bold text-[24px] leading-[36px] text-[#083F92] m-0 break-words max-w-[calc(100vw-150px)] md:max-w-[500px]">
               {tournamentTitle}
             </h1>
           </div>
