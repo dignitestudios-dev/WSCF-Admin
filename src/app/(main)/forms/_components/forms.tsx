@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import {
   Plus,
+  Minus,
   Pencil,
   Trash2,
 } from 'lucide-react';
@@ -40,7 +41,8 @@ export default function Forms() {
   const [fieldType, setFieldType] = useState('text');
   const [nature, setNature] = useState('mandatory');
   const [minLength, setMinLength] = useState<number>(0);
-  const [optionsStr, setOptionsStr] = useState('');
+  const [optionsList, setOptionsList] = useState<string[]>([]);
+  const [currentOption, setCurrentOption] = useState('');
   const [isTournamentSpecific, setIsTournamentSpecific] = useState<boolean>(false);
 
   const handleOpenAddDialog = () => {
@@ -49,7 +51,8 @@ export default function Forms() {
     setFieldType('text');
     setNature('mandatory');
     setMinLength(0);
-    setOptionsStr('');
+    setOptionsList([]);
+    setCurrentOption('');
     setIsTournamentSpecific(false);
     setIsDialogOpen(true);
   };
@@ -60,7 +63,8 @@ export default function Forms() {
     setFieldType(field.fieldType || 'text');
     setNature(field.nature || 'mandatory');
     setMinLength(field.minLength || 0);
-    setOptionsStr((field.options || []).join(', '));
+    setOptionsList(field.options || []);
+    setCurrentOption('');
     setIsTournamentSpecific(field.isTournamentSpecific || false);
     setIsDialogOpen(true);
   };
@@ -78,16 +82,27 @@ export default function Forms() {
     }
   };
 
+  const handleAddOption = () => {
+    const trimmed = currentOption.trim();
+    if (trimmed && !optionsList.includes(trimmed)) {
+      setOptionsList(prev => [...prev, trimmed]);
+      setCurrentOption('');
+    }
+  };
+
+  const handleRemoveOption = (index: number) => {
+    setOptionsList(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const optionsArray = optionsStr.split(',').map(s => s.trim()).filter(s => s.length > 0);
 
     const payload = {
       fieldName: fieldName.trim(),
       fieldType,
       nature,
       minLength: Number(minLength),
-      options: fieldType === 'dropdown' && !isTournamentSpecific ? optionsArray : [],
+      options: fieldType === 'dropdown' && !isTournamentSpecific ? optionsList : [],
       isTournamentSpecific: fieldType === 'dropdown' ? isTournamentSpecific : false,
     };
 
@@ -306,16 +321,50 @@ export default function Forms() {
               {fieldType === 'dropdown' && !isTournamentSpecific && (
                 <div className="flex flex-col gap-[8px] w-full">
                   <label className="font-general-sans font-medium text-[14px] leading-[19px] text-[#181818] capitalize">
-                    Options (comma-separated) <span className="text-red-500">*</span>
+                    Options <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative h-[44px]">
+                  <div className="relative h-[44px] flex items-center w-full bg-white border border-[#3D3775] rounded-[24px] overflow-hidden">
                     <Input
-                      value={optionsStr}
-                      onChange={(e) => setOptionsStr(e.target.value)}
-                      placeholder="e.g. Beginner, Intermediate, Expert"
-                      className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
+                      value={currentOption}
+                      onChange={(e) => setCurrentOption(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddOption();
+                        }
+                      }}
+                      placeholder="e.g. Beginner"
+                      className="h-full flex-1 bg-transparent border-none pl-4 pr-[80px] font-general-sans text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
                     />
+                    <button
+                      type="button"
+                      onClick={handleAddOption}
+                      className="absolute right-0 top-1/2 -translate-y-1/2 w-[92px] h-[92px] bg-[#083F92] rounded-full flex items-center justify-center hover:bg-[#083F92]/95 transition-colors shrink-0 z-10 focus:outline-none"
+                    >
+                      <Plus className="w-[28px] h-[28px] text-white stroke-[2.5]" />
+                    </button>
                   </div>
+                  
+                  {/* Tags */}
+                  {optionsList.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {optionsList.map((opt, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-3 h-[44px] px-4 pr-2.5 bg-white border border-[#3D3775] rounded-[24px]"
+                        >
+                          <span className="font-general-sans font-medium text-[14px] text-[#181818]">{opt}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveOption(i)}
+                            className="w-[24px] h-[24px] rounded-full bg-[#083F92] flex items-center justify-center text-white hover:opacity-90 transition-opacity focus:outline-none"
+                          >
+                            <Minus className="w-[14px] h-[14px] stroke-[3]" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 

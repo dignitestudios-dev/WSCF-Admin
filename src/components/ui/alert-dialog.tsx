@@ -109,7 +109,7 @@ function AlertDialogDescription({
     <DialogPrimitive.Description
       data-slot="alert-dialog-description"
       className={cn(
-        "text-sm text-muted-foreground leading-relaxed font-poppins",
+        "text-sm text-muted-foreground leading-relaxed font-poppins break-words",
         className
       )}
       {...props}
@@ -179,10 +179,11 @@ function ConfirmDeleteDialog({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>{cancelText}</AlertDialogCancel>
+          <AlertDialogCancel className={"p-5"} disabled={isLoading}>{cancelText}</AlertDialogCancel>
           <Button 
             disabled={isLoading}
             variant="destructive"
+            className={"p-5"}
             onClick={onConfirm}
           >
             {isLoading ? "Deleting..." : confirmText}

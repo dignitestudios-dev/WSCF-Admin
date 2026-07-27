@@ -26,6 +26,7 @@ interface CreateTournamentDialogProps {
 
 export function CreateTournamentDialog({ open, onOpenChange, initialData }: CreateTournamentDialogProps) {
   const [customFields, setCustomFields] = useState<Record<string, string[]>>({});
+  const [initialCustomFields, setInitialCustomFields] = useState<Record<string, string[]>>({});
   const [customFieldInputs, setCustomFieldInputs] = useState<Record<string, string>>({});
   const [customFieldErrors, setCustomFieldErrors] = useState<Record<string, string>>({});
   const [isFree, setIsFree] = useState(false);
@@ -45,7 +46,7 @@ export function CreateTournamentDialog({ open, onOpenChange, initialData }: Crea
     reset,
     setValue,
     watch,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<TournamentFormData>({
     resolver: zodResolver(tournamentSchema),
     defaultValues: {
@@ -69,6 +70,7 @@ export function CreateTournamentDialog({ open, onOpenChange, initialData }: Crea
         });
       }
       setCustomFields(initCustomFields);
+      setInitialCustomFields(initCustomFields);
       setCustomFieldInputs({});
       setCustomFieldErrors({});
       setIsFree(initialData.isPaid === false);
@@ -97,6 +99,7 @@ export function CreateTournamentDialog({ open, onOpenChange, initialData }: Crea
         divisions: [],
       });
       setCustomFields({});
+      setInitialCustomFields({});
       setCustomFieldInputs({});
       setCustomFieldErrors({});
       setIsFree(false);
@@ -189,6 +192,7 @@ export function CreateTournamentDialog({ open, onOpenChange, initialData }: Crea
   const handleClose = () => {
     reset();
     setCustomFields({});
+    setInitialCustomFields({});
     setCustomFieldInputs({});
     setCustomFieldErrors({});
     setIsFree(false);
@@ -455,7 +459,7 @@ export function CreateTournamentDialog({ open, onOpenChange, initialData }: Crea
             {/* Submit Button */}
             <Button
               type="submit"
-              disabled={isPending || isSubmitting}
+              disabled={isPending || isSubmitting || (!!initialData && !isDirty && JSON.stringify(customFields) === JSON.stringify(initialCustomFields))}
               className="w-full h-[48px] bg-[#083F92] hover:bg-[#083F92]/90 rounded-[12px] mt-8 disabled:opacity-50 shadow-md"
             >
               <span className="font-poppins font-semibold text-[14px] leading-[19px] text-white capitalize">
@@ -485,7 +489,7 @@ export function CreateTournamentDialog({ open, onOpenChange, initialData }: Crea
               <h2 className="text-[32px] leading-[43px] font-semibold font-poppins text-[#181818] tracking-[-0.008em] capitalize m-0">
                 {initialData ? 'Updated Successfully!' : 'Created Successfully!'}
               </h2>
-              <p className="text-[18px] leading-[28px] font-normal font-poppins text-[#565656] tracking-[-0.014em] m-0">
+              <p className="text-[18px] leading-[28px] font-normal font-poppins text-[#565656] tracking-[-0.014em] m-0 break-words max-w-full">
                 {initialData ? 'Tournament has been updated!' : 'New Tournament has been added to you upcoming list!'}
               </p>
             </div>

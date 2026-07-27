@@ -9,6 +9,7 @@ export function useCreateTournament() {
     mutationFn: (data: any) => tournamentService.createTournament(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tournaments'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardKPIs'] });
     },
     onError: (error: any) => {
       toast.error(error?.response?.data?.message || 'Failed to create tournament');

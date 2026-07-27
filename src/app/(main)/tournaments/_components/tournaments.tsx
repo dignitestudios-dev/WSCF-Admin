@@ -141,9 +141,9 @@ export default function Tournaments() {
                       <div className="flex items-center gap-x-4 gap-y-2 flex-wrap text-[#151515]/90">
                         
                         {/* Location details */}
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <MapPin className="w-4 h-4 text-[#083F92]" />
-                          <span className="font-poppins font-normal text-[13px] md:text-[14px]">{t.location}</span>
+                        <div className="flex items-center gap-1.5 shrink-0 max-w-full">
+                          <MapPin className="w-4 h-4 text-[#083F92] shrink-0" />
+                          <span className="font-poppins font-normal text-[13px] md:text-[14px] truncate max-w-[150px] sm:max-w-[250px] md:max-w-[400px]">{t.location}</span>
                         </div>
 
                         {/* Date details */}

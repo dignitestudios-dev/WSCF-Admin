@@ -9,6 +9,7 @@ export function useDeleteTournament() {
     mutationFn: (id: string) => tournamentService.deleteTournament(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tournaments'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardKPIs'] });
       toast.success('Tournament deleted successfully');
     },
     onError: (error: any) => {
