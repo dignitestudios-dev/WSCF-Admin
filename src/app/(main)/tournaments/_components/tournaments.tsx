@@ -37,7 +37,8 @@ export default function Tournaments() {
     return new Date(dateStr).toLocaleDateString('en-US', {
       month: 'long',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
+      timeZone: 'UTC'
     });
   };
 
@@ -187,7 +188,11 @@ export default function Tournaments() {
               ))
             ) : (
               <div className="w-full py-16 text-center text-[#787878] font-poppins bg-[#083F92]/5 rounded-[12px] border border-dashed border-[#083F92]/20">
-                No tournaments found. Click "Add Tournament" to create one.
+                {activeTab === 'completed'
+                  ? 'No completed tournaments found.'
+                  : activeTab === 'upcoming'
+                  ? 'No upcoming tournaments found.'
+                  : 'No tournaments found. Click "Add Tournament" to create one.'}
               </div>
             )}
           </div>

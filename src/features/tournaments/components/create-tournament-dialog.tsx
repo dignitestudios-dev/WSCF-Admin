@@ -18,6 +18,17 @@ import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const getLocalDateFromUtcString = (utcString: string) => {
+  if (!utcString) return undefined;
+  const date = new Date(utcString);
+  return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+};
+
+const getUtcStringFromLocalDate = (localDate: Date) => {
+  if (!localDate) return '';
+  return new Date(Date.UTC(localDate.getFullYear(), localDate.getMonth(), localDate.getDate())).toISOString();
+};
+
 interface CreateTournamentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -234,6 +245,7 @@ export function CreateTournamentDialog({ open, onOpenChange, initialData }: Crea
                 <div className="relative h-[44px]">
                   <Input
                     id="title"
+                    maxLength={100}
                     placeholder="Enter Title"
                     className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
                     {...register('title')}
@@ -262,16 +274,16 @@ export function CreateTournamentDialog({ open, onOpenChange, initialData }: Crea
                           !watch('date') && "text-[#181818]/40"
                         )}
                       >
-                        {watch('date') ? format(new Date(watch('date')), "PPP") : <span className="font-normal text-[#181818]/40">Pick a date</span>}
+                        {watch('date') ? format(getLocalDateFromUtcString(watch('date'))!, "PPP") : <span className="font-normal text-[#181818]/40">Pick a date</span>}
                         <CalendarIcon className="h-4 w-4 text-[#083F92] opacity-80" />
                       </button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0 z-[100]" align="start">
                       <Calendar
                         mode="single"
-                        selected={watch('date') ? new Date(watch('date')) : undefined}
+                        selected={watch('date') ? getLocalDateFromUtcString(watch('date')) : undefined}
                         onSelect={(date) => {
-                          setValue('date', date ? date.toISOString() : '', { shouldValidate: true });
+                          setValue('date', date ? getUtcStringFromLocalDate(date) : '', { shouldValidate: true });
                           setIsCalendarOpen(false);
                         }}
                         disabled={(date) => {
@@ -324,6 +336,7 @@ export function CreateTournamentDialog({ open, onOpenChange, initialData }: Crea
                     <Input
                       id="entryFee"
                       type="text"
+                      maxLength={10}
                       placeholder="Enter Amount"
                       disabled={isFree}
                       className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40 disabled:opacity-40"
@@ -369,6 +382,7 @@ export function CreateTournamentDialog({ open, onOpenChange, initialData }: Crea
                   <div className="relative h-[44px]">
                     <Input
                       id="director"
+                      maxLength={100}
                       placeholder="Enter name"
                       className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
                       {...register('director')}
@@ -390,6 +404,7 @@ export function CreateTournamentDialog({ open, onOpenChange, initialData }: Crea
                   <div className="relative h-[44px]">
                     <Input
                       id="host"
+                      maxLength={100}
                       placeholder="Enter name"
                       className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
                       {...register('host')}
@@ -414,6 +429,7 @@ export function CreateTournamentDialog({ open, onOpenChange, initialData }: Crea
                   <div className="relative h-[44px] flex items-center w-full bg-white border border-[#3D3775] rounded-[24px] overflow-hidden">
                     <Input
                       placeholder={`Write ${field.fieldName.toLowerCase()}!`}
+                      maxLength={50}
                       value={customFieldInputs[field._id] || ''}
                       onChange={(e) => handleCustomFieldInput(field._id, e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomField(field._id); } }}

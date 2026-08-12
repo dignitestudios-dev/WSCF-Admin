@@ -159,14 +159,14 @@ export default function Users() {
                           }`}
                       >
                         <td className="px-6 py-3 font-semibold text-nowrap">{user.userId}</td>
-                        <td className={`px-6 py-3 ${isEven ? 'font-bold' : 'font-semibold'}`}>
+                        <td className={`max-w-[180px] truncate px-6 py-3 ${isEven ? 'font-bold' : 'font-semibold'}`} title={user.name}>
                           {user.name}
                         </td>
                         <td className={`px-6 py-3 ${isEven ? 'font-bold' : 'font-semibold'}`}>
                           {user.grade}
                         </td>
-                        <td className="px-6 py-3 font-semibold tracking-[-0.02em]">{user.team}</td>
-                        <td className="px-6 py-3 font-semibold">{user.teamCode}</td>
+                        <td className="max-w-[230px] truncate px-6 py-3 font-semibold tracking-[-0.02em]" title={user.team}>{user.team}</td>
+                        <td className="max-w-[110px] truncate px-6 py-3 font-semibold" title={user.teamCode}>{user.teamCode}</td>
                         <td className="px-6 py-3 font-semibold tracking-[-0.02em]">
                           <div className="line-clamp-2" title={user.city}>
                             {user.city}

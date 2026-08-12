@@ -422,7 +422,7 @@ export default function UserProfile() {
                               <div className="flex items-center gap-1.5 shrink-0">
                                 <Calendar className="w-4 h-4 text-[#083F92]" />
                                 <span className="font-poppins font-normal text-[13px] md:text-[14px]">
-                                  {t.tournament?.date ? new Date(t.tournament.date).toLocaleDateString() : 'N/A'}
+                                  {t.tournament?.date ? new Date(t.tournament.date).toLocaleDateString('en-US', { timeZone: 'UTC' }) : 'N/A'}
                                 </span>
                               </div>
                               {/* <div className="flex items-center gap-1.5 shrink-0">

@@ -278,7 +278,7 @@ export default function Dashboard() {
                 </div>
               ) : tournaments.map((t, index) => {
                 const isOdd = index % 2 === 0;
-                const displayDate = t.date ? new Date(t.date).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' }) : '';
+                const displayDate = t.date ? new Date(t.date).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', timeZone: 'UTC' }) : '';
 
                 return (
                   <div
