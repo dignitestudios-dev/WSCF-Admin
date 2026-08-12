@@ -50,8 +50,7 @@ export default function TeamDetails() {
 
   // Interactivity: Add Member Dialog State
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState('');
-  const [selectedUserName, setSelectedUserName] = useState('');
+  const [selectedUsers, setSelectedUsers] = useState<{ id: string; name: string; email?: string }[]>([]);
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const debouncedUserSearchQuery = useDebounce(userSearchQuery, 500);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
@@ -137,24 +136,31 @@ export default function TeamDetails() {
   // Add Member handler
   const handleAddMemberSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedUserId) {
-      toast.error('Please select a player to add');
+    if (selectedUsers.length === 0) {
+      toast.error('Please select at least one player to add');
       return;
     }
 
     try {
-      await addTeamMember({
-        userId: selectedUserId,
-      });
+      await Promise.all(
+        selectedUsers.map(user =>
+          addTeamMember({
+            userId: user.id,
+          })
+        )
+      );
 
       // Reset states and close dialog
-      setSelectedUserId('');
-      setSelectedUserName('');
+      setSelectedUsers([]);
       setUserSearchQuery('');
       setShowAddDialog(false);
     } catch {
       // Error is handled inside useAddTeamMember hook onError
     }
+  };
+
+  const handleRemoveSelectedUser = (userId: string) => {
+    setSelectedUsers(prev => prev.filter(u => u.id !== userId));
   };
 
   return (
@@ -326,8 +332,10 @@ export default function TeamDetails() {
                     onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
                     className="w-full h-[54px] bg-white border border-[#3D3775] rounded-[24px] pl-[16px] pr-[40px] font-general-sans font-normal text-[14px] leading-[19px] text-left focus:outline-none flex items-center justify-between"
                   >
-                    <span className={selectedUserName ? 'text-[#181818]' : 'text-[#181818]/60'}>
-                      {selectedUserName || 'Enter player name to search'}
+                    <span className={selectedUsers.length > 0 ? 'text-[#181818] font-medium' : 'text-[#181818]/60'}>
+                      {selectedUsers.length > 0
+                        ? `${selectedUsers.length} player(s) selected`
+                        : 'Enter player name to search'}
                     </span>
                   </button>
                   <ChevronDown className={`absolute right-[16px] top-1/2 -translate-y-1/2 w-[15px] h-[27px] text-[#000000] pointer-events-none transition-transform ${isUserDropdownOpen ? 'rotate-180' : ''}`} />
@@ -353,21 +361,33 @@ export default function TeamDetails() {
                         {usersLoading ? (
                           <div className="p-4 text-center text-[#787878] font-general-sans text-[14px]">Loading...</div>
                         ) : usersList.length > 0 ? (
-                          usersList.map((user) => (
-                            <div
-                              key={user._id}
-                              onClick={() => {
-                                setSelectedUserId(user._id);
-                                setSelectedUserName(user.name);
-                                setUserSearchQuery('');
-                                setIsUserDropdownOpen(false);
-                              }}
-                              className="px-[16px] py-[12px] hover:bg-[#083F92]/10 cursor-pointer transition-colors border-b border-[#EEEEEE] last:border-b-0"
-                            >
-                              <div className="font-general-sans font-medium text-[14px] text-[#181818]">{user.name}</div>
-                              <div className="font-general-sans text-[12px] text-[#636363]">{user.email}</div>
-                            </div>
-                          ))
+                          usersList.map((user) => {
+                            const isAlreadySelected = selectedUsers.some(u => u.id === user._id);
+                            return (
+                              <div
+                                key={user._id}
+                                onClick={() => {
+                                  if (isAlreadySelected) {
+                                    setSelectedUsers(prev => prev.filter(u => u.id !== user._id));
+                                  } else {
+                                    setSelectedUsers(prev => [...prev, { id: user._id, name: user.name, email: user.email }]);
+                                  }
+                                  setUserSearchQuery('');
+                                }}
+                                className={`px-[16px] py-[12px] hover:bg-[#083F92]/10 cursor-pointer transition-colors border-b border-[#EEEEEE] last:border-b-0 flex items-center justify-between ${
+                                  isAlreadySelected ? 'bg-[#083F92]/5' : ''
+                                }`}
+                              >
+                                <div className="flex flex-col">
+                                  <div className="font-general-sans w-[200px] break-word truncate font-medium text-[14px] text-[#181818]">{user.name}</div>
+                                  <div className="font-general-sans text-[12px] text-[#636363]">{user.email}</div>
+                                </div>
+                                {isAlreadySelected && (
+                                  <span className="font-general-sans font-semibold text-[12px] text-[#083F92]">Selected</span>
+                                )}
+                              </div>
+                            );
+                          })
                         ) : (
                           <div className="p-4 text-center text-[#787878] font-general-sans text-[14px]">No players found.</div>
                         )}
@@ -400,15 +420,36 @@ export default function TeamDetails() {
                     </div>
                   )}
                 </div>
+
+                {/* Selected Members Badges */}
+                {selectedUsers.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {selectedUsers.map((user) => (
+                      <div
+                        key={user.id}
+                        className="flex max-w-[200px] break-words truncate items-center gap-1.5 h-[32px] px-3 bg-[#083F92]/10 text-[#083F92] rounded-[16px] font-general-sans text-[13px] font-medium"
+                      >
+                        <span className='max-w-[180px] break-words truncate'>{user.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSelectedUser(user.id)}
+                          className="w-4 h-4 rounded-full flex items-center justify-center hover:bg-[#083F92]/20 focus:outline-none"
+                        >
+                          <X className="w-3 h-3 text-[#083F92]" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="mt-6">
                 <Button
                   type="submit"
-                  disabled={isAddingMember}
+                  disabled={isAddingMember || selectedUsers.length === 0}
                   className="w-full h-[48px] bg-[#083F92] hover:bg-[#083F92]/95 text-white font-general-sans font-semibold text-[14px] leading-[19px] capitalize rounded-[100px] cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isAddingMember ? 'Adding...' : 'Add into team'}
+                  {isAddingMember ? 'Adding...' : `Add into team${selectedUsers.length > 0 ? ` (${selectedUsers.length})` : ''}`}
                 </Button>
               </div>
             </form>

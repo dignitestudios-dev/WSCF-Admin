@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   images:
   {
-    domains: ["images.unsplash.com"],
+    domains: ["images.unsplash.com", "wscf-storage-bucket.s3.us-east-1.amazonaws.com"],
   }
 };
 

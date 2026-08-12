@@ -60,8 +60,8 @@ export default function Dashboard() {
           </h1>
 
           {/* Actions Button Group */}
-          <div className="flex items-center gap-[12px] bg-[#083F92]/10 p-2.5 rounded-[100px] shadow-sm shrink-0 max-w-full overflow-x-auto no-scrollbar">
-            {/* Button 1: Already uploaded file */}
+          {/* <div className="flex items-center gap-[12px] bg-[#083F92]/10 p-2.5 rounded-[100px] shadow-sm shrink-0 max-w-full overflow-x-auto no-scrollbar">
+      
             <button className="flex items-center gap-2 px-4 py-2 bg-transparent text-[#000000] hover:bg-black/5 rounded-[100px] transition-colors focus:outline-none shrink-0">
               <div className="w-[32px] h-[32px] bg-[#083F92] rounded-full flex items-center justify-center text-white">
                 <FileSpreadsheet className="w-4 h-4" />
@@ -71,10 +71,10 @@ export default function Dashboard() {
               </span>
             </button>
 
-            {/* Vertical divider */}
+      
             <div className="w-[2px] h-6 bg-[#083F92] shrink-0" />
 
-            {/* Button 2: Import Master File */}
+       
             <button className="flex items-center gap-2 px-4 py-2 bg-transparent text-[#000000] hover:bg-black/5 rounded-[100px] transition-colors focus:outline-none shrink-0">
               <div className="w-[32px] h-[32px] bg-[#083F92] rounded-full flex items-center justify-center text-white">
                 <Plus className="w-5 h-5" />
@@ -83,7 +83,7 @@ export default function Dashboard() {
                 Import Master File
               </span>
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* Description Subheader */}

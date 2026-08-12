@@ -22,10 +22,13 @@ import {
 import Image from 'next/image';
 import { PageTransition } from '@/components/animations/page-transition';
 import Link from 'next/link';
-import { useUserDetails } from '@/features/users/hooks/use-users';
+import { useUserDetails, useDeactivateUser, useActivateUser } from '@/features/users/hooks/use-users';
+import { EditUserDialog } from '@/features/users/components/edit-user-dialog';
+import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUserTournamentHistory } from '@/features/tournaments/hooks/use-user-tournament-history';
 import { Pagination } from '@/components/ui/pagination';
+import { ConfirmActionDialog } from '@/components/ui/alert-dialog';
 
 interface TournamentItem {
   id: number;
@@ -45,6 +48,7 @@ export default function UserProfile() {
   const [tournamentFilter, setTournamentFilter] = useState<'Upcoming' | 'Completed'>('Upcoming');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   const { data: historyData, isLoading: isLoadingHistory } = useUserTournamentHistory(
     id,
@@ -57,6 +61,28 @@ export default function UserProfile() {
   const totalPages = historyData?.pagination?.totalPages || 1;
 
   const { data, isLoading } = useUserDetails(id);
+  const { mutate: deactivateUser, isPending: isDeactivating } = useDeactivateUser(id);
+  const { mutate: activateUser, isPending: isActivating } = useActivateUser(id);
+  const [showStatusConfirm, setShowStatusConfirm] = useState(false);
+
+  const executeToggleStatus = () => {
+    const isActive = data?.data?.user?.status === 'active';
+    if (isActive) {
+      deactivateUser(undefined, {
+        onSuccess: () => {
+          toast.success('User deactivated successfully');
+          setShowStatusConfirm(false);
+        },
+      });
+    } else {
+      activateUser(undefined, {
+        onSuccess: () => {
+          toast.success('User activated successfully');
+          setShowStatusConfirm(false);
+        },
+      });
+    }
+  };
   const apiData = data?.data;
 
   const user = apiData?.user;
@@ -70,7 +96,7 @@ export default function UserProfile() {
     team: "Milwaukee Knights Chess Club", // Keeping static placeholder as requested
     rating: profile?.rating?.toString() || "0",
     city: profile?.city || "N/A",
-    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face",
+    avatar: user?.profileImage || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face",
     performance: {
       totalTournaments: profile?.totalTournaments?.toString() || "0",
       totalWins: profile?.totalWins?.toString() || "0",
@@ -104,7 +130,10 @@ export default function UserProfile() {
           {/* Right Action buttons */}
           <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto overflow-x-auto no-scrollbar pb-1 sm:pb-0">
             {/* Edit Button */}
-            <button className="flex items-center gap-2 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-[105px] justify-center shrink-0 cursor-pointer">
+            <button
+              onClick={() => setShowEditDialog(true)}
+              className="flex items-center gap-2 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-[105px] justify-center shrink-0 cursor-pointer"
+            >
               <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md shrink-0">
                 <Edit className="w-4 h-4 text-white" />
               </div>
@@ -116,15 +145,34 @@ export default function UserProfile() {
             {/* Vertical divider */}
             <div className="w-[2px] h-6 bg-[#083F92] shrink-0" />
 
-            {/* Delete Button */}
-            <button className="flex items-center gap-2 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-destructive/10 text-[#CE2D32] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-[124px] justify-center shrink-0 cursor-pointer">
-              <div className="w-[42px] h-[42px] bg-[#CE2D32] rounded-full flex items-center justify-center text-white relative shadow-md shrink-0">
-                <Trash2 className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-poppins font-medium text-[14px] leading-[20px] tracking-[-0.019em]">
-                Delete
-              </span>
-            </button>
+            {/* Toggle Status Button */}
+            {user?.status === 'active' ? (
+              <button
+                onClick={() => setShowStatusConfirm(true)}
+                disabled={isDeactivating}
+                className="flex items-center gap-2 px-[15px] py-[15px] bg-[#CE2D32]/10 hover:bg-[#CE2D32]/15 text-[#CE2D32] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-[150px] justify-center shrink-0 cursor-pointer disabled:opacity-50"
+              >
+                <div className="w-[42px] h-[42px] bg-[#CE2D32] rounded-full flex items-center justify-center text-white relative shadow-md shrink-0">
+                  <Trash2 className="w-4 h-4 text-white" />
+                </div>
+                <span className="font-poppins font-medium text-[14px] leading-[20px] tracking-[-0.019em]">
+                  {isDeactivating ? 'Processing...' : 'Deactivate'}
+                </span>
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowStatusConfirm(true)}
+                disabled={isActivating}
+                className="flex items-center gap-2 px-[15px] py-[15px] bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-[130px] justify-center shrink-0 cursor-pointer disabled:opacity-50"
+              >
+                <div className="w-[42px] h-[42px] bg-emerald-600 rounded-full flex items-center justify-center text-white relative shadow-md shrink-0">
+                  <Star className="w-4 h-4 text-white" />
+                </div>
+                <span className="font-poppins font-medium text-[14px] leading-[20px] tracking-[-0.019em]">
+                  {isActivating ? 'Processing...' : 'Activate'}
+                </span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -158,9 +206,18 @@ export default function UserProfile() {
                   </>
                 ) : (
                   <>
-                    <h1 className="font-poppins font-semibold text-[32px] leading-[38px] text-white m-0">
-                      {userData.name}
-                    </h1>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                      <h1 className="font-poppins font-semibold text-[32px] leading-[38px] text-white m-0">
+                        {userData.name}
+                      </h1>
+                      <span className={`px-2.5 py-0.5 rounded-[100px] text-[12px] font-semibold uppercase tracking-wider ${
+                        user?.status === 'active'
+                          ? 'bg-emerald-600 text-white shadow-sm'
+                          : 'bg-rose-600 text-white shadow-sm'
+                      }`}>
+                        {user?.status || 'inactive'}
+                      </span>
+                    </div>
                     <span className="font-poppins font-normal text-[14px] leading-[21px] text-[#DBDBDB]">
                       {userData.email}
                     </span>
@@ -473,6 +530,29 @@ export default function UserProfile() {
         </div>
 
       </div>
+
+      <EditUserDialog
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        userId={id}
+        initialData={data?.data || null}
+      />
+
+      <ConfirmActionDialog
+        open={showStatusConfirm}
+        onOpenChange={setShowStatusConfirm}
+        title={user?.status === 'active' ? 'Deactivate User' : 'Activate User'}
+        description={
+          user?.status === 'active'
+            ? `Are you sure you want to deactivate ${userData.name}? They will not be able to join tournaments.`
+            : `Are you sure you want to activate ${userData.name}? They will be able to join tournaments again.`
+        }
+        confirmText={user?.status === 'active' ? 'Deactivate' : 'Activate'}
+        variant={user?.status === 'active' ? 'destructive' : 'default'}
+        confirmClassName={user?.status !== 'active' ? 'bg-[#083F92] text-white hover:bg-[#083F92]/90 border-transparent shadow-xs' : undefined}
+        isLoading={isDeactivating || isActivating}
+        onConfirm={executeToggleStatus}
+      />
     </PageTransition>
   );
 }

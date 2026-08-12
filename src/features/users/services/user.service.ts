@@ -7,6 +7,7 @@ export interface User {
   role: string;
   status: string;
   createdAt: string;
+  profileImage?: string;
 }
 
 export interface UsersResponse {
@@ -81,6 +82,18 @@ export const userService = {
     const response = await axiosInstance.get(`/user/export`, {
       responseType: 'blob'
     });
+    return response.data;
+  },
+  updateUser: async (id: string, data: any): Promise<any> => {
+    const response = await axiosInstance.put(`/user/${id}`, data);
+    return response.data;
+  },
+  deactivateUser: async (id: string): Promise<any> => {
+    const response = await axiosInstance.patch(`/user/${id}/deactivate`);
+    return response.data;
+  },
+  activateUser: async (id: string): Promise<any> => {
+    const response = await axiosInstance.patch(`/user/${id}/activate`);
     return response.data;
   },
 };
