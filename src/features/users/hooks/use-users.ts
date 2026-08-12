@@ -31,7 +31,7 @@ export function useUpdateUser(id: string) {
 export function useDeactivateUser(id: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => userService.deactivateUser(id),
+    mutationFn: (reason?: string) => userService.deactivateUser(id, reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user', id] });
       queryClient.invalidateQueries({ queryKey: ['users'] });

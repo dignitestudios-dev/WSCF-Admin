@@ -88,8 +88,8 @@ export const userService = {
     const response = await axiosInstance.put(`/user/${id}`, data);
     return response.data;
   },
-  deactivateUser: async (id: string): Promise<any> => {
-    const response = await axiosInstance.patch(`/user/${id}/deactivate`);
+  deactivateUser: async (id: string, reason?: string): Promise<any> => {
+    const response = await axiosInstance.patch(`/user/${id}/deactivate`, { reason });
     return response.data;
   },
   activateUser: async (id: string): Promise<any> => {

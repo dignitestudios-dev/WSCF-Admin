@@ -205,6 +205,7 @@ interface ConfirmActionDialogProps {
   isLoading?: boolean
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"
   confirmClassName?: string
+  children?: React.ReactNode
 }
 
 function ConfirmActionDialog({
@@ -218,6 +219,7 @@ function ConfirmActionDialog({
   isLoading = false,
   variant = "default",
   confirmClassName,
+  children,
 }: ConfirmActionDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={(isOpen) => {
@@ -229,6 +231,7 @@ function ConfirmActionDialog({
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
+        {children && <div className="py-2">{children}</div>}
         <AlertDialogFooter>
           <AlertDialogCancel className={"p-5"} disabled={isLoading}>{cancelText}</AlertDialogCancel>
           <Button 

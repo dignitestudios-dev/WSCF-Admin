@@ -64,14 +64,20 @@ export default function UserProfile() {
   const { mutate: deactivateUser, isPending: isDeactivating } = useDeactivateUser(id);
   const { mutate: activateUser, isPending: isActivating } = useActivateUser(id);
   const [showStatusConfirm, setShowStatusConfirm] = useState(false);
+  const [deactivationReason, setDeactivationReason] = useState("");
 
   const executeToggleStatus = () => {
     const isActive = data?.data?.user?.status === 'active';
     if (isActive) {
-      deactivateUser(undefined, {
+      if (!deactivationReason.trim()) {
+        toast.error('Please provide a reason for deactivation');
+        return;
+      }
+      deactivateUser(deactivationReason, {
         onSuccess: () => {
           toast.success('User deactivated successfully');
           setShowStatusConfirm(false);
+          setDeactivationReason("");
         },
       });
     } else {
@@ -540,7 +546,10 @@ export default function UserProfile() {
 
       <ConfirmActionDialog
         open={showStatusConfirm}
-        onOpenChange={setShowStatusConfirm}
+        onOpenChange={(open) => {
+          setShowStatusConfirm(open);
+          if (!open) setDeactivationReason("");
+        }}
         title={user?.status === 'active' ? 'Deactivate User' : 'Activate User'}
         description={
           user?.status === 'active'
@@ -552,7 +561,19 @@ export default function UserProfile() {
         confirmClassName={user?.status !== 'active' ? 'bg-[#083F92] text-white hover:bg-[#083F92]/90 border-transparent shadow-xs' : undefined}
         isLoading={isDeactivating || isActivating}
         onConfirm={executeToggleStatus}
-      />
+      >
+        {user?.status === 'active' && (
+          <div className="mt-4">
+            <label className="text-sm font-medium text-gray-700 mb-1 block">Reason for deactivation *</label>
+            <textarea
+              className="w-full min-h-[100px] p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#083F92] focus:border-transparent resize-none text-sm"
+              placeholder="Please provide a reason..."
+              value={deactivationReason}
+              onChange={(e) => setDeactivationReason(e.target.value)}
+            />
+          </div>
+        )}
+      </ConfirmActionDialog>
     </PageTransition>
   );
 }
