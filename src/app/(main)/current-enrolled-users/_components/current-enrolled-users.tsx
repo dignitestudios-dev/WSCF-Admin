@@ -282,7 +282,7 @@ export default function CurrentEnrolledUsers() {
                       {t.title}
                     </span>
                     <span className="text-[13px] text-[#636363] font-medium shrink-0 whitespace-nowrap">
-                      {t.date ? new Date(t.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
+                      {t.date ? new Date(t.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }) : 'N/A'}
                     </span>
                   </div>
                 ))

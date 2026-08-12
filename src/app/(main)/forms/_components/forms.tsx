@@ -235,8 +235,12 @@ export default function Forms() {
                 <div className="relative h-[44px]">
                   <Input
                     required
+                    maxLength={30}
                     value={fieldName}
-                    onChange={(e) => setFieldName(e.target.value)}
+                    onChange={(e) => {
+                      const cleanValue = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+                      setFieldName(cleanValue);
+                    }}
                     placeholder="E.g. Grade"
                     className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
                   />
@@ -258,7 +262,7 @@ export default function Forms() {
                       <SelectItem value="text" className="cursor-pointer focus:bg-[#083F92]/10 focus:text-[#083F92] rounded-[8px] py-2.5 mb-1 last:mb-0">Text</SelectItem>
                       <SelectItem value="number" className="cursor-pointer focus:bg-[#083F92]/10 focus:text-[#083F92] rounded-[8px] py-2.5 mb-1 last:mb-0">Number</SelectItem>
                       <SelectItem value="dropdown" className="cursor-pointer focus:bg-[#083F92]/10 focus:text-[#083F92] rounded-[8px] py-2.5 mb-1 last:mb-0">Dropdown</SelectItem>
-                      <SelectItem value="email" className="cursor-pointer focus:bg-[#083F92]/10 focus:text-[#083F92] rounded-[8px] py-2.5 mb-1 last:mb-0">Email</SelectItem>
+                      {/* <SelectItem value="email" className="cursor-pointer focus:bg-[#083F92]/10 focus:text-[#083F92] rounded-[8px] py-2.5 mb-1 last:mb-0">Email</SelectItem> */}
                     </SelectContent>
                   </Select>
                 </div>
@@ -325,6 +329,7 @@ export default function Forms() {
                   </label>
                   <div className="relative h-[44px] flex items-center w-full bg-white border border-[#3D3775] rounded-[24px] overflow-hidden">
                     <Input
+                      maxLength={30}
                       value={currentOption}
                       onChange={(e) => setCurrentOption(e.target.value)}
                       onKeyDown={(e) => {
