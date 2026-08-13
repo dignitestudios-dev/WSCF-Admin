@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getCookie } from './cookie';
+import { getCookie, removeCookie } from './cookie';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.wisconsinscholasticchess.org/';
 
@@ -30,9 +30,11 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   (error) => {
-    // TODO: Handle global response errors, e.g., 401 Unauthorized for logout
     if (error.response?.status === 401) {
-      // Handle logout/redirect
+      removeCookie('token');
+      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
