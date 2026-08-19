@@ -95,14 +95,14 @@ export default function UserProfile() {
   const profile = apiData?.playerProfile;
 
   const userData = {
-    name: user?.name || "Loading...",
+    name: user ? `${user.firstName} ${user.lastName}` : "Loading...",
     email: user?.email || "...",
     userId: user?._id?.substring(0, 8).toUpperCase() || "...",
     grade: profile?.grade || "N/A",
     team: "Milwaukee Knights Chess Club", // Keeping static placeholder as requested
     rating: profile?.rating?.toString() || "0",
     city: profile?.city || "N/A",
-    avatar: user?.profileImage || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face",
+    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face",
     performance: {
       totalTournaments: profile?.totalTournaments?.toString() || "0",
       totalWins: profile?.totalWins?.toString() || "0",

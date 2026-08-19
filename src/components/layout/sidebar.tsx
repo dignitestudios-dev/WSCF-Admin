@@ -15,7 +15,8 @@ import {
   UserPlus,
   LogOut,
   Loader2,
-  X
+  X,
+  School
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -39,6 +40,7 @@ export function Sidebar({ onClose }: SidebarProps) {
   const featuresNav = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
     { name: 'Users', href: '/users', icon: Users },
+    { name: 'Schools', href: '/schools', icon: School },
     { name: 'Tournaments', href: '/tournaments', icon: Trophy },
     { name: 'Current Enrolled Users', href: '/current-enrolled-users', icon: UserCheck },
     { name: 'Membership', href: '/membership', icon: CreditCard },
@@ -86,7 +88,7 @@ export function Sidebar({ onClose }: SidebarProps) {
       </div>
 
       {/* Navigation Links Container */}
-      <div className="flex-1 mt-[140px] px-8 z-10 flex flex-col gap-8">
+      <div className="flex-1 mt-[140px] mb-6 px-8 z-10 flex flex-col gap-8 overflow-y-auto min-h-0 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
 
         {/* Features Section */}
         <div className="flex flex-col gap-4">

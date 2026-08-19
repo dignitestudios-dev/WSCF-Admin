@@ -44,7 +44,10 @@ function formatPhoneNumber(value: string) {
 }
 
 const editUserSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(100, 'Name must be at most 100 characters'),
+  firstName: z.string().min(1, 'First name is required').max(50, 'First name must be at most 50 characters'),
+  lastName: z.string().min(1, 'Last name is required').max(50, 'Last name must be at most 50 characters'),
+  gender: z.string().optional(),
+  sigma: z.string().optional(),
   streetAddress: z.string().max(150, 'Street Address must be at most 150 characters').optional().or(z.literal('')),
   city: z.string().max(100, 'City must be at most 100 characters').optional().or(z.literal('')),
   grade: z.string().max(20, 'Grade must be at most 20 characters').optional().or(z.literal('')),
@@ -64,7 +67,10 @@ interface EditUserDialogProps {
   userId: string;
   initialData: {
     user?: {
-      name: string;
+      firstName: string;
+      lastName: string;
+      gender?: string;
+      sigma?: string;
     };
     playerProfile?: {
       streetAddress?: string;
@@ -97,7 +103,10 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
   } = useForm<EditUserFormData>({
     resolver: zodResolver(editUserSchema),
     defaultValues: {
-      name: '',
+      firstName: '',
+      lastName: '',
+      gender: '',
+      sigma: '',
       streetAddress: '',
       city: '',
       grade: '',
@@ -115,7 +124,10 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
       const user = initialData.user;
       const profile = initialData.playerProfile;
       reset({
-        name: user?.name || '',
+        firstName: user?.firstName || '',
+        lastName: user?.lastName || '',
+        gender: user?.gender || '',
+        sigma: user?.sigma || '',
         streetAddress: profile?.streetAddress || '',
         city: profile?.city || '',
         grade: profile?.grade || '',
@@ -131,7 +143,10 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
 
   const onSubmit = async (data: EditUserFormData) => {
     const payload = {
-      name: data.name,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      gender: data.gender || undefined,
+      sigma: data.sigma || undefined,
       streetAddress: data.streetAddress || undefined,
       city: data.city || undefined,
       grade: data.grade || undefined,
@@ -186,26 +201,91 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-0 px-8 pb-8 pt-4 overflow-y-auto no-scrollbar max-h-[80vh]">
           <div className="flex flex-col gap-[22px]">
             {/* Name */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="name" className="font-poppins font-medium text-[14px] leading-[21px] text-[#181818] capitalize">
-                Full Name <span className="text-red-500">*</span>
-              </Label>
-              <div className="relative h-[44px]">
-                <Input
-                  id="name"
-                  maxLength={100}
-                  placeholder="Enter full name"
-                  className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
-                  {...register('name', {
-                    onChange: (e) => {
-                      e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '');
-                    }
-                  })}
-                />
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col gap-2 flex-1">
+                <Label htmlFor="firstName" className="font-poppins font-medium text-[14px] leading-[21px] text-[#181818] capitalize">
+                  First Name <span className="text-red-500">*</span>
+                </Label>
+                <div className="relative h-[44px]">
+                  <Input
+                    id="firstName"
+                    maxLength={50}
+                    placeholder="Enter first name"
+                    className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
+                    {...register('firstName', {
+                      onChange: (e) => {
+                        e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+                      }
+                    })}
+                  />
+                </div>
+                {errors.firstName && (
+                  <p className="text-[12px] text-red-500 mt-[-6px]">{errors.firstName.message}</p>
+                )}
               </div>
-              {errors.name && (
-                <p className="text-[12px] text-red-500 mt-[-6px]">{errors.name.message}</p>
-              )}
+
+              <div className="flex flex-col gap-2 flex-1">
+                <Label htmlFor="lastName" className="font-poppins font-medium text-[14px] leading-[21px] text-[#181818] capitalize">
+                  Last Name <span className="text-red-500">*</span>
+                </Label>
+                <div className="relative h-[44px]">
+                  <Input
+                    id="lastName"
+                    maxLength={50}
+                    placeholder="Enter last name"
+                    className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
+                    {...register('lastName', {
+                      onChange: (e) => {
+                        e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+                      }
+                    })}
+                  />
+                </div>
+                {errors.lastName && (
+                  <p className="text-[12px] text-red-500 mt-[-6px]">{errors.lastName.message}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Gender and Sigma */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col gap-2 flex-1">
+                <Label htmlFor="gender" className="font-poppins font-medium text-[14px] leading-[21px] text-[#181818] capitalize">
+                  Gender
+                </Label>
+                <div className="relative h-[44px]">
+                  <select
+                    id="gender"
+                    {...register('gender')}
+                    className="h-full w-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40 outline-none"
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                {errors.gender && (
+                  <p className="text-[12px] text-red-500 mt-[-6px]">{errors.gender.message}</p>
+                )}
+              </div>
+              <div className="flex flex-col gap-2 flex-1">
+                <Label htmlFor="sigma" className="font-poppins font-medium text-[14px] leading-[21px] text-[#181818] capitalize">
+                  Sigma
+                </Label>
+                <div className="relative h-[44px]">
+                  <Input
+                    id="sigma"
+                    maxLength={50}
+                    placeholder="Enter sigma"
+                    className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
+                    {...register('sigma')}
+                  />
+                </div>
+                {errors.sigma && (
+                  <p className="text-[12px] text-red-500 mt-[-6px]">{errors.sigma.message}</p>
+                )}
+              </div>
             </div>
 
             {/* Address */}
@@ -314,11 +394,11 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
 
             {/* Father's Details */}
             <div className="flex flex-col gap-3 border-t border-neutral-100 pt-4">
-              <h3 className="font-poppins font-semibold text-[16px] text-[#083F92] m-0">Father's Details</h3>
+              <h3 className="font-poppins font-semibold text-[16px] text-[#083F92] m-0">Father&apos;s Details</h3>
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex flex-col gap-2 flex-1">
                   <Label htmlFor="fatherName" className="font-poppins font-medium text-[14px] leading-[21px] text-[#181818] capitalize">
-                    Father's Name
+                    Father&apos;s Name
                   </Label>
                   <div className="relative h-[44px]">
                     <Input
@@ -340,7 +420,7 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
 
                 <div className="flex flex-col gap-2 flex-1">
                   <Label htmlFor="fatherPhone" className="font-poppins font-medium text-[14px] leading-[21px] text-[#181818] capitalize">
-                    Father's Phone
+                    Father&apos;s Phone
                   </Label>
                   <div className="relative h-[44px]">
                     <Input
@@ -364,11 +444,11 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
 
             {/* Mother's Details */}
             <div className="flex flex-col gap-3 border-t border-neutral-100 pt-4">
-              <h3 className="font-poppins font-semibold text-[16px] text-[#083F92] m-0">Mother's Details</h3>
+              <h3 className="font-poppins font-semibold text-[16px] text-[#083F92] m-0">Mother&apos;s Details</h3>
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex flex-col gap-2 flex-1">
                   <Label htmlFor="motherName" className="font-poppins font-medium text-[14px] leading-[21px] text-[#181818] capitalize">
-                    Mother's Name
+                    Mother&apos;s Name
                   </Label>
                   <div className="relative h-[44px]">
                     <Input
@@ -390,7 +470,7 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
 
                 <div className="flex flex-col gap-2 flex-1">
                   <Label htmlFor="motherPhone" className="font-poppins font-medium text-[14px] leading-[21px] text-[#181818] capitalize">
-                    Mother's Phone
+                    Mother&apos;s Phone
                   </Label>
                   <div className="relative h-[44px]">
                     <Input

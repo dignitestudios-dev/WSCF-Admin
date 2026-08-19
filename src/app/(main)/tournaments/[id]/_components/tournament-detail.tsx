@@ -22,7 +22,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { PageTransition } from '@/components/animations/page-transition';
-import { CreateTournamentDialog } from '@/features/tournaments/components/create-tournament-dialog';
 import { Pagination } from '@/components/ui/pagination';
 import { ConfirmDeleteDialog } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
@@ -31,7 +30,6 @@ export default function TournamentDetail() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
-  const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isExporting, setIsExporting] = useState(false);
@@ -67,7 +65,14 @@ export default function TournamentDetail() {
     }
   };
 
-  const divisions = tournament?.customDropdownOptions?.find((opt: any) => opt.fieldId)?.values?.join(', ') || 'N/A';
+  const divisions = tournament?.divisions?.length > 0 
+    ? tournament.divisions.map((d: any) => {
+        if (d.type === 'conditional') {
+          return `${d.divisionName} ${(d.condition === 'over' || d.condition === 'above') ? 'O' : 'U'} ${d.rating}`;
+        }
+        return 'Open';
+      }).join(', ')
+    : 'N/A';
   
   const formatDate = (dateStr: string) => {
     if (!dateStr) return 'N/A';
@@ -84,7 +89,7 @@ export default function TournamentDetail() {
     entryFee: tournament?.isPaid ? `$${tournament?.entryFee}` : 'Free',
     date: formatDate(tournament?.date),
     division: divisions,
-    tournamentId: tournament?._id?.substring(0, 8).toUpperCase() || "N/A",
+
     tournamentHost: tournament?.tournamentHost || "N/A",
     tournamentDirector: tournament?.tournamentDirector || "N/A"
   };
@@ -127,7 +132,7 @@ export default function TournamentDetail() {
           <div className="flex items-center gap-3 shrink-0">
             {/* Edit Button */}
             <button
-              onClick={() => setShowEditDialog(true)}
+              onClick={() => router.push(`/tournaments/${id}/edit`)}
               className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-[105px] justify-center"
             >
               <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md shrink-0">
@@ -169,7 +174,7 @@ export default function TournamentDetail() {
                 { label: 'Entry fee', value: tournamentDetails.entryFee, icon: DollarSign },
                 { label: 'Date of Tournament', value: tournamentDetails.date, icon: Calendar },
                 { label: 'Division', value: tournamentDetails.division, icon: GitMerge },
-                { label: 'Tournament Id', value: tournamentDetails.tournamentId, icon: Hash },
+
                 { label: 'Tournament Host', value: tournamentDetails.tournamentHost, icon: User },
                 { label: 'Tournament Director', value: tournamentDetails.tournamentDirector, icon: Award }
               ].map((item, idx) => (
@@ -312,12 +317,6 @@ export default function TournamentDetail() {
         </div>
 
       </div>
-
-      <CreateTournamentDialog
-        open={showEditDialog}
-        onOpenChange={setShowEditDialog}
-        initialData={tournament}
-      />
 
       <ConfirmDeleteDialog
         open={showDeleteConfirm}

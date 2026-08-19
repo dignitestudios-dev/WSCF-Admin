@@ -6,7 +6,7 @@ export function useCreateTeam() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { name: string; teamCode: string }) => teamService.createTeam(data),
+    mutationFn: (data: { name: string; teamCode: string; schoolId: string }) => teamService.createTeam(data),
     onSuccess: (data) => {
       toast.success(data.message || 'Team created successfully');
       queryClient.invalidateQueries({ queryKey: ['teams'] });

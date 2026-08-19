@@ -6,6 +6,7 @@ import {
   Minus,
   Pencil,
   Trash2,
+  ChevronDown,
 } from 'lucide-react';
 import { PageTransition } from '@/components/animations/page-transition';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -40,7 +41,7 @@ export default function Forms() {
   const [fieldName, setFieldName] = useState('');
   const [fieldType, setFieldType] = useState('text');
   const [nature, setNature] = useState('mandatory');
-  const [minLength, setMinLength] = useState<number>(0);
+  const [minLength, setMinLength] = useState<number | ''>('');
   const [optionsList, setOptionsList] = useState<string[]>([]);
   const [currentOption, setCurrentOption] = useState('');
   const [isTournamentSpecific, setIsTournamentSpecific] = useState<boolean>(false);
@@ -50,7 +51,7 @@ export default function Forms() {
     setFieldName('');
     setFieldType('text');
     setNature('mandatory');
-    setMinLength(0);
+    setMinLength('');
     setOptionsList([]);
     setCurrentOption('');
     setIsTournamentSpecific(false);
@@ -62,7 +63,7 @@ export default function Forms() {
     setFieldName(field.fieldName || '');
     setFieldType(field.fieldType || 'text');
     setNature(field.nature || 'mandatory');
-    setMinLength(field.minLength || 0);
+    setMinLength(field.minLength !== undefined ? field.minLength : '');
     setOptionsList(field.options || []);
     setCurrentOption('');
     setIsTournamentSpecific(field.isTournamentSpecific || false);
@@ -124,95 +125,82 @@ export default function Forms() {
               Registration Form
             </h1>
           </div>
-
-          <button
-            onClick={handleOpenAddDialog}
-            className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-all focus:outline-none h-[72px] shadow-sm w-full sm:w-auto justify-center shrink-0 cursor-pointer"
-          >
-            <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center  relative shadow-md shrink-0">
-              <Plus className="w-5 h-5 stroke-[2.5]  text-[#083F92] bg-white rounded-full" />
-            </div>
-            <span className="font-poppins font-medium text-[14px] leading-[20px] tracking-[-0.019em] pr-2">
-              Add Field
-            </span>
-          </button>
         </div>
 
-        {/* Table Container */}
-        <div className="w-full bg-white border border-[#DADADA] rounded-[24px] shadow-sm flex flex-col justify-between overflow-hidden min-h-[400px] relative pb-16 mt-6">
-          <div className="overflow-x-auto w-full">
-            <table className="w-full border-collapse min-w-[800px]">
-              <thead>
-                <tr className="bg-[#083F92] text-white text-left h-[50px] font-poppins font-semibold text-[13px]">
-                  <th className="px-6 py-3 font-semibold">Field Name</th>
-                  <th className="px-6 py-3 font-semibold">Type</th>
-                  <th className="px-6 py-3 font-semibold">Nature</th>
-                  <th className="px-6 py-3 font-semibold">Min Length</th>
-                  <th className="px-6 py-3 font-semibold">Tournament Specific</th>
-                  <th className="px-6 py-3 font-semibold text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {isLoading || isFetching ? (
-                  Array.from({ length: 5 }).map((_, i) => (
-                    <tr key={`skeleton-${i}`} className="h-[50px] border-b border-[#EEEEEE] bg-white">
-                      <td className="px-6 py-3"><Skeleton className="h-4 w-3/4 max-w-[200px]" /></td>
-                      <td className="px-6 py-3"><Skeleton className="h-4 w-24" /></td>
-                      <td className="px-6 py-3"><Skeleton className="h-4 w-20" /></td>
-                      <td className="px-6 py-3"><Skeleton className="h-4 w-12" /></td>
-                      <td className="px-6 py-3"><Skeleton className="h-4 w-16" /></td>
-                      <td className="px-6 py-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Skeleton className="h-8 w-8 rounded-full" />
-                          <Skeleton className="h-8 w-8 rounded-full" />
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : fields.length > 0 ? (
-                  fields.map((field, idx) => {
-                    const isEven = idx % 2 !== 0;
-                    return (
-                      <tr
-                        key={field._id}
-                        className={`h-[50px] font-poppins text-[13px] text-[#000000] border-b border-[#EEEEEE] last:border-b-0 ${isEven ? 'bg-[#083F92]/10' : 'bg-white'
-                          }`}
+        {/* Form Preview Container */}
+        <div className="w-full bg-[#FFFFFF] border border-[#DADADA] rounded-[24px] overflow-hidden flex flex-col shadow-xs mt-6 p-8">
+          <div className="flex flex-col gap-6 w-full max-w-3xl mx-auto">
+            {isLoading || isFetching ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <div key={`skeleton-${i}`} className="flex flex-col gap-2 w-full">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-[42px] w-full rounded-full" />
+                </div>
+              ))
+            ) : fields.length > 0 ? (
+              fields.map((field) => (
+                <div key={field._id} className="flex flex-col gap-2 relative group">
+                  <div className="flex justify-between items-center">
+                    <label className="font-poppins font-medium text-[14px] leading-[21px] text-[#181818] capitalize">
+                      {field.fieldName} {field.nature === 'mandatory' && <span className="text-red-500">*</span>}
+                    </label>
+                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => handleOpenEditDialog(field)}
+                        className="w-[28px] h-[28px] bg-[#083F92]/10 hover:bg-[#083F92]/20 rounded-full flex items-center justify-center text-[#083F92] transition-colors cursor-pointer focus:outline-none"
+                        title="Edit Field"
                       >
-                        <td className="px-6 py-3 font-medium truncate max-w-[200px]">{field.fieldName}</td>
-                        <td className="px-6 py-3 capitalize">{field.fieldType}</td>
-                        <td className="px-6 py-3 capitalize">{field.nature}</td>
-                        <td className="px-6 py-3">{field.minLength}</td>
-                        <td className="px-6 py-3">{field.isTournamentSpecific ? 'Yes' : 'No'}</td>
-                        <td className="px-6 py-3 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => handleOpenEditDialog(field)}
-                              className="w-[32px] h-[32px] bg-[#083F92]/10 hover:bg-[#083F92]/20 rounded-full flex items-center justify-center cursor-pointer transition-colors shadow-xs"
-                              title="Edit Field"
-                            >
-                              <Pencil className="w-4 h-4 text-[#083F92]" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteClick(field)}
-                              className="w-[32px] h-[32px] bg-[#083F92]/10 hover:bg-destructive/15 rounded-full flex items-center justify-center cursor-pointer transition-colors shadow-xs"
-                              title="Delete Field"
-                            >
-                              <Trash2 className="w-4 h-4 text-[#CE2D32]" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="text-center py-16 text-[#787878] font-poppins bg-[#083F92]/5 border-dashed border-[#083F92]/20">
-                      No form fields found. Click "Add Field" to create one.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                        <Pencil className="w-[14px] h-[14px]" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(field)}
+                        className="w-[28px] h-[28px] bg-[#083F92]/10 hover:bg-red-100 rounded-full flex items-center justify-center text-[#CE2D32] transition-colors cursor-pointer focus:outline-none"
+                        title="Delete Field"
+                      >
+                        <Trash2 className="w-[14px] h-[14px]" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="relative h-[42px] w-full">
+                    {field.fieldType === 'dropdown' ? (
+                      <div className="w-full h-full bg-white border border-[#3D3775] rounded-full px-4 font-normal text-[14px] text-[#181818] flex items-center opacity-70 pointer-events-none justify-between">
+                        <span className="text-[#181818]/60">Select {field.fieldName}...</span>
+                        <ChevronDown className="w-4 h-4 text-[#083F92] opacity-80" />
+                      </div>
+                    ) : (
+                      <Input
+                        type={field.fieldType === 'number' ? 'number' : field.fieldType === 'email' ? 'email' : 'text'}
+                        placeholder={`Enter ${field.fieldName}`}
+                        className="w-full h-full bg-white border border-[#3D3775] rounded-full px-4 font-normal text-[14px] text-[#181818] placeholder:text-[#181818]/40 pointer-events-none opacity-70"
+                        readOnly
+                      />
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-[12px] text-[#181818]/50">Min Length: {field.minLength}</span>
+                    {field.fieldType === 'dropdown' && (
+                      <span className="text-[12px] text-[#181818]/50 truncate max-w-[200px]" title={field.options?.join(', ')}>Options: {field.isTournamentSpecific ? 'Tournament Specific' : field.options?.join(', ')}</span>
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="w-full py-12 text-center text-[#787878] font-poppins">
+                No fields created for this form yet.
+              </div>
+            )}
+            
+            {/* Add Field Button at bottom */}
+            <div className="pt-6 flex justify-center w-full mt-2">
+              <button
+                onClick={handleOpenAddDialog}
+                className="flex items-center gap-2 px-[24px] py-[12px] bg-white border border-[#083F92] hover:bg-[#083F92]/5 text-[#083F92] rounded-full transition-colors font-poppins font-semibold text-[14px] shadow-sm cursor-pointer focus:outline-none"
+              >
+                <Plus className="w-5 h-5 stroke-[2.5]" />
+                {fields.length > 0 ? 'Add Another Field' : 'Add Field'}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -296,8 +284,8 @@ export default function Forms() {
                       type="number"
                       min={0}
                       value={minLength}
-                      onChange={(e) => setMinLength(Number(e.target.value))}
-                      className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0"
+                      onChange={(e) => setMinLength(e.target.value ? Number(e.target.value) : '')}
+                      className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                 </div>

@@ -13,11 +13,11 @@ import {
 import { SearchInput } from '@/components/ui/search-input';
 import { useDebounce } from '@/hooks/use-debounce';
 import { PageTransition } from '@/components/animations/page-transition';
-import { CreateTournamentDialog } from '@/features/tournaments/components/create-tournament-dialog';
 import Link from 'next/link';
 import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTournaments } from '@/features/tournaments/hooks/use-tournaments';
+import { useDeleteTournament } from '@/features/tournaments/hooks/use-delete-tournament';
 
 export default function Tournaments() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,11 +27,14 @@ export default function Tournaments() {
   const itemsPerPage = 10;
 
   const statusParam = activeTab === 'All' ? undefined : activeTab;
+  const { mutateAsync: deleteTournament, isPending: isDeleting } = useDeleteTournament();
+
+  const [tournamentToDelete, setTournamentToDelete] = useState<any>(null);
+
   const { data: tournamentsData, isLoading, isFetching } = useTournaments(currentPage, itemsPerPage, debouncedSearchQuery, statusParam);
 
   const tournaments = tournamentsData?.data?.tournaments || [];
   const totalPages = tournamentsData?.pagination?.totalPages || 1;
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('en-US', {
@@ -62,8 +65,8 @@ export default function Tournaments() {
           </div>
 
           {/* Right Button: Add Tournament */}
-          <button
-            onClick={() => setShowCreateDialog(true)}
+          <Link
+            href="/tournaments/create"
             className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shrink-0 shadow-sm w-full sm:w-auto justify-center cursor-pointer"
           >
             <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md">
@@ -72,7 +75,7 @@ export default function Tournaments() {
             <span className="font-poppins font-medium text-[14px] leading-[20px] tracking-[-0.019em] pr-2">
               Add Tournament
             </span>
-          </button>
+          </Link>
 
         </div>
 
@@ -211,11 +214,7 @@ export default function Tournaments() {
 
       </div>
 
-      {/* Create Tournament Dialog */}
-      <CreateTournamentDialog
-        open={showCreateDialog}
-        onOpenChange={setShowCreateDialog}
-      />
+
     </PageTransition>
   );
 }

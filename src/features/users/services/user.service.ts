@@ -2,12 +2,14 @@ import { axiosInstance } from '@/lib/axios';
 
 export interface User {
   _id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
+  gender: string;
+  sigma?: string;
   email: string;
   role: string;
   status: string;
   createdAt: string;
-  profileImage?: string;
 }
 
 export interface UsersResponse {
@@ -35,7 +37,6 @@ export interface PlayerProfile {
   _id: string;
   userId: string;
   teamId: string;
-  name: string;
   city: string;
   streetAddress: string;
   zipCode: number;

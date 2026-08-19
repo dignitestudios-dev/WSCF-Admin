@@ -72,7 +72,7 @@ export const teamService = {
     });
     return response.data;
   },
-  createTeam: async (data: { name: string; teamCode: string }): Promise<any> => {
+  createTeam: async (data: { name: string; teamCode: string; schoolId: string }): Promise<any> => {
     const response = await axiosInstance.post('/team', data);
     return response.data;
   },

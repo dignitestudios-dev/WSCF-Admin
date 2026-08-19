@@ -9,6 +9,7 @@ import {
   FileSpreadsheet
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { PageTransition } from '@/components/animations/page-transition';
 import { PieChart, Pie, Cell, Label } from "recharts";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
@@ -34,6 +35,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function Dashboard() {
+  const router = useRouter();
   const { data: kpiData, isLoading: isLoadingKPIs } = useDashboardKPIs();
   const kpis = kpiData?.data;
 
@@ -283,7 +285,8 @@ export default function Dashboard() {
                 return (
                   <div
                     key={t._id}
-                    className={`w-full min-h-[72px] h-auto flex items-center justify-between px-4 py-3 rounded-[8px] transition-all duration-150 hover:shadow-sm cursor-pointer border border-[#083F92]/5 ${isOdd ? 'bg-[#083F92]/5' : 'bg-white'
+                    onClick={() => router.push(`/tournaments/${t._id}`)}
+                    className={`w-full min-h-[72px] h-auto flex items-center justify-between px-4 py-3 rounded-[8px] transition-all duration-150 hover:shadow-sm cursor-pointer border border-[#083F92]/5 hover:bg-[#083F92]/10 ${isOdd ? 'bg-[#083F92]/5' : 'bg-white'
                       }`}
                   >
                     {/* Left block info */}

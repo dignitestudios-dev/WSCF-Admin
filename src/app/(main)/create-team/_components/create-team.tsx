@@ -23,6 +23,7 @@ interface TeamItem {
   id: string;
   name: string;
   code: string;
+  schoolId?: string;
 }
 
 const getPaginationRange = (current: number, total: number) => {
@@ -90,7 +91,8 @@ export default function CreateTeam() {
     try {
       await createTeam({
         name: data.teamName,
-        teamCode: data.teamCode
+        teamCode: data.teamCode,
+        schoolId: data.schoolId || '',
       });
       // React query automatically refetches on mutation success
     } catch (e) {
@@ -120,6 +122,7 @@ export default function CreateTeam() {
       await createTeam({
         name: request.name,
         teamCode: request.code,
+        schoolId: request.schoolId || '',
       });
       setTeamRequests(teamRequests.filter(r => r.id !== request.id));
       // React query automatically refetches on mutation success
