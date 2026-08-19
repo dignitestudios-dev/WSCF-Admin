@@ -24,6 +24,14 @@ import Link from 'next/link';
 import { PageTransition } from '@/components/animations/page-transition';
 import { Pagination } from '@/components/ui/pagination';
 import { ConfirmDeleteDialog } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from 'sonner';
 
 export default function TournamentDetail() {
@@ -33,6 +41,8 @@ export default function TournamentDetail() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isExporting, setIsExporting] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [exportDivisionId, setExportDivisionId] = useState<string>('all');
 
   const { data: response, isLoading } = useGetTournament(id);
   const { data: participantsResponse, isLoading: isParticipantsLoading } = useGetTournamentParticipants(id, currentPage, 10);
@@ -45,18 +55,25 @@ export default function TournamentDetail() {
     try {
       setIsExporting(true);
       toast.info('Starting export...');
-      const blob = await tournamentService.exportTournamentParticipants(id);
+      const divisionParam = exportDivisionId === 'all' ? undefined : exportDivisionId;
+      const blob = await tournamentService.exportTournamentParticipants(id, divisionParam);
       
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `${tournamentTitle.replace(/\s+/g, '_')}_participants.csv`);
+      
+      const divisionPrefix = exportDivisionId !== 'all' && tournament?.divisions?.find((d: any) => d._id === exportDivisionId)
+        ? `${getDivisionLabel(tournament.divisions.find((d: any) => d._id === exportDivisionId))}_`
+        : '';
+        
+      link.setAttribute('download', `${tournamentTitle.replace(/\s+/g, '_')}_${divisionPrefix}participants.csv`);
       document.body.appendChild(link);
       link.click();
       link.parentNode?.removeChild(link);
       window.URL.revokeObjectURL(url);
       
       toast.success('Export completed successfully!');
+      setShowExportDialog(false);
     } catch (error) {
       console.error('Export failed:', error);
       toast.error('Failed to export participants.');
@@ -65,13 +82,15 @@ export default function TournamentDetail() {
     }
   };
 
+  const getDivisionLabel = (d: any) => {
+    if (d.type === 'conditional') {
+      return `${d.divisionName}${(d.condition === 'over' || d.condition === 'above') ? 'o' : 'u'}${d.rating}`;
+    }
+    return 'Open';
+  };
+
   const divisions = tournament?.divisions?.length > 0 
-    ? tournament.divisions.map((d: any) => {
-        if (d.type === 'conditional') {
-          return `${d.divisionName} ${(d.condition === 'over' || d.condition === 'above') ? 'O' : 'U'} ${d.rating}`;
-        }
-        return 'Open';
-      }).join(', ')
+    ? tournament.divisions.map((d: any) => getDivisionLabel(d)).join(', ')
     : 'N/A';
   
   const formatDate = (dateStr: string) => {
@@ -216,15 +235,17 @@ export default function TournamentDetail() {
 
               {/* CSV Button */}
               <button 
-                onClick={handleExportCSV}
-                disabled={isExporting}
-                className="flex items-center gap-2 px-3 py-1.5 bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[42px] shrink-0 shadow-sm w-full sm:w-auto justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => {
+                  setExportDivisionId('all');
+                  setShowExportDialog(true);
+                }}
+                className="flex items-center gap-2 px-3 py-1.5 bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[42px] shrink-0 shadow-sm w-full sm:w-auto justify-center cursor-pointer"
               >
                 <div className="w-[32px] h-[32px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md">
                   <FileSpreadsheet className="w-4 h-4" />
                 </div>
                 <span className="font-poppins font-medium text-[12px] leading-[20px] tracking-[-0.019em] pr-1 pl-1">
-                  {isExporting ? 'Exporting...' : 'Export As CSV'}
+                  Export As CSV
                 </span>
               </button>
             </div>
@@ -242,9 +263,8 @@ export default function TournamentDetail() {
                       <th className="px-6 py-3 font-semibold w-[120px]">User ID</th>
                       <th className="px-6 py-3 font-semibold w-[120px]">Name</th>
                       <th className="px-6 py-3 font-semibold w-[80px]">Grade</th>
-                      {/* <th className="px-6 py-3 font-semibold w-[200px]">Team</th> */}
+                      <th className="px-6 py-3 font-semibold w-[100px]">Division</th>
                       <th className="px-6 py-3 font-semibold w-[70px]">Rating</th>
-                      {/* <th className="px-6 py-3 font-semibold w-[170px]">City</th> */}
                       <th className="px-6 py-3 font-semibold text-right w-[126px]">Action</th>
                     </tr>
                   </thead>
@@ -259,7 +279,7 @@ export default function TournamentDetail() {
                       </tr>
                     ) : registeredPlayers.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="px-6 py-8 text-center text-[#636363]">
+                        <td colSpan={6} className="px-6 py-8 text-center text-[#636363]">
                           No participants found.
                         </td>
                       </tr>
@@ -276,9 +296,8 @@ export default function TournamentDetail() {
                             <td className="px-6 py-3 font-semibold">{player.playerProfile?.membershipId || 'N/A'}</td>
                             <td className="px-6 py-3 font-semibold text-black">{player.user?.name || 'N/A'}</td>
                             <td className="px-6 py-3 font-semibold text-black">{player.playerProfile?.grade || 'N/A'}</td>
-                            {/* <td className="px-6 py-3 font-semibold text-black tracking-[-0.02em]">{player.team?.name || 'N/A'}</td> */}
+                            <td className="px-6 py-3 font-semibold text-[#083F92]">{player.division?.label || 'N/A'}</td>
                             <td className="px-6 py-3 font-semibold text-black">{player.playerProfile?.rating || '0'}</td>
-                            {/* <td className="px-6 py-3 font-semibold text-black tracking-[-0.02em]">{player.playerProfile?.city || 'N/A'}</td> */}
                             <td className="px-6 py-3 text-right">
                               {userId ? (
                                 <Link
@@ -332,6 +351,62 @@ export default function TournamentDetail() {
           });
         }}
       />
+
+      {/* Export CSV Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent
+          showCloseButton={false}
+          className="bg-white rounded-[24px] p-8 w-[90vw] sm:w-full max-w-[400px] border-none shadow-2xl"
+        >
+          <DialogTitle className="font-poppins font-semibold text-[24px] text-[#083F92] mb-2">
+            Export Participants
+          </DialogTitle>
+          <p className="font-poppins text-[14px] text-[#636363] mb-6">Select a division to filter exports, or export all.</p>
+          
+          <div className="flex flex-col gap-2 mb-8">
+            <label className="font-poppins font-medium text-[14px] text-[#181818]">Division</label>
+            <Select
+              value={exportDivisionId}
+              onValueChange={(val) => setExportDivisionId(val || 'all')}
+            >
+              <SelectTrigger className="h-[48px]! w-full px-4 rounded-full border-[#DADADA] font-poppins text-[14px] text-[#181818] focus:ring-[#083F92] focus:border-[#083F92] shadow-none outline-none">
+                <SelectValue placeholder="Select Division">
+                  {exportDivisionId === 'all' 
+                    ? 'All Divisions' 
+                    : getDivisionLabel(tournament?.divisions?.find((d: any) => d._id === exportDivisionId) || {})}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="bg-white rounded-[12px] border-[#DADADA] font-poppins">
+                <SelectItem value="all" className="cursor-pointer hover:bg-[#083F92]/5 hover:text-[#083F92] rounded-[8px] mx-1 my-1">
+                  All Divisions
+                </SelectItem>
+                {tournament?.divisions?.map((d: any) => (
+                  <SelectItem key={d._id} value={d._id} className="cursor-pointer hover:bg-[#083F92]/5 hover:text-[#083F92] rounded-[8px] mx-1 my-1 mb-0 last:mb-1">
+                    {getDivisionLabel(d)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center gap-4 w-full">
+            <button
+              onClick={() => setShowExportDialog(false)}
+              className="flex-1 h-[48px] rounded-[100px] font-poppins font-semibold text-[14px] text-[#181818] bg-[#F6F6F6] hover:bg-[#EAEAEA] transition-colors cursor-pointer"
+              disabled={isExporting}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleExportCSV}
+              disabled={isExporting}
+              className="flex-1 h-[48px] rounded-[100px] font-poppins font-semibold text-[14px] text-white bg-[#083F92] hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isExporting ? 'Exporting...' : 'Export'}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </PageTransition>
   );
 }
