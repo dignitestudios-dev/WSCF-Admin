@@ -119,7 +119,7 @@ export default function Dashboard() {
                   </h2>
                 )}
 
-                <div className="absolute left-[14px] top-[202px] flex items-center gap-[4px] h-[24px]">
+                {/* <div className="absolute left-[14px] top-[202px] flex items-center gap-[4px] h-[24px]">
                   <div className="w-[45px] h-[24px] bg-[#083F92] rounded-[8px] flex items-center justify-center gap-[2px] px-[6px] py-[3px] text-white">
                     <span className="font-poppins font-normal text-[12px] leading-[18px]">34</span>
                     <svg width="8" height="8" viewBox="0 0 8 8" fill="none" className="w-[8px] h-[8px] fill-current">
@@ -129,7 +129,7 @@ export default function Dashboard() {
                   <span className="font-poppins font-normal text-[12px] leading-[18px] tracking-[-0.02em] text-[#000000]">
                     Increased from last month
                   </span>
-                </div>
+                </div> */}
               </div>
 
               {/* Card 2: Active Users */}
@@ -149,7 +149,7 @@ export default function Dashboard() {
                   </h2>
                 )}
 
-                <div className="absolute left-[14.5px] top-[202px] flex items-center gap-[4px] h-[24px]">
+                {/* <div className="absolute left-[14.5px] top-[202px] flex items-center gap-[4px] h-[24px]">
                   <div className="w-[45px] h-[24px] bg-[#083F92] rounded-[8px] flex items-center justify-center gap-[2px] px-[6px] py-[3px] text-white">
                     <span className="font-poppins font-normal text-[12px] leading-[18px]">34</span>
                     <svg width="8" height="8" viewBox="0 0 8 8" fill="none" className="w-[8px] h-[8px] fill-current">
@@ -159,7 +159,7 @@ export default function Dashboard() {
                   <span className="font-poppins font-normal text-[12px] leading-[18px] tracking-[-0.02em] text-[#000000]">
                     Increased from last month
                   </span>
-                </div>
+                </div> */}
               </div>
 
             </div>
