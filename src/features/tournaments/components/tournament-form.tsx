@@ -39,7 +39,7 @@ export interface TournamentFormProps {
   submitButtonText?: string;
 }
 
-const DIVISION_TYPES = ['K1', 'K2', 'K3', 'K4', 'K5', 'K6', 'K7', 'K8', 'K9', 'K10', 'K11', 'K12'];
+const DIVISION_TYPES = ['K', 'K1', 'K2', 'K3', 'K4', 'K5', 'K6', 'K7', 'K8', 'K9', 'K10', 'K11', 'K12'];
 
 export function TournamentForm({ initialData, onSubmitAction, isPending, submitButtonText = "Save" }: TournamentFormProps) {
   const [customFields, setCustomFields] = useState<Record<string, string[]>>({});
@@ -111,7 +111,7 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
     const input = customFieldInputs[fieldId] || '';
     const trimmed = input.trim();
     if (!trimmed) return;
-    
+
     setCustomFields(prev => {
       const current = prev[fieldId] || [];
       return { ...prev, [fieldId]: [...current, trimmed] };
@@ -134,7 +134,7 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
   const onSubmit = (data: TournamentFormData) => {
     let hasError = false;
     const newErrors: Record<string, string> = {};
-    
+
     tournamentSpecificFields.forEach(field => {
       if (field.nature === 'mandatory') {
         const values = customFields[field._id] || [];
@@ -162,7 +162,7 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
         if (d.type === 'open') {
           return { type: 'open' };
         }
-        
+
         return {
           type: d.type,
           divisionName: d.divisionType || 'Unknown',
@@ -185,7 +185,7 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
     if (!div) return '';
     if (div.type === 'open') return 'Open';
     if (div.type === 'conditional' && div.divisionType && div.condition && div.rating !== undefined && !Number.isNaN(div.rating)) {
-      return `${div.divisionType} ${div.condition === 'over' ? 'O' : 'U'} ${div.rating}`;
+      return `${div.divisionType}${div.condition === 'over' ? 'o' : 'u'}${div.rating}`;
     }
     return 'Incomplete condition...';
   };
@@ -194,10 +194,10 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
     const allDivisions = watch('divisions') || [];
     const names = new Map<string, number>();
     const duplicates = new Set<number>();
-    
+
     allDivisions.forEach((d, i) => {
       if (d.type === 'conditional' && d.divisionType && d.condition && d.rating !== undefined && !Number.isNaN(d.rating)) {
-        const name = `${d.divisionType} ${d.condition === 'over' ? 'O' : 'U'} ${d.rating}`;
+        const name = `${d.divisionType}${d.condition === 'over' ? 'o' : 'u'}${d.rating}`;
         if (names.has(name)) {
           duplicates.add(i);
           duplicates.add(names.get(name)!);
@@ -213,10 +213,10 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-[22px] w-full">
-      
+
       {/* Main Grid for Inputs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-[22px] w-full">
-        
+
         {/* Tournament Title */}
         <div className="flex flex-col gap-2">
           <Label
@@ -387,21 +387,8 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
           <Label className="font-poppins font-medium text-[16px] leading-[21px] text-[#083F92] capitalize m-0">
             Divisions
           </Label>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              const currentDivisions = watch('divisions') || [];
-              const hasOpen = currentDivisions.some(d => d.type === 'open');
-              appendDivision({ type: hasOpen ? 'conditional' : 'open' });
-            }}
-            className="border-[#083F92] text-[#083F92] py-5 hover:bg-[#083F92]/5 rounded-full"
-          >
-            <Plus className="w-4 h-6 mr-1" /> Add Division
-          </Button>
         </div>
-        
+
         {divisionFields.length === 0 && (
           <p className="text-[14px] text-[#181818]/60 text-center py-2">No divisions added.</p>
         )}
@@ -422,7 +409,7 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
                     <X className="w-4 h-4" />
                   </button>
                 )}
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 gap-y-5 pr-6 mt-2">
                   <div className="flex flex-col gap-2">
                     <Label className="font-poppins font-medium text-[14px] text-[#181818]">Type</Label>
@@ -430,7 +417,7 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
                       value={divType}
                       disabled={watch('divisions')?.some((d, i) => d.type === 'open' && i !== index)}
                       onValueChange={(val) => {
-                        if (val) setValue(`divisions.${index}.type`, val as 'open'|'conditional', { shouldDirty: true, shouldValidate: true });
+                        if (val) setValue(`divisions.${index}.type`, val as 'open' | 'conditional', { shouldDirty: true, shouldValidate: true });
                       }}
                     >
                       <SelectTrigger className="w-full h-[42px]! bg-white border border-[#3D3775] rounded-full px-4 font-poppins font-normal text-[14px] text-[#181818] outline-none focus:ring-0 focus-visible:ring-0 capitalize disabled:opacity-50 disabled:cursor-not-allowed">
@@ -474,8 +461,8 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
                           <Label className="font-poppins font-medium text-[14px] text-[#181818]">Rating Limit</Label>
                           <div className="flex items-center gap-4 pr-1">
                             <label className="flex items-center gap-1.5 cursor-pointer group">
-                              <input 
-                                type="radio" 
+                              <input
+                                type="radio"
                                 value="under"
                                 checked={watch(`divisions.${index}.condition`) === 'under'}
                                 onChange={() => setValue(`divisions.${index}.condition`, 'under', { shouldDirty: true, shouldValidate: true })}
@@ -484,8 +471,8 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
                               <span className="text-[13px] font-poppins font-medium text-[#181818] group-hover:text-[#083F92] transition-colors">Under (U)</span>
                             </label>
                             <label className="flex items-center gap-1.5 cursor-pointer group">
-                              <input 
-                                type="radio" 
+                              <input
+                                type="radio"
                                 value="over"
                                 checked={watch(`divisions.${index}.condition`) === 'over'}
                                 onChange={() => setValue(`divisions.${index}.condition`, 'over', { shouldDirty: true, shouldValidate: true })}
@@ -524,8 +511,8 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
                 {divType === 'conditional' && (
                   <div className={cn(
                     "mt-2 border rounded-[8px] px-4 py-3 flex items-center justify-between",
-                    duplicateIndices.has(index) 
-                      ? "bg-red-50 border-red-200" 
+                    duplicateIndices.has(index)
+                      ? "bg-red-50 border-red-200"
                       : "bg-[#F8FAFC] border-[#E2E8F0]"
                   )}>
                     <span className="text-[13px] font-poppins font-medium text-[#181818]/70 flex items-center gap-2">
@@ -535,7 +522,7 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
                           ? "bg-red-500"
                           : "bg-[#083F92]"
                       )} />
-                      {duplicateIndices.has(index) 
+                      {duplicateIndices.has(index)
                         ? <span className="text-red-500 font-semibold">Duplicate Division Detected</span>
                         : "Generated Name:"
                       }
@@ -613,6 +600,22 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
           ))}
         </div>
       )}
+
+      <div className="flex justify-center md:justify-end pt-4">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            const currentDivisions = watch('divisions') || [];
+            const hasOpen = currentDivisions.some(d => d.type === 'open');
+            appendDivision({ type: hasOpen ? 'conditional' : 'open' });
+          }}
+          className="border-[#083F92] text-[#083F92] h-[48px] px-8 hover:bg-[#083F92]/5 rounded-full"
+        >
+          <Plus className="w-5 h-5 mr-2 stroke-[2.5]" /> Add Division
+        </Button>
+      </div>
 
       {/* Submit Button */}
       <Button

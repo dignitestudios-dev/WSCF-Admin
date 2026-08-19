@@ -69,8 +69,11 @@ export const tournamentService = {
     return response.data;
   },
 
-  exportTournamentParticipants: async (id: string): Promise<Blob> => {
+  exportTournamentParticipants: async (id: string, divisionId?: string): Promise<Blob> => {
+    const params: any = {};
+    if (divisionId) params.divisionId = divisionId;
     const response = await axiosInstance.get(`/tournament/${id}/participants/export`, {
+      params,
       responseType: 'blob'
     });
     return response.data;
