@@ -1,10 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userService } from '../services/user.service';
 
-export function useUsers(page: number, limit: number, search: string = '') {
+export function useUsers(
+  page: number,
+  limit: number,
+  search: string = '',
+  schoolId?: string
+) {
   return useQuery({
-    queryKey: ['users', { page, limit, search }],
-    queryFn: () => userService.getUsers(page, limit, search),
+    // schoolId must be part of the key, or the cached unfiltered list is served
+    queryKey: ['users', { page, limit, search, schoolId }],
+    queryFn: () => userService.getUsers(page, limit, search, schoolId),
     staleTime: 5 * 60 * 1000,
   });
 }

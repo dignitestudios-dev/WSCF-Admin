@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import {
   ChevronLeft,
   Edit,
-  Trash2,
+  Ban,
   MapPin,
   Calendar,
   Armchair,
@@ -19,7 +19,6 @@ import {
   Phone,
   Mail
 } from 'lucide-react';
-import Image from 'next/image';
 import { PageTransition } from '@/components/animations/page-transition';
 import Link from 'next/link';
 import { useUserDetails, useDeactivateUser, useActivateUser } from '@/features/users/hooks/use-users';
@@ -99,10 +98,10 @@ export default function UserProfile() {
     email: user?.email || "...",
     userId: user?._id?.substring(0, 8).toUpperCase() || "...",
     grade: profile?.grade || "N/A",
-    team: "Milwaukee Knights Chess Club", // Keeping static placeholder as requested
+    team: profile?.teamId?.name || "N/A",
+    school: profile?.school?.name || "N/A",
     rating: profile?.rating?.toString() || "0",
     city: profile?.city || "N/A",
-    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face",
     performance: {
       totalTournaments: profile?.totalTournaments?.toString() || "0",
       totalWins: profile?.totalWins?.toString() || "0",
@@ -159,7 +158,7 @@ export default function UserProfile() {
                 className="flex items-center gap-2 px-[15px] py-[15px] bg-[#CE2D32]/10 hover:bg-[#CE2D32]/15 text-[#CE2D32] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-[150px] justify-center shrink-0 cursor-pointer disabled:opacity-50"
               >
                 <div className="w-[42px] h-[42px] bg-[#CE2D32] rounded-full flex items-center justify-center text-white relative shadow-md shrink-0">
-                  <Trash2 className="w-4 h-4 text-white" />
+                  <Ban className="w-4 h-4 text-white" />
                 </div>
                 <span className="font-poppins font-medium text-[14px] leading-[20px] tracking-[-0.019em]">
                   {isDeactivating ? 'Processing...' : 'Deactivate'}
@@ -183,28 +182,14 @@ export default function UserProfile() {
         </div>
 
         {/* Outer Banner and Details Container */}
-        <div className="w-full bg-[#083F92] rounded-[20px] shadow-md flex flex-col relative min-h-[600px] mt-16">
+        <div className="w-full bg-[#083F92] rounded-[20px] shadow-md flex flex-col relative min-h-[600px]">
 
           {/* Blue Top Profile Header Area */}
-          <div className="w-full px-6 md:px-12 pt-4 pb-10 flex flex-col md:flex-row gap-6 items-center relative z-10">
-            {/* Avatar Circle */}
-            <div className="absolute left-1/2 -translate-x-1/2 md:left-12 md:-translate-x-0 w-[150px] h-[150px] rounded-full overflow-hidden border-[6px] border-[#EFEEF9] shrink-0 shadow-lg -top-[75px] bg-[#D9D9D9] z-30">
-              {isLoading ? (
-                <Skeleton className="w-full h-full rounded-full bg-[#083F92]/10" />
-              ) : (
-                <Image
-                  src={userData.avatar}
-                  alt={userData.name}
-                  fill
-                  className="object-cover"
-                />
-              )}
-            </div>
-
+          <div className="w-full px-6 md:px-12 pt-8 pb-10 flex flex-col md:flex-row gap-6 items-center relative z-10">
             {/* Profile text details & stats grid */}
             <div className="flex flex-col gap-6 flex-1 w-full text-white">
               {/* Title & Email */}
-              <div className="flex flex-col items-center md:items-start md:ml-[170px] mt-[65px] md:mt-0 gap-1 text-center md:text-left">
+              <div className="flex flex-col items-center md:items-start gap-1 text-center md:text-left">
                 {isLoading ? (
                   <>
                     <Skeleton className="h-9 w-[200px] bg-white/20" />
@@ -250,13 +235,22 @@ export default function UserProfile() {
                 </div>
 
                 {/* Divider Line & Stats block - Team */}
-                {/* <div className="flex items-center md:items-start gap-0 md:gap-3 justify-center md:justify-start">
+                <div className="flex items-center md:items-start gap-0 md:gap-3 justify-center md:justify-start">
                   <div className="hidden md:block w-[4px] h-[18px] bg-white rounded-full shrink-0" />
                   <div className="flex flex-col items-center md:items-start text-center md:text-left">
                     <span className="font-poppins font-normal text-[12px] leading-[18px] text-white/70">Team</span>
                     <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em]">{userData.team}</span>
                   </div>
-                </div> */}
+                </div>
+
+                {/* Divider Line & Stats block - School */}
+                <div className="flex items-center md:items-start gap-0 md:gap-3 justify-center md:justify-start">
+                  <div className="hidden md:block w-[4px] h-[18px] bg-white rounded-full shrink-0" />
+                  <div className="flex flex-col items-center md:items-start text-center md:text-left">
+                    <span className="font-poppins font-normal text-[12px] leading-[18px] text-white/70">School</span>
+                    <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em]">{userData.school}</span>
+                  </div>
+                </div>
 
                 {/* Divider Line & Stats block - Rating */}
                 <div className="flex items-center md:items-start gap-0 md:gap-3 justify-center md:justify-start">

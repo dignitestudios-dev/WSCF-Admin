@@ -148,9 +148,14 @@ export default function CurrentEnrolledUsers() {
                     Team <ChevronsUpDown className="w-4 h-4" />
                   </div>
                 </th>
-                <th className="px-6 py-3 font-semibold w-[110px]">
+                <th className="px-6 py-3 font-semibold w-[90px]">
                   <div className="flex items-center gap-1.5 cursor-pointer hover:opacity-80">
-                    Division <ChevronsUpDown className="w-4 h-4" />
+                    Rating <ChevronsUpDown className="w-4 h-4" />
+                  </div>
+                </th>
+                <th className="px-6 py-3 font-semibold w-[150px]">
+                  <div className="flex items-center gap-1.5 cursor-pointer hover:opacity-80">
+                    Selected Division <ChevronsUpDown className="w-4 h-4" />
                   </div>
                 </th>
                 <th className="px-6 py-3 font-semibold w-[170px]">
@@ -166,7 +171,7 @@ export default function CurrentEnrolledUsers() {
             <tbody>
               {!selectedTournamentId ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-16 text-center text-[#636363] font-poppins">
+                  <td colSpan={8} className="px-6 py-16 text-center text-[#636363] font-poppins">
                     Please select a tournament to view enrolled users.
                   </td>
                 </tr>
@@ -180,6 +185,7 @@ export default function CurrentEnrolledUsers() {
                     <td className="px-6 py-3"><Skeleton className="h-4 w-32" /></td>
                     <td className="px-6 py-3"><Skeleton className="h-4 w-12" /></td>
                     <td className="px-6 py-3"><Skeleton className="h-4 w-24" /></td>
+                    <td className="px-6 py-3"><Skeleton className="h-4 w-12" /></td>
                     <td className="px-6 py-3"><Skeleton className="h-4 w-20" /></td>
                     <td className="px-6 py-3"><Skeleton className="h-4 w-32" /></td>
                     <td className="px-6 py-3 text-right">
@@ -189,7 +195,7 @@ export default function CurrentEnrolledUsers() {
                 ))
               ) : participants.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-16 text-center text-[#636363] font-poppins">
+                  <td colSpan={8} className="px-6 py-16 text-center text-[#636363] font-poppins">
                     No participants found.
                   </td>
                 </tr>
@@ -208,7 +214,8 @@ export default function CurrentEnrolledUsers() {
                       <td className="px-6 py-3 font-bold text-[#636363] select-text">{user.user?.name || 'N/A'}</td>
                       <td className="px-6 py-3 font-bold text-[#636363] select-text">{user.playerProfile?.grade || 'N/A'}</td>
                       <td className="px-6 py-3 font-medium tracking-[-0.02em] select-text">{user.team?.name || 'N/A'}</td>
-                      <td className="px-6 py-3 font-semibold select-text">{user.division || 'N/A'}</td>
+                      <td className="px-6 py-3 font-semibold select-text">{user.playerProfile?.rating ?? 0}</td>
+                      <td className="px-6 py-3 font-semibold select-text">{user.division?.label || 'N/A'}</td>
                       <td className="px-6 py-3 font-semibold tracking-[-0.02em] select-text pr-2 max-w-[170px] truncate">
                         {selectedTournamentTitle || 'N/A'}
                       </td>

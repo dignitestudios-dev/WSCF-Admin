@@ -125,11 +125,12 @@ export default function Forms() {
               Registration Form
             </h1>
           </div>
+
         </div>
 
         {/* Form Preview Container */}
         <div className="w-full bg-[#FFFFFF] border border-[#DADADA] rounded-[24px] overflow-hidden flex flex-col shadow-xs mt-6 p-8">
-          <div className="flex flex-col gap-6 w-full max-w-3xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 w-full">
             {isLoading || isFetching ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <div key={`skeleton-${i}`} className="flex flex-col gap-2 w-full">
@@ -164,10 +165,39 @@ export default function Forms() {
                   
                   <div className="relative h-[42px] w-full">
                     {field.fieldType === 'dropdown' ? (
-                      <div className="w-full h-full bg-white border border-[#3D3775] rounded-full px-4 font-normal text-[14px] text-[#181818] flex items-center opacity-70 pointer-events-none justify-between">
-                        <span className="text-[#181818]/60">Select {field.fieldName}...</span>
-                        <ChevronDown className="w-4 h-4 text-[#083F92] opacity-80" />
-                      </div>
+                      field.isTournamentSpecific ? (
+                        // Options are chosen per tournament, so there is nothing
+                        // to preview here — keep the inert placeholder.
+                        <div className="w-full h-full bg-white border border-[#3D3775] rounded-full px-4 font-normal text-[14px] text-[#181818] flex items-center opacity-70 pointer-events-none justify-between">
+                          <span className="text-[#181818]/60">Set per tournament</span>
+                          <ChevronDown className="w-4 h-4 text-[#083F92] opacity-80" />
+                        </div>
+                      ) : (
+                        // Preview only: it opens so the options can be read, but
+                        // onValueChange is a no-op so nothing can be selected.
+                        <Select value="" onValueChange={() => {}}>
+                          <SelectTrigger className="w-full h-[42px]! bg-white border border-[#3D3775] rounded-full px-4 font-normal text-[14px] text-[#181818] outline-none focus:ring-0 focus-visible:ring-0">
+                            <SelectValue placeholder={`Select ${field.fieldName}...`} />
+                          </SelectTrigger>
+                          <SelectContent alignItemWithTrigger={false}>
+                            {(field.options || []).length > 0 ? (
+                              field.options.map((opt: string) => (
+                                <SelectItem
+                                  key={opt}
+                                  value={opt}
+                                  className="cursor-default focus:bg-[#083F92]/10 focus:text-[#083F92] rounded-[8px] py-2.5"
+                                >
+                                  {opt}
+                                </SelectItem>
+                              ))
+                            ) : (
+                              <div className="px-3 py-2.5 text-[13px] text-[#181818]/50">
+                                No options configured
+                              </div>
+                            )}
+                          </SelectContent>
+                        </Select>
+                      )
                     ) : (
                       <Input
                         type={field.fieldType === 'number' ? 'number' : field.fieldType === 'email' ? 'email' : 'text'}
@@ -186,21 +216,23 @@ export default function Forms() {
                 </div>
               ))
             ) : (
-              <div className="w-full py-12 text-center text-[#787878] font-poppins">
+              <div className="w-full md:col-span-2 py-12 text-center text-[#787878] font-poppins">
                 No fields created for this form yet.
               </div>
             )}
-            
-            {/* Add Field Button at bottom */}
-            <div className="pt-6 flex justify-center w-full mt-2">
-              <button
-                onClick={handleOpenAddDialog}
-                className="flex items-center gap-2 px-[24px] py-[12px] bg-white border border-[#083F92] hover:bg-[#083F92]/5 text-[#083F92] rounded-full transition-colors font-poppins font-semibold text-[14px] shadow-sm cursor-pointer focus:outline-none"
-              >
-                <Plus className="w-5 h-5 stroke-[2.5]" />
-                {fields.length > 0 ? 'Add Another Field' : 'Add Field'}
-              </button>
-            </div>
+
+          </div>
+
+          {/* Add Field — below the fields, outside the grid so it spans the
+              full width instead of landing in one column */}
+          <div className="flex justify-center w-full mt-8 pt-6 border-t border-[#DADADA]/60">
+            <button
+              onClick={handleOpenAddDialog}
+              className="flex items-center gap-2 h-[40px] px-5 bg-white border border-[#083F92] hover:bg-[#083F92]/5 text-[#083F92] rounded-full transition-colors font-poppins font-medium text-[13px] cursor-pointer focus:outline-none"
+            >
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+              {fields.length > 0 ? 'Add Another Field' : 'Add Field'}
+            </button>
           </div>
         </div>
 

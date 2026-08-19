@@ -197,7 +197,7 @@ export default function TournamentDetail() {
                 { label: 'Tournament Host', value: tournamentDetails.tournamentHost, icon: User },
                 { label: 'Tournament Director', value: tournamentDetails.tournamentDirector, icon: Award }
               ].map((item, idx) => (
-                <div key={idx} className="flex flex-col sm:flex-row sm:items-center w-full sm:h-[32px] gap-1 sm:gap-0 border-b border-[#083F92]/5 pb-2 sm:pb-0 sm:border-b-0">
+                <div key={idx} className="flex flex-col sm:flex-row sm:items-start w-full gap-1 sm:gap-0 border-b border-[#083F92]/5 pb-2 sm:pb-0 sm:border-b-0">
 
                   {/* Left Label column with Icon */}
                   <div className="flex items-center gap-2.5 w-full sm:w-[280px] shrink-0">
@@ -215,7 +215,7 @@ export default function TournamentDetail() {
                   </span>
 
                   {/* Value column */}
-                  <span className="font-poppins font-bold text-[16px] sm:text-[20px] leading-[30px] text-[#083F92] truncate pl-11 sm:pl-0">
+                  <span className="font-poppins font-bold text-[16px] sm:text-[20px] leading-[30px] text-[#083F92] break-words min-w-0 flex-1 pl-11 sm:pl-0">
                     {item.value}
                   </span>
 
@@ -263,7 +263,7 @@ export default function TournamentDetail() {
                       <th className="px-6 py-3 font-semibold w-[120px]">User ID</th>
                       <th className="px-6 py-3 font-semibold w-[120px]">Name</th>
                       <th className="px-6 py-3 font-semibold w-[80px]">Grade</th>
-                      <th className="px-6 py-3 font-semibold w-[100px]">Division</th>
+                      <th className="px-6 py-3 font-semibold w-[150px]">Selected Division</th>
                       <th className="px-6 py-3 font-semibold w-[70px]">Rating</th>
                       <th className="px-6 py-3 font-semibold text-right w-[126px]">Action</th>
                     </tr>
@@ -273,7 +273,7 @@ export default function TournamentDetail() {
                   <tbody>
                     {isParticipantsLoading ? (
                       <tr>
-                        <td colSpan={7} className="px-6 py-8 text-center text-[#636363]">
+                        <td colSpan={6} className="px-6 py-8 text-center text-[#636363]">
                           Loading participants...
                         </td>
                       </tr>
