@@ -86,7 +86,7 @@ export function EditTournamentDialog({ open, onOpenChange, initialData }: EditTo
             </div>
             <button
               onClick={() => setShowSuccess(false)}
-              className="mt-4 w-[200px] h-[48px] bg-[#083F92] hover:bg-[#083F92]/90 rounded-[24px] text-white font-poppins font-semibold text-[14px] shadow-md transition-colors"
+              className="mt-4 w-[200px] h-[48px] bg-[#083F92] hover:bg-[#083F92]/90 rounded-full text-white font-poppins font-semibold text-[14px] shadow-md transition-colors"
             >
               Close
             </button>

@@ -18,12 +18,13 @@ import {
   Hash,
   User,
   Award,
-  FileSpreadsheet
+  FileSpreadsheet,
+  CheckCircle
 } from 'lucide-react';
 import Link from 'next/link';
 import { PageTransition } from '@/components/animations/page-transition';
 import { Pagination } from '@/components/ui/pagination';
-import { ConfirmDeleteDialog } from '@/components/ui/alert-dialog';
+import { ConfirmDeleteDialog, ConfirmActionDialog } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import {
   Select,
@@ -42,6 +43,7 @@ export default function TournamentDetail() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isExporting, setIsExporting] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
+  const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [exportDivisionId, setExportDivisionId] = useState<string>('all');
 
   const { data: response, isLoading } = useGetTournament(id);
@@ -147,8 +149,23 @@ export default function TournamentDetail() {
             </h1>
           </div>
 
-          {/* Right Action buttons: Edit & Delete */}
+          {/* Right Action buttons: Complete, Edit & Delete */}
           <div className="flex items-center gap-3 shrink-0">
+            {/* Mark as completed Button */}
+            {tournament?.status === 'ongoing' && (
+              <button
+                onClick={() => setShowCompleteDialog(true)}
+                className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm justify-center"
+              >
+                <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md shrink-0">
+                  <CheckCircle className="w-4 h-4" />
+                </div>
+                <span className="font-poppins font-medium text-[14px] leading-[20px] tracking-[-0.019em] pr-2 whitespace-nowrap">
+                  Mark as completed
+                </span>
+              </button>
+            )}
+
             {/* Edit Button */}
             <button
               onClick={() => router.push(`/tournaments/${id}/edit`)}
@@ -163,17 +180,19 @@ export default function TournamentDetail() {
             </button>
 
             {/* Delete Button */}
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-[124px] justify-center"
-            >
-              <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md shrink-0">
-                <Trash2 className="w-4 h-4" />
-              </div>
-              <span className="font-poppins font-medium text-[14px] leading-[20px] tracking-[-0.019em] pr-1">
-                Delete
-              </span>
-            </button>
+            {totalItems === 0 && !isParticipantsLoading && (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-[124px] justify-center"
+              >
+                <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md shrink-0">
+                  <Trash2 className="w-4 h-4" />
+                </div>
+                <span className="font-poppins font-medium text-[14px] leading-[20px] tracking-[-0.019em] pr-1">
+                  Delete
+                </span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -407,6 +426,19 @@ export default function TournamentDetail() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ConfirmActionDialog
+        open={showCompleteDialog}
+        onOpenChange={setShowCompleteDialog}
+        title="Mark as Completed"
+        description="Are you sure you want to mark this tournament as completed? This action cannot be undone."
+        confirmText="Mark as completed"
+        confirmClassName="bg-[#083F92] text-white hover:bg-[#083F92]/90 rounded-full"
+        onConfirm={() => {
+          // TODO: Implement API call to mark as completed
+          setShowCompleteDialog(false);
+        }}
+      />
     </PageTransition>
   );
 }

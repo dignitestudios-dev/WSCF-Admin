@@ -204,7 +204,7 @@ export function AssignUserDialog({ open, onOpenChange, school }: AssignUserDialo
           <Button
             type="submit"
             disabled={isPending}
-            className="w-full h-[48px] bg-[#083F92] hover:bg-[#083F92]/90 rounded-[12px] mt-4 shadow-md"
+            className="w-full h-[48px] bg-[#083F92] hover:bg-[#083F92]/90 rounded-full mt-4 shadow-md"
           >
             <span className="font-poppins font-semibold text-[14px] text-white capitalize">
               {isPending ? 'Assigning...' : 'Assign User'}

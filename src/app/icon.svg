@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- Background circle in theme color -->
+  <circle cx="128" cy="128" r="128" fill="#083F92"/>
+  <!-- Simple solid crown -->
+  <path d="M40 96 L80 152 L128 72 L176 152 L216 96 L196 200 L60 200 Z" fill="#ffffff" stroke="#ffffff" stroke-width="16" stroke-linejoin="round"/>
+</svg>

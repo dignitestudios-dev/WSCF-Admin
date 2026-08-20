@@ -496,7 +496,7 @@ export default function UserProfile() {
 
                         {/* Action & Badge details */}
                         <div className="flex items-center justify-between md:justify-end gap-6 shrink-0 w-full md:w-auto border-t md:border-t-0 pt-3 md:pt-0 border-neutral-100">
-                          <div className={`w-[89px] h-[38px] rounded-[8px] flex items-center justify-center font-poppins font-medium text-[13px] leading-[18px] ${tournamentFilter === 'Completed'
+                          <div className={`w-[89px] h-[38px] rounded-full flex items-center justify-center font-poppins font-medium text-[13px] leading-[18px] ${tournamentFilter === 'Completed'
                             ? 'bg-[#083F92] text-white shadow-sm'
                             : 'bg-[#083F92]/10 text-[#083F92]'
                             }`}>

@@ -18,11 +18,12 @@ import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTournaments } from '@/features/tournaments/hooks/use-tournaments';
 import { useDeleteTournament } from '@/features/tournaments/hooks/use-delete-tournament';
+import { ConfirmActionDialog } from '@/components/ui/alert-dialog';
 
 export default function Tournaments() {
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
-  const [activeTab, setActiveTab] = useState<'All' | 'upcoming' | 'completed'>('All');
+  const [activeTab, setActiveTab] = useState<'All' | 'upcoming' | 'ongoing' | 'completed'>('All');
   const [currentPage, setCurrentPage] = useState(1); 
   const itemsPerPage = 10;
 
@@ -30,6 +31,8 @@ export default function Tournaments() {
   const { mutateAsync: deleteTournament, isPending: isDeleting } = useDeleteTournament();
 
   const [tournamentToDelete, setTournamentToDelete] = useState<any>(null);
+  const [showCompleteDialog, setShowCompleteDialog] = useState(false);
+  const [tournamentToComplete, setTournamentToComplete] = useState<any>(null);
 
   const { data: tournamentsData, isLoading, isFetching } = useTournaments(currentPage, itemsPerPage, debouncedSearchQuery, statusParam);
 
@@ -80,8 +83,8 @@ export default function Tournaments() {
         </div>
 
         {/* Status Filter Tab Pills */}
-        <div className="flex items-center gap-2 w-full max-w-[325px] h-[50px] mt-2">
-          {(['All', 'upcoming', 'completed'] as const).map((tab) => {
+        <div className="flex items-center gap-2 w-full max-w-[440px] h-[50px] mt-2">
+          {(['All', 'upcoming', 'ongoing', 'completed'] as const).map((tab) => {
             const isActive = activeTab === tab;
             return (
               <button
@@ -174,8 +177,24 @@ export default function Tournaments() {
 
                   {/* Right Card Actions (Status Pill + Navigation Chevron) */}
                   <div className="flex items-center justify-between md:justify-end gap-6 shrink-0 w-full md:w-auto border-t md:border-t-0 pt-3 md:pt-0 border-neutral-100">
+                    
+                    {/* Mark as completed button */}
+                    {t.status === 'ongoing' && (
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setTournamentToComplete(t);
+                          setShowCompleteDialog(true);
+                        }}
+                        className="px-4 py-4 bg-[#083F92] text-white rounded-[100px] font-poppins text-[13px] hover:opacity-90 transition-opacity whitespace-nowrap"
+                      >
+                        Mark as completed
+                      </button>
+                    )}
+
                     {/* Status badge */}
-                    <div className={`w-[89px] h-[38px] rounded-[8px] flex items-center justify-center font-poppins font-medium text-[13px] leading-[18px] capitalize ${
+                    <div className={`w-[89px] h-[38px] rounded-full flex items-center justify-center font-poppins font-medium text-[13px] leading-[18px] capitalize ${
                       t.status === 'completed'
                         ? 'bg-[#083F92] text-white shadow-sm'
                         : 'bg-[#083F92]/10 text-[#083F92]'
@@ -195,6 +214,8 @@ export default function Tournaments() {
                   ? 'No completed tournaments found.'
                   : activeTab === 'upcoming'
                   ? 'No upcoming tournaments found.'
+                  : activeTab === 'ongoing'
+                  ? 'No ongoing tournaments found.'
                   : 'No tournaments found. Click "Add Tournament" to create one.'}
               </div>
             )}
@@ -214,6 +235,19 @@ export default function Tournaments() {
 
       </div>
 
+      <ConfirmActionDialog
+        open={showCompleteDialog}
+        onOpenChange={setShowCompleteDialog}
+        title="Mark as Completed"
+        description="Are you sure you want to mark this tournament as completed? This action cannot be undone."
+        confirmText="Mark as completed"
+        confirmClassName="bg-[#083F92] text-white hover:bg-[#083F92]/90 rounded-full"
+        onConfirm={() => {
+          // TODO: Implement API call to mark as completed
+          setShowCompleteDialog(false);
+          setTournamentToComplete(null);
+        }}
+      />
 
     </PageTransition>
   );

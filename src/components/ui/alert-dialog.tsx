@@ -179,11 +179,10 @@ function ConfirmDeleteDialog({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className={"p-5"} disabled={isLoading}>{cancelText}</AlertDialogCancel>
+          <AlertDialogCancel className={"p-5 rounded-full"} disabled={isLoading}>{cancelText}</AlertDialogCancel>
           <Button 
             disabled={isLoading}
-            variant="destructive"
-            className={"p-5"}
+            className={"p-5 rounded-full bg-[#083F92] text-white hover:bg-[#083F92]/90"}
             onClick={onConfirm}
           >
             {isLoading ? "Deleting..." : confirmText}
@@ -233,11 +232,11 @@ function ConfirmActionDialog({
         </AlertDialogHeader>
         {children && <div className="py-2">{children}</div>}
         <AlertDialogFooter>
-          <AlertDialogCancel className={"p-5"} disabled={isLoading}>{cancelText}</AlertDialogCancel>
+          <AlertDialogCancel className={"p-5 rounded-full"} disabled={isLoading}>{cancelText}</AlertDialogCancel>
           <Button 
             disabled={isLoading}
             variant={variant}
-            className={cn("p-5", confirmClassName)}
+            className={cn("p-5 rounded-full", confirmClassName)}
             onClick={onConfirm}
           >
             {isLoading ? "Processing..." : confirmText}

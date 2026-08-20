@@ -497,7 +497,7 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
           <Button
             type="submit"
             disabled={isPending}
-            className="w-full h-[48px] bg-[#083F92] hover:bg-[#083F92]/90 rounded-[12px] mt-8 disabled:opacity-50 shadow-md"
+            className="w-full h-[48px] bg-[#083F92] hover:bg-[#083F92]/90 rounded-full mt-8 disabled:opacity-50 shadow-md"
           >
             <span className="font-poppins font-semibold text-[14px] leading-[19px] text-white capitalize">
               {isPending ? 'Saving...' : 'Save Changes'}

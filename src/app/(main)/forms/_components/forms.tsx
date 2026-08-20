@@ -397,7 +397,7 @@ export default function Forms() {
               <button
                 type="submit"
                 disabled={isCreating || isUpdating}
-                className="w-full h-[48px] bg-[#083F92] hover:bg-[#083F92]/90 text-white font-poppins font-semibold text-[16px] rounded-[12px] mt-4 transition-colors disabled:opacity-50 shadow-md flex items-center justify-center cursor-pointer"
+                className="w-full h-[48px] bg-[#083F92] hover:bg-[#083F92]/90 text-white font-poppins font-semibold text-[16px] rounded-full mt-4 transition-colors disabled:opacity-50 shadow-md flex items-center justify-center cursor-pointer"
               >
                 {(isCreating || isUpdating) ? 'Saving...' : 'Save Field'}
               </button>

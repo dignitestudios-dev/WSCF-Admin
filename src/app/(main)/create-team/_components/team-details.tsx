@@ -370,7 +370,7 @@ export default function TeamDetails() {
                                   if (isAlreadySelected) {
                                     setSelectedUsers(prev => prev.filter(u => u.id !== user._id));
                                   } else {
-                                    setSelectedUsers(prev => [...prev, { id: user._id, name: user.name, email: user.email }]);
+                                    setSelectedUsers(prev => [...prev, { id: user._id, name: `${user.firstName} ${user.lastName}`, email: user.email }]);
                                   }
                                   setUserSearchQuery('');
                                 }}
@@ -379,7 +379,7 @@ export default function TeamDetails() {
                                 }`}
                               >
                                 <div className="flex flex-col">
-                                  <div className="font-general-sans w-[200px] break-word truncate font-medium text-[14px] text-[#181818]">{user.name}</div>
+                                  <div className="font-general-sans w-[200px] break-word truncate font-medium text-[14px] text-[#181818]">{user.firstName} {user.lastName}</div>
                                   <div className="font-general-sans text-[12px] text-[#636363]">{user.email}</div>
                                 </div>
                                 {isAlreadySelected && (

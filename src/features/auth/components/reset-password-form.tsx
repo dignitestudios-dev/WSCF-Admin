@@ -192,7 +192,7 @@ export function ResetPasswordForm() {
                   setShowSuccessDialog(false);
                   router.push('/login');
                 }}
-                className="w-full h-full bg-[#083F92] hover:bg-[#083F92]/90 rounded-[24px] flex justify-center items-center shadow-[0px_4px_4px_rgba(61,55,117,0.25)] border-none"
+                className="w-full h-full bg-[#083F92] hover:bg-[#083F92]/90 rounded-full flex justify-center items-center shadow-[0px_4px_4px_rgba(61,55,117,0.25)] border-none"
               >
                 <span className="font-semibold text-[14px] leading-[19px] text-center capitalize text-white">
                   Login

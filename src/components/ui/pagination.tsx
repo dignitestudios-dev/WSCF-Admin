@@ -16,10 +16,26 @@ export function Pagination({
   onPageChange,
   className = ''
 }: PaginationProps) {
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  const getPages = () => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    
+    if (currentPage <= 4) {
+      return [1, 2, 3, 4, 5, '...', totalPages];
+    }
+    
+    if (currentPage >= totalPages - 3) {
+      return [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+    
+    return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+  };
+
+  const pages = getPages();
 
   return (
-    <div className={`w-[299px] h-[61px] bg-white border border-[#DADADA]/20 shadow-lg rounded-[100px] flex items-center justify-between px-4 ${className}`}>
+    <div className={`w-fit min-w-[299px] h-[61px] bg-white border border-[#DADADA]/20 shadow-lg rounded-[100px] flex items-center justify-between gap-4 px-4 ${className}`}>
       
       {/* Left Arrow Button */}
       <button 
@@ -32,12 +48,19 @@ export function Pagination({
       
       {/* Page Numbers Block */}
       <div className="flex items-center bg-[#083F92]/10 h-[38px] rounded-[88px] px-1 shrink-0 relative">
-        {pages.map((page) => {
+        {pages.map((page, index) => {
+          if (page === '...') {
+            return (
+              <div key={`ellipsis-${index}`} className="flex items-center justify-center w-[32px] h-[32px] text-[#636363] font-poppins font-bold text-[14px]">
+                ...
+              </div>
+            );
+          }
           const isActive = page === currentPage;
           return (
             <button 
               key={page}
-              onClick={() => onPageChange(page)}
+              onClick={() => onPageChange(page as number)}
               className={`relative font-poppins font-bold text-[14px] flex items-center justify-center transition-colors mx-0.5 rounded-full w-[32px] h-[32px] ${
                 isActive ? 'text-white' : 'text-[#636363] hover:text-[#083F92]'
               }`}
