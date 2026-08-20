@@ -12,6 +12,28 @@ export interface User {
   createdAt: string;
 }
 
+/** A row from GET /user — the list endpoint returns more than the bare User. */
+export interface UserListItem {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  status: string;
+  createdAt: string;
+  playerProfile?: {
+    membershipId?: string;
+    grade?: string;
+    city?: string;
+    rating?: number;
+  } | null;
+  team?: {
+    _id: string;
+    name: string;
+    teamCode?: string;
+  } | null;
+}
+
 export interface UsersResponse {
   success: boolean;
   message: string;
@@ -33,10 +55,25 @@ export interface ParentDetails {
   isPrimary: boolean;
 }
 
+export interface School {
+  _id: string;
+  name: string;
+  address?: string;
+}
+
+export interface TeamSummary {
+  _id: string;
+  name: string;
+  teamCode?: string;
+}
+
 export interface PlayerProfile {
   _id: string;
   userId: string;
-  teamId: string;
+  /** Populated by the user-details endpoint; null when the player has no team. */
+  teamId?: TeamSummary | null;
+  /** Populated school, or null when the player is unassigned. */
+  school?: School | null;
   city: string;
   streetAddress: string;
   zipCode: number;
@@ -65,12 +102,19 @@ export interface UserDetailsResponse {
 }
 
 export const userService = {
-  getUsers: async (page: number, limit: number, search: string = ''): Promise<UsersResponse> => {
+  getUsers: async (
+    page: number,
+    limit: number,
+    search: string = '',
+    schoolId?: string
+  ): Promise<UsersResponse> => {
     const response = await axiosInstance.get<UsersResponse>('/user', {
       params: {
         page,
         limit,
         search,
+        // Omitted unless set, so the unfiltered list is unaffected
+        ...(schoolId ? { schoolId } : {}),
       },
     });
     return response.data;

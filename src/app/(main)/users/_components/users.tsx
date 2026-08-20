@@ -16,7 +16,8 @@ import { userService } from '@/features/users/services/user.service';
 
 interface UserRow {
   userId: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   grade: string;
   team: string;
   teamCode: string;
@@ -57,7 +58,8 @@ export default function Users() {
   const mappedUsers = users.map((user: any) => ({
     userId: user.playerProfile?.membershipId || user._id.substring(0, 8).toUpperCase(),
     originalId: user._id, // Used for Link
-    name: user.name,
+    firstName: user.firstName || 'N/A',
+    lastName: user.lastName || 'N/A',
     grade: user.playerProfile?.grade || 'N/A',
     team: user.team?.name || 'N/A',
     teamCode: user.team?.teamCode || 'N/A',
@@ -110,13 +112,14 @@ export default function Users() {
               <thead>
                 <tr className="bg-[#083F92] text-white text-left h-[50px] font-poppins font-semibold text-[13px]">
                   <th className="px-6 py-3 font-semibold w-[100px]">UserId</th>
-                  <th className="px-6 py-3 font-semibold w-[120px]">Name</th>
+                  <th className="px-6 py-3 font-semibold w-[130px]">First Name</th>
+                  <th className="px-6 py-3 font-semibold w-[130px]">Last Name</th>
                   <th className="px-6 py-3 font-semibold w-[80px]">
                     <div className="flex items-center gap-1 cursor-pointer hover:opacity-80">
                       Grade <ChevronsUpDown className="w-4 h-4" />
                     </div>
                   </th>
-                  <th className="px-6 py-3 font-semibold w-[230px]">
+                  <th className="px-6 py-3 font-semibold w-[190px]">
                     <div className="flex items-center gap-1 cursor-pointer hover:opacity-80">
                       Team <ChevronsUpDown className="w-4 h-4" />
                     </div>
@@ -126,7 +129,7 @@ export default function Users() {
                       Team Code <ChevronsUpDown className="w-4 h-4" />
                     </div>
                   </th>
-                  <th className="px-6 py-3 font-semibold w-[170px]">
+                  <th className="px-6 py-3 font-semibold w-[140px]">
                     <div className="flex items-center gap-1 cursor-pointer hover:opacity-80">
                       City <ChevronsUpDown className="w-4 h-4" />
                     </div>
@@ -141,7 +144,8 @@ export default function Users() {
                   Array.from({ length: 5 }).map((_, i) => (
                     <tr key={`skeleton-${i}`} className="h-[50px] border-b border-[#DADADA]/30 bg-white">
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[80px]" /></td>
-                      <td className="px-6 py-3"><Skeleton className="h-4 w-[120px]" /></td>
+                      <td className="px-6 py-3"><Skeleton className="h-4 w-[100px]" /></td>
+                      <td className="px-6 py-3"><Skeleton className="h-4 w-[100px]" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[40px]" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[160px]" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[80px]" /></td>
@@ -159,8 +163,11 @@ export default function Users() {
                           }`}
                       >
                         <td className="px-6 py-3 font-semibold text-nowrap">{user.userId}</td>
-                        <td className={`max-w-[180px] truncate px-6 py-3 ${isEven ? 'font-bold' : 'font-semibold'}`} title={user.name}>
-                          {user.name}
+                        <td className={`max-w-[130px] truncate px-6 py-3 ${isEven ? 'font-bold' : 'font-semibold'}`} title={user.firstName}>
+                          {user.firstName}
+                        </td>
+                        <td className={`max-w-[130px] truncate px-6 py-3 ${isEven ? 'font-bold' : 'font-semibold'}`} title={user.lastName}>
+                          {user.lastName}
                         </td>
                         <td className={`px-6 py-3 ${isEven ? 'font-bold' : 'font-semibold'}`}>
                           {user.grade}
@@ -185,7 +192,7 @@ export default function Users() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={7} className="text-center py-16 text-[#787878] font-poppins">
+                    <td colSpan={8} className="text-center py-16 text-[#787878] font-poppins">
                       No users found.
                     </td>
                   </tr>

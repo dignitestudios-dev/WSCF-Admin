@@ -3,6 +3,8 @@ import { axiosInstance } from '@/lib/axios';
 export interface SendBulkNotificationRequest {
   subject: string;
   message: string;
+  /** Omit to email every user; set to email only that tournament's participants. */
+  tournamentId?: string;
 }
 
 export interface SendBulkNotificationResponse {
@@ -10,6 +12,10 @@ export interface SendBulkNotificationResponse {
   message: string;
   data: {
     jobId: string;
+    audience: 'all' | 'tournament';
+    tournamentId?: string;
+    tournamentTitle?: string;
+    recipientCount?: number;
   };
 }
 
