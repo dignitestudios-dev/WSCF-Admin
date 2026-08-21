@@ -61,33 +61,46 @@ const editUserSchema = z.object({
 
 type EditUserFormData = z.infer<typeof editUserSchema>;
 
+/**
+ * `userId` is the PLAYER being edited — a child. The name, grade and rating
+ * belong to them; the address and guardian details belong to the account and
+ * are shared with any siblings, which the dialog says out loud.
+ */
 interface EditUserDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userId: string;
   initialData: {
     user?: {
-      firstName: string;
-      lastName: string;
+      name?: string;
+      address?: {
+        streetAddress?: string | null;
+        city?: string | null;
+        zipCode?: number | null;
+      };
+      parents?: {
+        father?: { name?: string; phone?: string };
+        mother?: { name?: string; phone?: string };
+      };
+    } | null;
+    playerProfile?: {
+      firstName?: string;
+      lastName?: string;
       gender?: string;
       sigma?: string;
-    };
-    playerProfile?: {
-      streetAddress?: string;
-      city?: string;
       grade?: string;
-      zipCode?: number;
       rating?: number;
-      parents?: {
-        father?: {
-          name?: string;
-          phone?: string;
+      account?: {
+        address?: {
+          streetAddress?: string | null;
+          city?: string | null;
+          zipCode?: number | null;
         };
-        mother?: {
-          name?: string;
-          phone?: string;
+        parents?: {
+          father?: { name?: string; phone?: string };
+          mother?: { name?: string; phone?: string };
         };
-      };
+      } | null;
     } | null;
   } | null;
 }
@@ -121,22 +134,28 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
 
   useEffect(() => {
     if (open && initialData) {
-      const user = initialData.user;
       const profile = initialData.playerProfile;
+      // The account, whichever key the caller passed it under.
+      const account = initialData.user ?? profile?.account ?? null;
+      const address = account?.address;
+
       reset({
-        firstName: user?.firstName || '',
-        lastName: user?.lastName || '',
-        gender: user?.gender || '',
-        sigma: user?.sigma || '',
-        streetAddress: profile?.streetAddress || '',
-        city: profile?.city || '',
+        firstName: profile?.firstName || '',
+        lastName: profile?.lastName || '',
+        gender: profile?.gender || '',
+        sigma: profile?.sigma || '',
+        streetAddress: address?.streetAddress || '',
+        city: address?.city || '',
         grade: profile?.grade || '',
-        zipCode: profile?.zipCode !== undefined && profile?.zipCode !== null ? String(profile.zipCode) : '',
+        zipCode:
+          address?.zipCode !== undefined && address?.zipCode !== null
+            ? String(address.zipCode)
+            : '',
         rating: profile?.rating !== undefined && profile?.rating !== null ? String(profile.rating) : '',
-        fatherName: profile?.parents?.father?.name || '',
-        fatherPhone: formatPhoneNumber(profile?.parents?.father?.phone || ''),
-        motherName: profile?.parents?.mother?.name || '',
-        motherPhone: formatPhoneNumber(profile?.parents?.mother?.phone || ''),
+        fatherName: account?.parents?.father?.name || '',
+        fatherPhone: formatPhoneNumber(account?.parents?.father?.phone || ''),
+        motherName: account?.parents?.mother?.name || '',
+        motherPhone: formatPhoneNumber(account?.parents?.mother?.phone || ''),
       });
     }
   }, [open, initialData, reset]);

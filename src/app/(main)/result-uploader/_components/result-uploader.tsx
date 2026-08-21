@@ -15,7 +15,6 @@ import {
   DollarSign,
   Users,
   Shield,
-  User,
   ArrowLeft
 } from 'lucide-react';
 import { SearchInput } from '@/components/ui/search-input';
@@ -37,48 +36,36 @@ const getTournamentDetails = (tournament: Tournament) => {
       return {
         entryFee: '$40',
         division: 'U-10, U-14, U18, U20',
-        host: 'James',
-        director: 'Alex',
         idString: '00000'
       };
     case '2':
       return {
         entryFee: '$50',
         division: 'Open, Under 1800, Under 1400',
-        host: 'Robert',
-        director: 'Emily',
         idString: '00001'
       };
     case '3':
       return {
         entryFee: '$35',
         division: 'U-8, U-12, U-16',
-        host: 'Michael',
-        director: 'Sarah',
         idString: '00002'
       };
     case '4':
       return {
         entryFee: '$25',
         division: 'Open Blitz',
-        host: 'William',
-        director: 'Jessica',
         idString: '00003'
       };
     case '5':
       return {
         entryFee: '$45',
         division: 'Open, Under 2000, Under 1600',
-        host: 'David',
-        director: 'Daniel',
         idString: '00004'
       };
     default:
       return {
         entryFee: '$30',
         division: 'Open',
-        host: 'Admin',
-        director: 'Staff',
         idString: '00000'
       };
   }
@@ -349,37 +336,6 @@ export default function ResultUploader() {
                   </span>
                 </div>
 
-                {/* Tournament Host row */}
-                <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-start md:items-center gap-1 md:gap-4 border-b border-[#083F92]/5 pb-2 md:pb-0 md:border-b-0">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#083F92] flex items-center justify-center text-white shrink-0">
-                      <User className="w-[16px] h-[16px]" />
-                    </div>
-                    <span className="font-poppins font-medium text-[16px] md:text-[20px] leading-[30px] text-[#636363] truncate">
-                      Tournament Host
-                    </span>
-                  </div>
-                  <span className="hidden md:inline font-general-sans font-medium text-[20px] leading-[27px] text-black">:</span>
-                  <span className="font-poppins font-bold text-[16px] md:text-[20px] leading-[30px] text-[#083F92] pl-11 md:pl-0">
-                    {details.host}
-                  </span>
-                </div>
-
-                {/* Tournament Director row */}
-                <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-start md:items-center gap-1 md:gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#083F92] flex items-center justify-center text-white shrink-0">
-                      <User className="w-[16px] h-[16px]" />
-                    </div>
-                    <span className="font-poppins font-medium text-[16px] md:text-[20px] leading-[30px] text-[#636363] truncate">
-                      Tournament Director
-                    </span>
-                  </div>
-                  <span className="hidden md:inline font-general-sans font-medium text-[20px] leading-[27px] text-black">:</span>
-                  <span className="font-poppins font-bold text-[16px] md:text-[20px] leading-[30px] text-[#083F92] pl-11 md:pl-0">
-                    {details.director}
-                  </span>
-                </div>
               </div>
             </div>
 

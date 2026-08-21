@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import {
-  ChevronsUpDown,
   FileSpreadsheet
 } from 'lucide-react';
 import { SearchInput } from '@/components/ui/search-input';
@@ -20,7 +19,6 @@ interface UserRow {
   lastName: string;
   grade: string;
   team: string;
-  teamCode: string;
   city: string;
 }
 
@@ -32,7 +30,6 @@ export default function Users() {
   const [isExporting, setIsExporting] = useState(false);
 
   const { data: usersData, isLoading } = useUsers(currentPage, itemsPerPage, debouncedSearchQuery);
-  console.log(usersData, "usersData")
   const users = usersData?.data?.users || [];
   const totalPages = usersData?.data?.pagination?.totalPages || 1;
 
@@ -55,15 +52,16 @@ export default function Users() {
     }
   };
 
+  // A row is a player — a child. The membership id, grade and name are theirs;
+  // the address comes from the parent account and is shared with any siblings.
   const mappedUsers = users.map((user: any) => ({
-    userId: user.playerProfile?.membershipId || user._id.substring(0, 8).toUpperCase(),
-    originalId: user._id, // Used for Link
+    userId: user.membershipId || user._id.substring(0, 8).toUpperCase(),
+    originalId: user._id, // the player, which is what /users/[id] expects
     firstName: user.firstName || 'N/A',
     lastName: user.lastName || 'N/A',
-    grade: user.playerProfile?.grade || 'N/A',
+    grade: user.grade || 'N/A',
     team: user.team?.name || 'N/A',
-    teamCode: user.team?.teamCode || 'N/A',
-    city: user.playerProfile?.city || 'N/A',
+    city: user.account?.address?.city || 'N/A',
   }));
 
   return (
@@ -115,24 +113,13 @@ export default function Users() {
                   <th className="px-6 py-3 font-semibold w-[130px]">First Name</th>
                   <th className="px-6 py-3 font-semibold w-[130px]">Last Name</th>
                   <th className="px-6 py-3 font-semibold w-[80px]">
-                    <div className="flex items-center gap-1 cursor-pointer hover:opacity-80">
-                      Grade <ChevronsUpDown className="w-4 h-4" />
-                    </div>
+                    Grade
                   </th>
                   <th className="px-6 py-3 font-semibold w-[190px]">
-                    <div className="flex items-center gap-1 cursor-pointer hover:opacity-80">
-                      Team <ChevronsUpDown className="w-4 h-4" />
-                    </div>
-                  </th>
-                  <th className="px-6 py-3 font-semibold w-[110px]">
-                    <div className="flex items-center gap-1 cursor-pointer hover:opacity-80">
-                      Team Code <ChevronsUpDown className="w-4 h-4" />
-                    </div>
+                    Team
                   </th>
                   <th className="px-6 py-3 font-semibold w-[140px]">
-                    <div className="flex items-center gap-1 cursor-pointer hover:opacity-80">
-                      City <ChevronsUpDown className="w-4 h-4" />
-                    </div>
+                    City
                   </th>
                   <th className="px-6 py-3 font-semibold text-right w-[126px]">Action</th>
                 </tr>
@@ -148,7 +135,6 @@ export default function Users() {
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[100px]" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[40px]" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[160px]" /></td>
-                      <td className="px-6 py-3"><Skeleton className="h-4 w-[80px]" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[120px]" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[80px] float-right" /></td>
                     </tr>
@@ -173,7 +159,6 @@ export default function Users() {
                           {user.grade}
                         </td>
                         <td className="max-w-[230px] truncate px-6 py-3 font-semibold tracking-[-0.02em]" title={user.team}>{user.team}</td>
-                        <td className="max-w-[110px] truncate px-6 py-3 font-semibold" title={user.teamCode}>{user.teamCode}</td>
                         <td className="px-6 py-3 font-semibold tracking-[-0.02em]">
                           <div className="line-clamp-2" title={user.city}>
                             {user.city}
@@ -192,7 +177,7 @@ export default function Users() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={8} className="text-center py-16 text-[#787878] font-poppins">
+                    <td colSpan={7} className="text-center py-16 text-[#787878] font-poppins">
                       No users found.
                     </td>
                   </tr>

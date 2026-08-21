@@ -133,7 +133,7 @@ export default function SchoolDetail() {
                               className={`h-[50px] border-b border-[#DADADA]/30 font-poppins text-[13px] text-[#636363] ${isEven ? 'bg-[#083F92]/10' : 'bg-white'}`}
                             >
                               <td className="px-6 py-3 font-semibold text-nowrap">
-                                {player.playerProfile?.membershipId || player._id.substring(0, 8).toUpperCase()}
+                                {player.membershipId || player._id.substring(0, 8).toUpperCase()}
                               </td>
                               <td className="px-6 py-3 font-semibold truncate" title={player.firstName}>
                                 {player.firstName || 'N/A'}
@@ -141,7 +141,7 @@ export default function SchoolDetail() {
                               <td className="px-6 py-3 font-semibold truncate" title={player.lastName}>
                                 {player.lastName || 'N/A'}
                               </td>
-                              <td className="px-6 py-3 font-semibold">{player.playerProfile?.grade || 'N/A'}</td>
+                              <td className="px-6 py-3 font-semibold">{player.grade || 'N/A'}</td>
                               <td className="px-6 py-3 font-semibold truncate" title={player.team?.name}>
                                 {player.team?.name || 'N/A'}
                               </td>

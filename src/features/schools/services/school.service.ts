@@ -53,8 +53,9 @@ export const schoolService = {
     return response.data;
   },
 
-  assignUser: async (id: string, userId: string): Promise<any> => {
-    const response = await axiosInstance.post(`/schools/${id}/assign-user`, { userId });
+  /** `playerId` is the player being assigned — a child, not the account. */
+  assignUser: async (id: string, playerId: string): Promise<any> => {
+    const response = await axiosInstance.post(`/schools/${id}/assign-user`, { playerId });
     return response.data;
   },
 };

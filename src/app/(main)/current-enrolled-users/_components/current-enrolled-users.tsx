@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { 
   FileSpreadsheet, 
-  ChevronsUpDown
 } from 'lucide-react';
 import { SearchInput } from '@/components/ui/search-input';
 import Link from 'next/link';
@@ -139,29 +138,19 @@ export default function CurrentEnrolledUsers() {
                 <th className="px-6 py-3 font-semibold w-[100px]">UserId</th>
                 <th className="px-6 py-3 font-semibold w-[120px]">Name</th>
                 <th className="px-6 py-3 font-semibold w-[80px]">
-                  <div className="flex items-center gap-1.5 cursor-pointer hover:opacity-80">
-                    Grade <ChevronsUpDown className="w-4 h-4" />
-                  </div>
+                  Grade
                 </th>
                 <th className="px-6 py-3 font-semibold w-[230px]">
-                  <div className="flex items-center gap-1.5 cursor-pointer hover:opacity-80">
-                    Team <ChevronsUpDown className="w-4 h-4" />
-                  </div>
+                  Team
                 </th>
                 <th className="px-6 py-3 font-semibold w-[90px]">
-                  <div className="flex items-center gap-1.5 cursor-pointer hover:opacity-80">
-                    Rating <ChevronsUpDown className="w-4 h-4" />
-                  </div>
+                  Rating
                 </th>
                 <th className="px-6 py-3 font-semibold w-[150px]">
-                  <div className="flex items-center gap-1.5 cursor-pointer hover:opacity-80">
-                    Selected Division <ChevronsUpDown className="w-4 h-4" />
-                  </div>
+                  Selected Division
                 </th>
                 <th className="px-6 py-3 font-semibold w-[170px]">
-                  <div className="flex items-center gap-1.5 cursor-pointer hover:opacity-80">
-                    Tournament <ChevronsUpDown className="w-4 h-4" />
-                  </div>
+                  Tournament
                 </th>
                 <th className="px-6 py-3 font-semibold text-right w-[126px]">Action</th>
               </tr>

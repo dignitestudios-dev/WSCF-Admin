@@ -112,7 +112,7 @@ Base URL + `/…`, all admin endpoints. Current surface in use:
 | tournaments | `/tournament`, `/tournament/{id}`, `/tournament/{id}/participants`, `…/participants/export`, `/tournament/form-fields`, `/tournament/user-history/{userId}` |
 | users | `/user`, `/user/{id}`, `/user/{id}/activate`, `/user/{id}/deactivate`, `/user/export` |
 | schools | `/schools`, `/schools/{id}`, `/schools/{id}/assign-user` |
-| teams | `/team`, `/team/{id}`, `/team/{teamId}/members` |
+| teams | `/team`, `/team/{id}`, `/team/{teamId}/members` (GET list, POST add, DELETE bulk remove), `/team/{teamId}/members/{userId}` |
 | membership | `/membership/admin/all`, `/membership/admin/export` |
 | notifications | `/notification/send-bulk`, `/notification/send-individual` |
 

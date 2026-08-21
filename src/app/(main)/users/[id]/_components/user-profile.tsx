@@ -27,7 +27,7 @@ import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUserTournamentHistory } from '@/features/tournaments/hooks/use-user-tournament-history';
 import { Pagination } from '@/components/ui/pagination';
-import { ConfirmActionDialog } from '@/components/ui/alert-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface TournamentItem {
   id: number;
@@ -60,8 +60,15 @@ export default function UserProfile() {
   const totalPages = historyData?.pagination?.totalPages || 1;
 
   const { data, isLoading } = useUserDetails(id);
-  const { mutate: deactivateUser, isPending: isDeactivating } = useDeactivateUser(id);
-  const { mutate: activateUser, isPending: isActivating } = useActivateUser(id);
+  // Resolved below once the row loads: deactivation applies to the account,
+  // which means every sibling on it.
+  const accountId = data?.data?.user?._id ?? data?.data?.player?.account?._id ?? '';
+
+  const { mutate: deactivateUser, isPending: isDeactivating } = useDeactivateUser(
+    accountId,
+    id
+  );
+  const { mutate: activateUser, isPending: isActivating } = useActivateUser(accountId, id);
   const [showStatusConfirm, setShowStatusConfirm] = useState(false);
   const [deactivationReason, setDeactivationReason] = useState("");
 
@@ -90,18 +97,20 @@ export default function UserProfile() {
   };
   const apiData = data?.data;
 
-  const user = apiData?.user;
-  const profile = apiData?.playerProfile;
+  // The page is about one player — a child. The account underneath is their
+  // parent's, and that is where the address, email and guardian details live.
+  const profile = apiData?.player ?? apiData?.playerProfile;
+  const account = apiData?.user ?? profile?.account ?? null;
 
   const userData = {
-    name: user ? `${user.firstName} ${user.lastName}` : "Loading...",
-    email: user?.email || "...",
-    userId: user?._id?.substring(0, 8).toUpperCase() || "...",
+    name: profile?.name || "Loading...",
+    email: account?.email || "...",
+    userId: profile?.membershipId || profile?._id?.substring(0, 8).toUpperCase() || "...",
     grade: profile?.grade || "N/A",
-    team: profile?.teamId?.name || "N/A",
+    team: profile?.team?.name || "N/A",
     school: profile?.school?.name || "N/A",
     rating: profile?.rating?.toString() || "0",
-    city: profile?.city || "N/A",
+    city: account?.address?.city || "N/A",
     performance: {
       totalTournaments: profile?.totalTournaments?.toString() || "0",
       totalWins: profile?.totalWins?.toString() || "0",
@@ -109,9 +118,9 @@ export default function UserProfile() {
       currentRating: profile?.rating?.toString() || "0"
     },
     parentDetail: {
-      name: profile?.parents?.mother?.name || profile?.parents?.father?.name || "N/A",
-      contact: profile?.parents?.mother?.phone || profile?.parents?.father?.phone || "N/A",
-      email: profile?.parents?.mother?.email || profile?.parents?.father?.email || "N/A"
+      name: account?.parents?.mother?.name || account?.parents?.father?.name || account?.name || "N/A",
+      contact: account?.parents?.mother?.phone || account?.parents?.father?.phone || account?.phone || "N/A",
+      email: account?.parents?.mother?.email || account?.parents?.father?.email || account?.email || "N/A"
     }
   };
 
@@ -151,7 +160,7 @@ export default function UserProfile() {
             <div className="w-[2px] h-6 bg-[#083F92] shrink-0" />
 
             {/* Toggle Status Button */}
-            {user?.status === 'active' ? (
+            {account?.status === 'active' ? (
               <button
                 onClick={() => setShowStatusConfirm(true)}
                 disabled={isDeactivating}
@@ -202,11 +211,11 @@ export default function UserProfile() {
                         {userData.name}
                       </h1>
                       <span className={`px-2.5 py-0.5 rounded-[100px] text-[12px] font-semibold uppercase tracking-wider ${
-                        user?.status === 'active'
+                        account?.status === 'active'
                           ? 'bg-emerald-600 text-white shadow-sm'
                           : 'bg-rose-600 text-white shadow-sm'
                       }`}>
-                        {user?.status || 'inactive'}
+                        {account?.status || 'inactive'}
                       </span>
                     </div>
                     <span className="font-poppins font-normal text-[14px] leading-[21px] text-[#DBDBDB]">
@@ -538,25 +547,27 @@ export default function UserProfile() {
         initialData={data?.data || null}
       />
 
-      <ConfirmActionDialog
+      <ConfirmDialog
         open={showStatusConfirm}
         onOpenChange={(open) => {
           setShowStatusConfirm(open);
           if (!open) setDeactivationReason("");
         }}
-        title={user?.status === 'active' ? 'Deactivate User' : 'Activate User'}
+        title={account?.status === 'active' ? 'Deactivate User' : 'Activate User'}
         description={
-          user?.status === 'active'
+          account?.status === 'active'
             ? `Are you sure you want to deactivate ${userData.name}? They will not be able to join tournaments.`
             : `Are you sure you want to activate ${userData.name}? They will be able to join tournaments again.`
         }
-        confirmText={user?.status === 'active' ? 'Deactivate' : 'Activate'}
-        variant={user?.status === 'active' ? 'destructive' : 'default'}
-        confirmClassName={user?.status !== 'active' ? 'bg-[#083F92] text-white hover:bg-[#083F92]/90 border-transparent shadow-xs' : undefined}
+        confirmText={account?.status === 'active' ? 'Deactivate' : 'Activate'}
+        loadingText={account?.status === 'active' ? 'Deactivating...' : 'Activating...'}
+        tone={account?.status === 'active' ? 'danger' : 'primary'}
+        icon={account?.status === 'active' ? Ban : Star}
         isLoading={isDeactivating || isActivating}
+        confirmDisabled={account?.status === 'active' && !deactivationReason.trim()}
         onConfirm={executeToggleStatus}
       >
-        {user?.status === 'active' && (
+        {account?.status === 'active' && (
           <div className="mt-4">
             <label className="text-sm font-medium text-gray-700 mb-1 block">Reason for deactivation *</label>
             <textarea
@@ -567,7 +578,7 @@ export default function UserProfile() {
             />
           </div>
         )}
-      </ConfirmActionDialog>
+      </ConfirmDialog>
     </PageTransition>
   );
 }

@@ -12,7 +12,7 @@ import { PageTransition } from '@/components/animations/page-transition';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { ConfirmDeleteDialog } from '@/components/ui/alert-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface FormField {
   id: string;
@@ -445,7 +445,7 @@ export default function FormDetail() {
           </DialogContent>
         </Dialog>
 
-        <ConfirmDeleteDialog
+        <ConfirmDialog
           open={deleteFormConfirmOpen}
           onOpenChange={setDeleteFormConfirmOpen}
           title="Delete Form"
@@ -453,7 +453,7 @@ export default function FormDetail() {
           onConfirm={executeDeleteForm}
         />
 
-        <ConfirmDeleteDialog
+        <ConfirmDialog
           open={!!fieldToDelete}
           onOpenChange={(open) => !open && setFieldToDelete(null)}
           title="Delete Field"

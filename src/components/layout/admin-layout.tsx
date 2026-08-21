@@ -3,6 +3,7 @@
 import { ReactNode, useState } from 'react';
 import { Sidebar } from './sidebar';
 import { Menu } from 'lucide-react';
+import { NotificationBell } from './notification-bell';
 import Image from 'next/image';
 
 export function AdminLayout({ children }: { children: ReactNode }) {
@@ -57,12 +58,16 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             />
           </div>
           
-          {/* Empty spacer to balance the layout centering the logo */}
-          <div className="w-8" />
+          <NotificationBell />
+        </div>
+
+        {/* Desktop header strip — the bell sits at the top right */}
+        <div className="hidden lg:flex items-center justify-end px-8 pt-6 shrink-0">
+          <NotificationBell />
         </div>
 
         {/* Dynamic page contents scrollable area */}
-        <div className="flex-grow overflow-auto no-scrollbar p-4 sm:p-6 lg:p-8">
+        <div className="flex-grow overflow-auto no-scrollbar p-4 sm:p-6 lg:px-8 lg:pt-4 lg:pb-8">
           <div className="flex flex-col gap-6 min-h-full">
             {children}
           </div>

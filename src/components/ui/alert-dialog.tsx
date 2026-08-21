@@ -147,107 +147,6 @@ function AlertDialogCancel({
   )
 }
 
-interface ConfirmDeleteDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  title?: string
-  description?: string
-  onConfirm: () => void
-  confirmText?: string
-  cancelText?: string
-  isLoading?: boolean
-}
-
-function ConfirmDeleteDialog({
-  open,
-  onOpenChange,
-  title = "Are you sure?",
-  description = "This action cannot be undone.",
-  onConfirm,
-  confirmText = "Delete",
-  cancelText = "Cancel",
-  isLoading = false,
-}: ConfirmDeleteDialogProps) {
-  return (
-    <AlertDialog open={open} onOpenChange={(isOpen) => {
-      if (isLoading) return;
-      onOpenChange(isOpen);
-    }}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel className={"p-5"} disabled={isLoading}>{cancelText}</AlertDialogCancel>
-          <Button 
-            disabled={isLoading}
-            variant="destructive"
-            className={"p-5"}
-            onClick={onConfirm}
-          >
-            {isLoading ? "Deleting..." : confirmText}
-          </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  )
-}
-
-interface ConfirmActionDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  title?: string
-  description?: string
-  onConfirm: () => void
-  confirmText?: string
-  cancelText?: string
-  isLoading?: boolean
-  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"
-  confirmClassName?: string
-  children?: React.ReactNode
-}
-
-function ConfirmActionDialog({
-  open,
-  onOpenChange,
-  title = "Are you sure?",
-  description = "Please confirm this action.",
-  onConfirm,
-  confirmText = "Confirm",
-  cancelText = "Cancel",
-  isLoading = false,
-  variant = "default",
-  confirmClassName,
-  children,
-}: ConfirmActionDialogProps) {
-  return (
-    <AlertDialog open={open} onOpenChange={(isOpen) => {
-      if (isLoading) return;
-      onOpenChange(isOpen);
-    }}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
-        </AlertDialogHeader>
-        {children && <div className="py-2">{children}</div>}
-        <AlertDialogFooter>
-          <AlertDialogCancel className={"p-5"} disabled={isLoading}>{cancelText}</AlertDialogCancel>
-          <Button 
-            disabled={isLoading}
-            variant={variant}
-            className={cn("p-5", confirmClassName)}
-            onClick={onConfirm}
-          >
-            {isLoading ? "Processing..." : confirmText}
-          </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  )
-}
-
 export {
   AlertDialog,
   AlertDialogPortal,
@@ -260,6 +159,4 @@ export {
   AlertDialogDescription,
   AlertDialogAction,
   AlertDialogCancel,
-  ConfirmDeleteDialog,
-  ConfirmActionDialog,
 }

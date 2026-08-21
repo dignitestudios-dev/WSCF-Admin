@@ -245,7 +245,9 @@ export default function Membership() {
                         <td className="px-6 py-3 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             <Link 
-                              href={`/users/${member.userId}`}
+                              // A membership belongs to a player, and the
+                              // profile page is keyed on the player.
+                              href={`/users/${member.playerProfileId}`}
                               className="font-semibold tracking-[-0.02em] underline text-[#636363] hover:text-[#083F92] transition-colors"
                             >
                               View Profile

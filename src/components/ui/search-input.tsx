@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
@@ -48,7 +48,22 @@ export function SearchInput({
         )}
         {...props}
       />
-      
+
+      {/* Clearing is a mousedown so it fires before the input blurs. */}
+      {value ? (
+        <button
+          type="button"
+          aria-label="Clear search"
+          onMouseDown={(event) => {
+            event.preventDefault();
+            onChangeValue('');
+          }}
+          className="mr-1 flex h-[26px] w-[26px] shrink-0 cursor-pointer items-center justify-center rounded-full text-[#808080] transition-colors hover:bg-[#F4F4F4] hover:text-[#181818]"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      ) : null}
+
       {/* Icon Circle Container with Hover/Focus Animations */}
       <motion.div
         animate={{

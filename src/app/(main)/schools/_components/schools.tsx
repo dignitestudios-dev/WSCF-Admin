@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  ChevronsUpDown,
   Plus,
   Edit,
   Trash2,
@@ -14,7 +13,8 @@ import { useDebounce } from '@/hooks/use-debounce';
 import { PageTransition } from '@/components/animations/page-transition';
 import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ConfirmDeleteDialog } from '@/components/ui/alert-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { ActionIconButton } from '@/components/ui/action-button';
 import { useSchools, useDeleteSchool } from '@/features/schools/hooks/use-schools';
 import { School } from '@/features/schools/services/school.service';
 import { CreateSchoolDialog } from '@/features/schools/components/create-school-dialog';
@@ -97,15 +97,11 @@ export default function Schools() {
               <thead>
                 <tr className="bg-[#083F92] text-white text-left h-[50px] font-poppins font-semibold text-[13px]">
                   <th className="px-6 py-3 font-semibold w-auto">
-                    <div className="flex items-center gap-1 cursor-pointer hover:opacity-80">
-                      School Name <ChevronsUpDown className="w-4 h-4" />
-                    </div>
+                    School Name
                   </th>
                   <th className="px-6 py-3 font-semibold w-[200px]">Address</th>
                   <th className="px-6 py-3 font-semibold w-[150px]">
-                    <div className="flex items-center gap-1 cursor-pointer hover:opacity-80">
-                      Created At <ChevronsUpDown className="w-4 h-4" />
-                    </div>
+                    Created At
                   </th>
                   <th className="px-6 py-3 font-semibold text-right w-[126px]">Action</th>
                 </tr>
@@ -141,27 +137,22 @@ export default function Schools() {
                         </td>
                         <td className="px-6 py-3 text-right">
                           <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                            <button
+                            <ActionIconButton
+                              icon={UserPlus}
+                              label="Assign User"
                               onClick={() => setSchoolToAssign(school)}
-                              className="w-8 h-8 rounded-full bg-[#083F92]/10 hover:bg-[#083F92]/20 flex items-center justify-center transition-colors shadow-xs"
-                              title="Assign User"
-                            >
-                              <UserPlus className="w-4 h-4 text-[#083F92]" />
-                            </button>
-                            <button
+                            />
+                            <ActionIconButton
+                              icon={Edit}
+                              label="Edit School"
                               onClick={() => setSchoolToEdit(school)}
-                              className="w-8 h-8 rounded-full bg-[#083F92]/10 hover:bg-[#083F92]/20 flex items-center justify-center transition-colors shadow-xs"
-                              title="Edit School"
-                            >
-                              <Edit className="w-4 h-4 text-[#083F92]" />
-                            </button>
-                            <button
+                            />
+                            <ActionIconButton
+                              icon={Trash2}
+                              label="Delete School"
+                              tone="danger"
                               onClick={() => setSchoolToDelete(school)}
-                              className="w-8 h-8 rounded-full bg-red-100 hover:bg-red-200 flex items-center justify-center transition-colors shadow-xs"
-                              title="Delete School"
-                            >
-                              <Trash2 className="w-4 h-4 text-red-600" />
-                            </button>
+                            />
                           </div>
                         </td>
                       </tr>
@@ -210,7 +201,7 @@ export default function Schools() {
         school={schoolToAssign}
       />
 
-      <ConfirmDeleteDialog
+      <ConfirmDialog
         open={!!schoolToDelete}
         onOpenChange={(open) => !open && setSchoolToDelete(null)}
         title="Delete School"

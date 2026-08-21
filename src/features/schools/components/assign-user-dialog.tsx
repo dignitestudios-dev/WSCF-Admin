@@ -143,7 +143,7 @@ export function AssignUserDialog({ open, onOpenChange, school }: AssignUserDialo
                             )}
                             onClick={() => {
                               setSelectedUserId(user._id);
-                              setSelectedUserName(`${user.firstName} ${user.lastName}`);
+                              setSelectedUserName(user.name || `${user.firstName} ${user.lastName}`);
                               setError('');
                               setOpenCombobox(false);
                             }}
@@ -154,7 +154,13 @@ export function AssignUserDialog({ open, onOpenChange, school }: AssignUserDialo
                                 selectedUserId === user._id ? "opacity-100" : "opacity-0"
                               )}
                             />
-                            {user.firstName} {user.lastName}
+                            {user.name || `${user.firstName} ${user.lastName}`}
+                            {user.grade ? (
+                              <span className="ml-2 text-[11px] text-[#8C8C8C]">
+                                Grade {user.grade}
+                                {user.membershipId ? ` · ${user.membershipId}` : ''}
+                              </span>
+                            ) : null}
                           </div>
                         ))
                       )}

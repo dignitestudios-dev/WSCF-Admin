@@ -7,7 +7,6 @@ import {
   LayoutDashboard,
   Users,
   Trophy,
-  UserCheck,
   CreditCard,
   Upload,
   Bell,
@@ -42,7 +41,10 @@ export function Sidebar({ onClose }: SidebarProps) {
     { name: 'Users', href: '/users', icon: Users },
     { name: 'Schools', href: '/schools', icon: School },
     { name: 'Tournaments', href: '/tournaments', icon: Trophy },
-    { name: 'Current Enrolled Users', href: '/current-enrolled-users', icon: UserCheck },
+    { name: 'Teams', href: '/teams', icon: UserPlus },
+    // Current Enrolled Users is hidden from navigation but the route and its
+    // component are intentionally kept — reachable directly at
+    // /current-enrolled-users if it is ever needed again.
     { name: 'Membership', href: '/membership', icon: CreditCard },
     { name: 'Result Uploader', href: '/result-uploader', icon: Upload },
   ];
@@ -50,7 +52,6 @@ export function Sidebar({ onClose }: SidebarProps) {
   const generalNav = [
     { name: 'Push Notifications', href: '/notifications', icon: Bell },
     { name: 'Form Management', href: '/forms', icon: FolderLock },
-    { name: 'Create Team', href: '/create-team', icon: UserPlus },
     { name: 'Logout', href: '/logout', icon: LogOut },
   ];
 

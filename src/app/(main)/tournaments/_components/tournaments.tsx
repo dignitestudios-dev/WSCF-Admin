@@ -8,6 +8,7 @@ import {
   Armchair, 
   Tag, 
   ArrowRight,
+  CheckCircle2,
   Crown
 } from 'lucide-react';
 import { SearchInput } from '@/components/ui/search-input';
@@ -16,17 +17,26 @@ import { PageTransition } from '@/components/animations/page-transition';
 import Link from 'next/link';
 import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useTournaments } from '@/features/tournaments/hooks/use-tournaments';
+import { useTournaments, useMarkTournamentCompleted } from '@/features/tournaments/hooks/use-tournaments';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useDeleteTournament } from '@/features/tournaments/hooks/use-delete-tournament';
 
 export default function Tournaments() {
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
-  const [activeTab, setActiveTab] = useState<'All' | 'upcoming' | 'completed'>('All');
+  const [activeTab, setActiveTab] = useState<'All' | 'upcoming' | 'ongoing' | 'completed'>('All');
   const [currentPage, setCurrentPage] = useState(1); 
   const itemsPerPage = 10;
 
   const statusParam = activeTab === 'All' ? undefined : activeTab;
+
+  // Completion is manual and one-way, so it asks first.
+  const [tournamentToComplete, setTournamentToComplete] = useState<{
+    _id: string;
+    title: string;
+  } | null>(null);
+  const { mutateAsync: markCompleted, isPending: isCompleting } =
+    useMarkTournamentCompleted();
   const { mutateAsync: deleteTournament, isPending: isDeleting } = useDeleteTournament();
 
   const [tournamentToDelete, setTournamentToDelete] = useState<any>(null);
@@ -80,14 +90,14 @@ export default function Tournaments() {
         </div>
 
         {/* Status Filter Tab Pills */}
-        <div className="flex items-center gap-2 w-full max-w-[325px] h-[50px] mt-2">
-          {(['All', 'upcoming', 'completed'] as const).map((tab) => {
+        <div className="flex flex-wrap items-center gap-2 w-full h-auto mt-2">
+          {(['All', 'upcoming', 'ongoing', 'completed'] as const).map((tab) => {
             const isActive = activeTab === tab;
             return (
               <button
                 key={tab}
                 onClick={() => { setActiveTab(tab); setCurrentPage(1); }}
-                className={`w-[103px] h-[50px] rounded-[100px] border-4 border-[#F4F4F4] font-poppins font-semibold text-[14px] leading-[19px] flex items-center justify-center transition-all duration-150 capitalize ${
+                className={`min-w-[103px] px-4 h-[50px] rounded-[100px] border-4 border-[#F4F4F4] font-poppins font-semibold text-[14px] leading-[19px] flex items-center justify-center transition-all duration-150 capitalize cursor-pointer ${
                   isActive 
                     ? 'bg-[#083F92] text-white border-transparent' 
                     : 'bg-white text-black hover:bg-black/5'
@@ -183,6 +193,27 @@ export default function Tournaments() {
                       {t.status}
                     </div>
                     
+                    {/* Only an ongoing tournament can be completed; the API
+                        enforces the same rule. */}
+                    {t.status === 'ongoing' && (
+                      <button
+                        type="button"
+                        title="Mark as completed"
+                        onClick={(event) => {
+                          // The whole card is a link.
+                          event.preventDefault();
+                          event.stopPropagation();
+                          setTournamentToComplete({ _id: t._id, title: t.title });
+                        }}
+                        className="flex h-[38px] shrink-0 cursor-pointer items-center gap-2 rounded-[100px] bg-[#083F92] px-4 text-white shadow-sm transition-opacity hover:opacity-90"
+                      >
+                        <CheckCircle2 className="h-4 w-4" />
+                        <span className="font-poppins text-[13px] font-semibold">
+                          Mark Completed
+                        </span>
+                      </button>
+                    )}
+
                     {/* Action arrow icon */}
                     <ArrowRight className="w-6 h-6 text-black/80 hover:translate-x-0.5 transition-transform hidden md:block" />
                   </div>
@@ -191,11 +222,9 @@ export default function Tournaments() {
               ))
             ) : (
               <div className="w-full py-16 text-center text-[#787878] font-poppins bg-[#083F92]/5 rounded-[12px] border border-dashed border-[#083F92]/20">
-                {activeTab === 'completed'
-                  ? 'No completed tournaments found.'
-                  : activeTab === 'upcoming'
-                  ? 'No upcoming tournaments found.'
-                  : 'No tournaments found. Click "Add Tournament" to create one.'}
+                {activeTab === 'All'
+                  ? 'No tournaments found. Click "Add Tournament" to create one.'
+                  : `No ${activeTab} tournaments found.`}
               </div>
             )}
           </div>
@@ -214,7 +243,26 @@ export default function Tournaments() {
 
       </div>
 
-
+      <ConfirmDialog
+        open={Boolean(tournamentToComplete)}
+        onOpenChange={(open) => !open && setTournamentToComplete(null)}
+        title={`Mark ${tournamentToComplete?.title ?? 'tournament'} as completed?`}
+        description="Players will see it as completed and it moves out of the ongoing list. This cannot be undone from the panel."
+        confirmText="Mark Completed"
+        loadingText="Marking..."
+        tone="primary"
+        icon={CheckCircle2}
+        isLoading={isCompleting}
+        onConfirm={async () => {
+          if (!tournamentToComplete) return;
+          try {
+            await markCompleted(tournamentToComplete._id);
+            setTournamentToComplete(null);
+          } catch {
+            // surfaced by the mutation toast
+          }
+        }}
+      />
     </PageTransition>
   );
 }

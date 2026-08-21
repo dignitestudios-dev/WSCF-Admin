@@ -16,14 +16,12 @@ import {
   Calendar,
   GitMerge,
   Hash,
-  User,
-  Award,
   FileSpreadsheet
 } from 'lucide-react';
 import Link from 'next/link';
 import { PageTransition } from '@/components/animations/page-transition';
 import { Pagination } from '@/components/ui/pagination';
-import { ConfirmDeleteDialog } from '@/components/ui/alert-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import {
   Select,
@@ -109,8 +107,6 @@ export default function TournamentDetail() {
     date: formatDate(tournament?.date),
     division: divisions,
 
-    tournamentHost: tournament?.tournamentHost || "N/A",
-    tournamentDirector: tournament?.tournamentDirector || "N/A"
   };
 
   if (isLoading) {
@@ -194,8 +190,6 @@ export default function TournamentDetail() {
                 { label: 'Date of Tournament', value: tournamentDetails.date, icon: Calendar },
                 { label: 'Division', value: tournamentDetails.division, icon: GitMerge },
 
-                { label: 'Tournament Host', value: tournamentDetails.tournamentHost, icon: User },
-                { label: 'Tournament Director', value: tournamentDetails.tournamentDirector, icon: Award }
               ].map((item, idx) => (
                 <div key={idx} className="flex flex-col sm:flex-row sm:items-start w-full gap-1 sm:gap-0 border-b border-[#083F92]/5 pb-2 sm:pb-0 sm:border-b-0">
 
@@ -337,7 +331,7 @@ export default function TournamentDetail() {
 
       </div>
 
-      <ConfirmDeleteDialog
+      <ConfirmDialog
         open={showDeleteConfirm}
         onOpenChange={setShowDeleteConfirm}
         title="Delete Tournament"

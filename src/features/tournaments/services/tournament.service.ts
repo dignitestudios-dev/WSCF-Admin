@@ -8,8 +8,6 @@ export interface Tournament {
   location: string;
   entryFee: number;
   isPaid: boolean;
-  tournamentDirector: string;
-  tournamentHost: string;
   status: string; // 'upcoming' | 'completed' etc
   customDropdownOptions: any[];
   createdBy: string;
@@ -79,6 +77,11 @@ export const tournamentService = {
     return response.data;
   },
 
+  /** Admin-only. Rejected unless the tournament has actually started. */
+  markCompleted: async (id: string) => {
+    const response = await axiosInstance.patch(`/tournament/${id}/complete`);
+    return response.data;
+  },
   getUserHistory: async (userId: string, status: string, page: number, limit: number): Promise<any> => {
     const response = await axiosInstance.get(`/tournament/user-history/${userId}`, {
       params: { status, page, limit }

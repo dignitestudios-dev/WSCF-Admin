@@ -1,36 +1,80 @@
 import { axiosInstance } from '@/lib/axios';
 
+/**
+ * The account behind a player: the parent.
+ *
+ * Siblings share one of these, so its email, address, guardian details and
+ * status apply to every player on it — deactivating hits all of them.
+ */
 export interface User {
   _id: string;
-  firstName: string;
-  lastName: string;
-  gender: string;
-  sigma?: string;
+  name: string;
   email: string;
+  phone?: string | null;
   role: string;
   status: string;
   createdAt: string;
+  address?: {
+    city?: string | null;
+    streetAddress?: string | null;
+    zipCode?: number | null;
+  };
+  parents?: {
+    father?: ParentDetails;
+    mother?: ParentDetails;
+  };
 }
 
-/** A row from GET /user — the list endpoint returns more than the bare User. */
+/**
+ * A row from GET /user.
+ *
+ * A user in this panel is a player, and a player is a child: `_id` is the
+ * player profile, and every action that targets a player takes it. Email,
+ * status and address come from `account` — the parent — and are mirrored at
+ * the top level for the columns that already read them there.
+ */
 export interface UserListItem {
   _id: string;
   firstName: string;
   lastName: string;
-  email: string;
-  role: string;
-  status: string;
+  name: string;
+  membershipId?: string;
+  grade?: string;
+  gender?: string;
+  dob?: string;
+  rating?: number;
   createdAt: string;
-  playerProfile?: {
-    membershipId?: string;
-    grade?: string;
-    city?: string;
-    rating?: number;
+
+  /** The parent account. Deactivation and email target this, not the player. */
+  account?: {
+    _id: string;
+    name: string;
+    email: string;
+    phone?: string | null;
+    status: string;
+    address?: {
+      city?: string | null;
+      streetAddress?: string | null;
+      zipCode?: number | null;
+    };
+    parents?: {
+      father?: ParentDetails;
+      mother?: ParentDetails;
+    };
   } | null;
+
+  email: string | null;
+  status: string | null;
+
+  school?: School | null;
   team?: {
     _id: string;
     name: string;
-    teamCode?: string;
+  } | null;
+  membership?: {
+    _id: string;
+    status: string;
+    currentPeriodEnd?: string;
   } | null;
 }
 
@@ -64,40 +108,30 @@ export interface School {
 export interface TeamSummary {
   _id: string;
   name: string;
-  teamCode?: string;
 }
 
-export interface PlayerProfile {
-  _id: string;
-  userId: string;
-  /** Populated by the user-details endpoint; null when the player has no team. */
-  teamId?: TeamSummary | null;
-  /** Populated school, or null when the player is unassigned. */
-  school?: School | null;
-  city: string;
-  streetAddress: string;
-  zipCode: number;
-  grade: string;
-  dob: string;
-  rating: number;
-  totalTournaments: number;
-  totalWins: number;
-  createdAt: string;
-  updatedAt: string;
-  membershipId: string;
-  parents?: {
-    father?: ParentDetails;
-    mother?: ParentDetails;
-  };
+/**
+ * One player in full. The address and guardian details live on `account`
+ * because they belong to the household, not to this child.
+ */
+export interface PlayerProfile extends UserListItem {
+  totalTournaments?: number;
+  totalWins?: number;
+  updatedAt?: string;
+  masterFileChecked?: boolean;
 }
 
 export interface UserDetailsResponse {
   success: boolean;
   message: string;
   data: {
-    user: User & { isEmailVerified?: boolean; updatedAt?: string };
+    /** The player. */
+    player: PlayerProfile;
+    /** The parent account behind them. */
+    user: (User & { isEmailVerified?: boolean; updatedAt?: string }) | null;
+    /** Same object as `player`, under the key the panel already reads. */
     playerProfile: PlayerProfile | null;
-    membership: any | null;
+    membership: { _id: string; status: string; currentPeriodEnd?: string } | null;
   };
 }
 
@@ -133,12 +167,17 @@ export const userService = {
     const response = await axiosInstance.put(`/user/${id}`, data);
     return response.data;
   },
-  deactivateUser: async (id: string, reason?: string): Promise<any> => {
-    const response = await axiosInstance.patch(`/user/${id}/deactivate`, { reason });
+  /**
+   * Takes the ACCOUNT id, not the player id. A parent signs in once for all of
+   * their children, so there is no way to disable one player on their own —
+   * pass `account._id` from the row.
+   */
+  deactivateUser: async (accountId: string, reason?: string): Promise<any> => {
+    const response = await axiosInstance.patch(`/user/${accountId}/deactivate`, { reason });
     return response.data;
   },
-  activateUser: async (id: string): Promise<any> => {
-    const response = await axiosInstance.patch(`/user/${id}/activate`);
+  activateUser: async (accountId: string): Promise<any> => {
+    const response = await axiosInstance.patch(`/user/${accountId}/activate`);
     return response.data;
   },
 };

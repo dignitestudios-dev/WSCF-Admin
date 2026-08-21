@@ -11,7 +11,7 @@ import {
 import { PageTransition } from '@/components/animations/page-transition';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { ConfirmDeleteDialog } from '@/components/ui/alert-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFormFields } from '@/features/forms/hooks/use-form-fields';
@@ -406,7 +406,7 @@ export default function Forms() {
         </Dialog>
 
         {/* Delete Confirmation */}
-        <ConfirmDeleteDialog
+        <ConfirmDialog
           open={deleteConfirmOpen}
           onOpenChange={setDeleteConfirmOpen}
           title="Delete Field"

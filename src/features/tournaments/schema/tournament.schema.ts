@@ -5,16 +5,17 @@ export const tournamentSchema = z.object({
   date: z.string().min(1, 'Date is required'),
   location: z.string().min(2, 'Location is required').max(100, 'Location must be at most 100 characters'),
   entryFee: z.string().min(1, 'Entry fee is required').refine(val => !isNaN(parseFloat(val)) && parseFloat(val) > 0, 'Entry fee must be greater than 0'),
-  director: z.string().min(2, 'Tournament director is required').max(100, 'Tournament director must be at most 100 characters'),
-  host: z.string().min(2, 'Tournament host is required').max(100, 'Tournament host must be at most 100 characters'),
   divisions: z.array(z.object({
-    type: z.enum(['open', 'conditional']),
+    // `exact` is a UI-only value: it submits as a conditional division
+    // with gradeRule 'exact', which is how the API models it.
+    type: z.enum(['open', 'conditional', 'exact']),
+    _id: z.string().optional(),
     divisionType: z.string().optional(),
     rating: z.number().or(z.nan()).optional(),
     condition: z.enum(['under', 'over']).optional(),
     divisionName: z.string().optional()
   }).superRefine((data, ctx) => {
-    if (data.type === 'conditional') {
+    if (data.type === 'conditional' || data.type === 'exact') {
       if (!data.divisionType) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
