@@ -62,18 +62,15 @@ export default function UserProfile() {
   const { data, isLoading } = useUserDetails(id);
   // Resolved below once the row loads: deactivation applies to the account,
   // which means every sibling on it.
-  const accountId = data?.data?.user?._id ?? data?.data?.player?.account?._id ?? '';
-
-  const { mutate: deactivateUser, isPending: isDeactivating } = useDeactivateUser(
-    accountId,
-    id
-  );
-  const { mutate: activateUser, isPending: isActivating } = useActivateUser(accountId, id);
+  // Barring is per player, so both actions target the player this page is
+  // about. Their siblings and the parent's sign-in are untouched.
+  const { mutate: deactivateUser, isPending: isDeactivating } = useDeactivateUser(id, id);
+  const { mutate: activateUser, isPending: isActivating } = useActivateUser(id, id);
   const [showStatusConfirm, setShowStatusConfirm] = useState(false);
   const [deactivationReason, setDeactivationReason] = useState("");
 
   const executeToggleStatus = () => {
-    const isActive = data?.data?.user?.status === 'active';
+    const isActive = playerStatus === 'active';
     if (isActive) {
       if (!deactivationReason.trim()) {
         toast.error('Please provide a reason for deactivation');
@@ -101,6 +98,9 @@ export default function UserProfile() {
   // parent's, and that is where the address, email and guardian details live.
   const profile = apiData?.player ?? apiData?.playerProfile;
   const account = apiData?.user ?? profile?.account ?? null;
+
+  // Deactivation lives on the player now, not on the account they belong to.
+  const playerStatus = profile?.status ?? 'active';
 
   const userData = {
     name: profile?.name || "Loading...",
@@ -141,8 +141,18 @@ export default function UserProfile() {
             <span className="font-poppins font-medium text-[18px] leading-[27px]">Back</span>
           </button>
 
-          {/* Right Action buttons */}
+          {/* Right Action buttons.
+              Held back until the player has loaded: until then there is
+              nothing to edit and no status to toggle, and a button that acts
+              on data it does not have yet is worse than no button. */}
           <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto overflow-x-auto no-scrollbar pb-1 sm:pb-0">
+            {isLoading ? (
+              <>
+                <Skeleton className="h-[72px] w-[105px] rounded-[100px] shrink-0" />
+                <Skeleton className="h-[72px] w-[150px] rounded-[100px] shrink-0" />
+              </>
+            ) : (
+              <>
             {/* Edit Button */}
             <button
               onClick={() => setShowEditDialog(true)}
@@ -160,7 +170,7 @@ export default function UserProfile() {
             <div className="w-[2px] h-6 bg-[#083F92] shrink-0" />
 
             {/* Toggle Status Button */}
-            {account?.status === 'active' ? (
+            {playerStatus === 'active' ? (
               <button
                 onClick={() => setShowStatusConfirm(true)}
                 disabled={isDeactivating}
@@ -187,6 +197,8 @@ export default function UserProfile() {
                 </span>
               </button>
             )}
+              </>
+            )}
           </div>
         </div>
 
@@ -211,11 +223,11 @@ export default function UserProfile() {
                         {userData.name}
                       </h1>
                       <span className={`px-2.5 py-0.5 rounded-[100px] text-[12px] font-semibold uppercase tracking-wider ${
-                        account?.status === 'active'
+                        playerStatus === 'active'
                           ? 'bg-emerald-600 text-white shadow-sm'
                           : 'bg-rose-600 text-white shadow-sm'
                       }`}>
-                        {account?.status || 'inactive'}
+                        {playerStatus}
                       </span>
                     </div>
                     <span className="font-poppins font-normal text-[14px] leading-[21px] text-[#DBDBDB]">
@@ -553,21 +565,21 @@ export default function UserProfile() {
           setShowStatusConfirm(open);
           if (!open) setDeactivationReason("");
         }}
-        title={account?.status === 'active' ? 'Deactivate User' : 'Activate User'}
+        title={playerStatus === 'active' ? 'Deactivate User' : 'Activate User'}
         description={
-          account?.status === 'active'
+          playerStatus === 'active'
             ? `Are you sure you want to deactivate ${userData.name}? They will not be able to join tournaments.`
             : `Are you sure you want to activate ${userData.name}? They will be able to join tournaments again.`
         }
-        confirmText={account?.status === 'active' ? 'Deactivate' : 'Activate'}
-        loadingText={account?.status === 'active' ? 'Deactivating...' : 'Activating...'}
-        tone={account?.status === 'active' ? 'danger' : 'primary'}
-        icon={account?.status === 'active' ? Ban : Star}
+        confirmText={playerStatus === 'active' ? 'Deactivate' : 'Activate'}
+        loadingText={playerStatus === 'active' ? 'Deactivating...' : 'Activating...'}
+        tone={playerStatus === 'active' ? 'danger' : 'primary'}
+        icon={playerStatus === 'active' ? Ban : Star}
         isLoading={isDeactivating || isActivating}
-        confirmDisabled={account?.status === 'active' && !deactivationReason.trim()}
+        confirmDisabled={playerStatus === 'active' && !deactivationReason.trim()}
         onConfirm={executeToggleStatus}
       >
-        {account?.status === 'active' && (
+        {playerStatus === 'active' && (
           <div className="mt-4">
             <label className="text-sm font-medium text-gray-700 mb-1 block">Reason for deactivation *</label>
             <textarea

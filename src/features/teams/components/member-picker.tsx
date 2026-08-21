@@ -18,8 +18,17 @@ interface MemberPickerProps {
   selected: PickedMember[];
   onChange: (members: PickedMember[]) => void;
   disabled?: boolean;
-  /** Already on the team — shown as "On this team" and not selectable. */
+  /** Already in this group — shown as taken and not selectable. */
   excludedIds?: string[];
+  /** What to call being already in it. */
+  excludedLabel?: string;
+  /**
+   * Players already at this school are excluded wherever they appear.
+   *
+   * Resolved from each row rather than from a list of ids, so it holds across
+   * pages and searches without fetching the whole roster up front.
+   */
+  excludedSchoolId?: string;
 }
 
 /**
@@ -35,6 +44,8 @@ export function MemberPicker({
   onChange,
   disabled,
   excludedIds = [],
+  excludedLabel = 'On this team',
+  excludedSchoolId,
 }: MemberPickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -138,6 +149,7 @@ export function MemberPicker({
                     grade?: string;
                     email?: string;
                     status?: string;
+                    school?: { _id: string; name: string } | null;
                   }) => {
                   // A row is a player — a child. Siblings share a surname and
                   // their parent's email, so the grade and membership id are
@@ -154,7 +166,10 @@ export function MemberPicker({
                     .filter(Boolean)
                     .join(' · ');
                   const isSelected = selectedIds.has(user._id);
-                  const isOnTeam = excluded.has(user._id);
+                  const isOnTeam =
+                    excluded.has(user._id) ||
+                    (Boolean(excludedSchoolId) &&
+                      user.school?._id === excludedSchoolId);
                   // The API rejects players whose account is deactivated, so
                   // block them here rather than letting the batch come back
                   // with a failure.
@@ -183,7 +198,9 @@ export function MemberPicker({
                         ) : null}
                       </span>
                       {isOnTeam ? (
-                        <span className="ml-2 shrink-0 text-[11px] text-[#8C8C8C]">On this team</span>
+                        <span className="ml-2 shrink-0 text-[11px] text-[#8C8C8C]">
+                          {excludedLabel}
+                        </span>
                       ) : isInactive ? (
                         <span className="ml-2 shrink-0 rounded-full bg-[#CE2D32]/10 px-2 py-0.5 text-[11px] font-medium text-[#CE2D32]">
                           Inactive

@@ -100,6 +100,7 @@ export default function Schools() {
                     School Name
                   </th>
                   <th className="px-6 py-3 font-semibold w-[200px]">Address</th>
+                  <th className="px-6 py-3 font-semibold w-[110px]">Students</th>
                   <th className="px-6 py-3 font-semibold w-[150px]">
                     Created At
                   </th>
@@ -114,6 +115,7 @@ export default function Schools() {
                     <tr key={`skeleton-${i}`} className="h-[50px] border-b border-[#DADADA]/30 bg-white">
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[120px]" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[250px]" /></td>
+                      <td className="px-6 py-3"><Skeleton className="h-4 w-[40px]" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[100px]" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-8 w-[64px] float-right rounded-full" /></td>
                     </tr>
@@ -132,6 +134,9 @@ export default function Schools() {
                           {school.name}
                         </td>
                         <td className="px-6 py-3 font-semibold text-nowrap truncate max-w-[200px]" title={school.address}>{school.address || 'N/A'}</td>
+                        {/* How many players are registered here — counted by
+                            the API rather than by fetching each school's roster. */}
+                        <td className="px-6 py-3 font-semibold">{school.studentCount ?? 0}</td>
                         <td className="px-6 py-3 font-semibold tracking-[-0.02em]">
                           {school.createdAt ? new Date(school.createdAt).toLocaleDateString() : 'N/A'}
                         </td>
@@ -160,7 +165,7 @@ export default function Schools() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={4} className="text-center py-16 text-[#787878] font-poppins">
+                    <td colSpan={5} className="text-center py-16 text-[#787878] font-poppins">
                       No schools found.
                     </td>
                   </tr>

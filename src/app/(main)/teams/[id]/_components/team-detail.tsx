@@ -166,7 +166,11 @@ export default function TeamDetail() {
         {/* Roster */}
         <div className="relative mb-8 flex min-h-[560px] w-full flex-1 flex-col justify-between overflow-hidden rounded-[24px] border border-[#DADADA] bg-white pb-20 shadow-sm">
           <div className="flex flex-col gap-4 border-b border-[#DADADA]/40 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="font-poppins text-[18px] font-semibold text-[#181818]">Members</h2>
+            {/* The total sits on the section heading, so it is visible while
+                scrolling the roster rather than only in the page header. */}
+            <h2 className="font-poppins text-[18px] font-semibold text-[#181818]">
+              Members ({totalMembers})
+            </h2>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               {selectedIds.length > 0 && (

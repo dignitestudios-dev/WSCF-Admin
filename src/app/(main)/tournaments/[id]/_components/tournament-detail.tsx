@@ -158,7 +158,9 @@ export default function TournamentDetail() {
               </span>
             </button>
 
-            {/* Delete Button */}
+            {/* A tournament with anyone registered cannot be deleted — the API
+                refuses it — so the button is not offered at all. */}
+            {totalItems === 0 && (
             <button
               onClick={() => setShowDeleteConfirm(true)}
               className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-[124px] justify-center"
@@ -170,6 +172,7 @@ export default function TournamentDetail() {
                 Delete
               </span>
             </button>
+            )}
           </div>
         </div>
 
@@ -227,13 +230,16 @@ export default function TournamentDetail() {
                 Registered Players ({totalItems})
               </h2>
 
-              {/* CSV Button */}
+              {/* Nothing to export with nobody registered, so the button says
+                  so rather than producing an empty file. */}
               <button 
                 onClick={() => {
                   setExportDivisionId('all');
                   setShowExportDialog(true);
                 }}
-                className="flex items-center gap-2 px-3 py-1.5 bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[42px] shrink-0 shadow-sm w-full sm:w-auto justify-center cursor-pointer"
+                disabled={totalItems === 0}
+                title={totalItems === 0 ? 'No participants to export' : undefined}
+                className="flex items-center gap-2 px-3 py-1.5 bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[42px] shrink-0 shadow-sm w-full sm:w-auto justify-center cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[#083F92]/10"
               >
                 <div className="w-[32px] h-[32px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md">
                   <FileSpreadsheet className="w-4 h-4" />

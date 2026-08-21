@@ -67,7 +67,9 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
       date: '',
       location: '',
       entryFee: '',
-      divisions: [{ type: 'open' }],
+      // Conditional is what almost every division is, so a new tournament
+      // starts on it rather than on Open.
+      divisions: [{ type: 'conditional', condition: 'under' }],
     },
   });
 
@@ -208,14 +210,22 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
     const duplicates = new Set<number>();
 
     allDivisions.forEach((d, i) => {
-      if (d.type !== 'open' && d.divisionType && d.condition && d.rating !== undefined && !Number.isNaN(d.rating)) {
-        const name = divisionLabel(d.divisionType, d.condition, d.rating);
-        if (names.has(name)) {
-          duplicates.add(i);
-          duplicates.add(names.get(name)!);
-        } else {
-          names.set(name, i);
-        }
+      // Open divisions have no label of their own, so they collide by being
+      // Open at all — a tournament can only have one.
+      const name =
+        d.type === 'open'
+          ? 'Open'
+          : d.divisionType && d.condition && d.rating !== undefined && !Number.isNaN(d.rating)
+            ? divisionLabel(d.divisionType, d.condition, d.rating)
+            : null;
+
+      if (!name) return;
+
+      if (names.has(name)) {
+        duplicates.add(i);
+        duplicates.add(names.get(name)!);
+      } else {
+        names.set(name, i);
       }
     });
     return duplicates;
@@ -386,9 +396,12 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 gap-y-5 pr-6 mt-2">
                   <div className="flex flex-col gap-2">
                     <Label className="font-poppins font-medium text-[14px] text-[#181818]">Type</Label>
+                    {/* Every division picks its own type freely. Locking the
+                        dropdown once one Open division existed left the others
+                        looking broken; a duplicate Open is caught on save
+                        instead, where it can be explained. */}
                     <Select
                       value={divType}
-                      disabled={watch('divisions')?.some((d, i) => d.type === 'open' && i !== index)}
                       onValueChange={(val) => {
                         if (val) setValue(`divisions.${index}.type`, val as 'open' | 'conditional' | 'exact', { shouldDirty: true, shouldValidate: true });
                       }}

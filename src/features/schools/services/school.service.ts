@@ -4,6 +4,8 @@ export interface School {
   _id: string;
   name: string;
   address: string;
+  /** How many players are registered here, counted by the API. */
+  studentCount?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -53,9 +55,9 @@ export const schoolService = {
     return response.data;
   },
 
-  /** `playerId` is the player being assigned — a child, not the account. */
-  assignUser: async (id: string, playerId: string): Promise<any> => {
-    const response = await axiosInstance.post(`/schools/${id}/assign-user`, { playerId });
+  /** The ids are players — children, not the parent accounts. */
+  assignUser: async (id: string, playerIds: string[]): Promise<any> => {
+    const response = await axiosInstance.post(`/schools/${id}/assign-user`, { playerIds });
     return response.data;
   },
 };

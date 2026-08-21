@@ -79,7 +79,11 @@ export default function Users() {
 
             {/* Search Pill Input */}
             <div className="w-full sm:w-auto">
-              <SearchInput value={searchQuery} onChangeValue={setSearchQuery} />
+              <SearchInput
+                value={searchQuery}
+                onChangeValue={setSearchQuery}
+                placeholder="Search by membership ID, first or last name"
+              />
             </div>
           </div>
 

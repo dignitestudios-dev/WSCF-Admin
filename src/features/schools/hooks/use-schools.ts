@@ -61,16 +61,21 @@ export function useDeleteSchool() {
   });
 }
 
+/** Assigns one or many players to a school. */
 export function useAssignUserToSchool() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, userId }: { id: string; userId: string }) => schoolService.assignUser(id, userId),
-    onSuccess: (_, variables) => {
+    mutationFn: ({ id, playerIds }: { id: string; playerIds: string[] }) =>
+      schoolService.assignUser(id, playerIds),
+    onSuccess: (response: any, variables) => {
       queryClient.invalidateQueries({ queryKey: ['school', variables.id] });
-      toast.success('User assigned to school successfully');
+      // The school's student count and each player's school both moved.
+      queryClient.invalidateQueries({ queryKey: ['schools'] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast.success(response?.message || 'Players assigned to school successfully');
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to assign user');
+      toast.error(error?.response?.data?.message || 'Failed to assign players');
     },
   });
 }
