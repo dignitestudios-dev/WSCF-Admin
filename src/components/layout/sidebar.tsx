@@ -15,7 +15,8 @@ import {
   LogOut,
   Loader2,
   X,
-  School
+  School,
+  TicketPercent
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -46,6 +47,7 @@ export function Sidebar({ onClose }: SidebarProps) {
     // component are intentionally kept — reachable directly at
     // /current-enrolled-users if it is ever needed again.
     { name: 'Membership', href: '/membership', icon: CreditCard },
+    { name: 'Coupons', href: '/coupons', icon: TicketPercent },
     { name: 'Result Uploader', href: '/result-uploader', icon: Upload },
   ];
 
