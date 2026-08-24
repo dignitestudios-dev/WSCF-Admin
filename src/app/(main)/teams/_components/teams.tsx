@@ -85,6 +85,7 @@ export default function Teams() {
                 <tr className="h-[50px] bg-[#083F92] text-left font-poppins text-[13px] font-semibold text-white">
                   <th className="w-[70px] px-6 py-3 font-semibold">No</th>
                   <th className="px-6 py-3 font-semibold">Team Name</th>
+                  <th className="w-[110px] px-6 py-3 font-semibold">Code</th>
                   <th className="w-[140px] px-6 py-3 font-semibold">Members</th>
                   <th className="w-[160px] px-6 py-3 font-semibold">Created</th>
                   <th className="w-[160px] px-6 py-3 text-right font-semibold">Action</th>
@@ -139,6 +140,14 @@ export default function Teams() {
                             {team.name}
                           </span>
                         </td>
+                        {/* The code WinTD knows this team by. It appears in the
+                            entry files we hand over and the result files that
+                            come back, so an admin reading WinTD needs it here. */}
+                        <td className="px-6 py-3">
+                          <span className="font-mono text-[12px] tracking-wide text-[#636363]">
+                            {team.code || '—'}
+                          </span>
+                        </td>
                         <td className="px-6 py-3">
                           <span className="inline-flex items-center rounded-full bg-[#083F92]/10 px-3 py-1 text-[12px] font-semibold text-[#083F92]">
                             {team.memberCount ?? 0}
@@ -171,7 +180,7 @@ export default function Teams() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={5} className="px-6 py-16">
+                    <td colSpan={6} className="px-6 py-16">
                       <div className="flex flex-col items-center justify-center gap-3 text-center">
                         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#083F92]">
                           <UsersRound className="h-6 w-6 text-white" />

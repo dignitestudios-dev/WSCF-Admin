@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useGetTournament } from '@/features/tournaments/hooks/use-get-tournament';
 import { useGetTournamentParticipants } from '@/features/tournaments/hooks/use-get-tournament-participants';
+import { WinTdExportCard } from '@/features/results/components/wintd-export-card';
 import { useDeleteTournament } from '@/features/tournaments/hooks/use-delete-tournament';
 import { tournamentService } from '@/features/tournaments/services/tournament.service';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -225,6 +226,14 @@ export default function TournamentDetail() {
           <div className="w-full bg-[#083F92]/10 rounded-[12px] p-6 flex flex-col gap-6 relative">
 
             {/* Header titles + CSV action button */}
+            {/* Handed to WinTD before the event is played. */}
+            {tournament?.divisions?.length > 0 && !tournament?.resultsPublishedAt ? (
+              <WinTdExportCard
+                tournamentId={id}
+                divisions={tournament.divisions}
+              />
+            ) : null}
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full border-b border-[#083F92]/10 pb-2 gap-4">
               <h2 className="font-poppins font-bold text-[24px] leading-[36px] text-[#083F92] m-0">
                 Registered Players ({totalItems})

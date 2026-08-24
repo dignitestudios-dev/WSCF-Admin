@@ -3,6 +3,11 @@ import { axiosInstance } from '@/lib/axios';
 export interface Team {
   _id: string;
   name: string;
+  /**
+   * The short code WinTD knows this team by, assigned on creation and never
+   * changed — it is what ties a returning results row back to this team.
+   */
+  code?: string | null;
   /** Only present on the list endpoint, which counts members per team. */
   memberCount?: number;
   isDeleted: boolean;
