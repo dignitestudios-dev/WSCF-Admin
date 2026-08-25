@@ -14,7 +14,7 @@ import { Pagination } from '@/components/ui/pagination';
 import { PageTransition } from '@/components/animations/page-transition';
 import { useDebounce } from '@/hooks/use-debounce';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { useMemberships, useExportMemberships } from '@/features/memberships/hooks/use-memberships';
 import { useSendIndividualNotification } from '@/features/notifications/hooks/use-send-notification';
 import { Skeleton } from '@/components/ui/skeleton';

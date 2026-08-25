@@ -23,7 +23,7 @@ import { PageTransition } from '@/components/animations/page-transition';
 import Link from 'next/link';
 import { useUserDetails, useDeactivateUser, useActivateUser } from '@/features/users/hooks/use-users';
 import { EditUserDialog } from '@/features/users/components/edit-user-dialog';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUserTournamentHistory } from '@/features/tournaments/hooks/use-user-tournament-history';
 import { Pagination } from '@/components/ui/pagination';
@@ -203,7 +203,7 @@ export default function UserProfile() {
         </div>
 
         {/* Outer Banner and Details Container */}
-        <div className="w-full bg-[#083F92] rounded-[20px] shadow-md flex flex-col relative min-h-[600px]">
+        <div className="w-full bg-[#083F92] rounded-[24px] shadow-md flex flex-col relative min-h-[600px]">
 
           {/* Blue Top Profile Header Area */}
           <div className="w-full px-6 md:px-12 pt-8 pb-10 flex flex-col md:flex-row gap-6 items-center relative z-10">

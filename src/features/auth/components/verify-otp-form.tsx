@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { ArrowLeft } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { useForgotPassword } from '../hooks/use-forgot-password';
 import { useVerifyOtp } from '../hooks/use-verify-otp';
 

@@ -75,7 +75,7 @@ export default function SchoolDetail() {
               {/* Details Cards */}
               <div className="grid grid-cols-1 gap-6 mt-4">
                 {/* Address Card */}
-                <div className="flex flex-col gap-3 p-6 bg-[#083F92]/5 border border-[#083F92]/10 rounded-[16px] transition-all hover:bg-[#083F92]/10">
+                <div className="flex flex-col gap-3 p-6 bg-[#083F92]/5 border border-[#083F92]/10 rounded-[24px] transition-all hover:bg-[#083F92]/10">
                   <div className="flex items-center gap-3 text-[#083F92] mb-1">
                     <MapPin className="w-6 h-6" />
                     <h3 className="font-poppins font-semibold text-[18px]">Location Address</h3>
@@ -100,7 +100,7 @@ export default function SchoolDetail() {
                   </h3>
                 </div>
 
-                <div className="w-full border border-[#DADADA] rounded-[16px] overflow-hidden relative pb-14">
+                <div className="w-full border border-[#DADADA] rounded-[24px] overflow-hidden relative pb-14">
                   <table className="w-full border-collapse table-fixed">
                     <thead>
                       <tr className="bg-[#083F92] text-white text-left h-[50px] font-poppins font-semibold text-[13px]">

@@ -1,7 +1,7 @@
 'use client';
 
-import ResultUploader from "./_components/result-uploader";
+import ResultUploaderList from "./_components/result-uploader-list";
 
 export default function ResultUploaderPage() {
-  return <ResultUploader />;
+  return <ResultUploaderList />;
 }

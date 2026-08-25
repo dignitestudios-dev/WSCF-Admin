@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronDown } from 'lucide-react';
 import { tournamentService } from '@/features/tournaments/services/tournament.service';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 export default function CurrentEnrolledUsers() {
   const [searchQuery, setSearchQuery] = useState('');

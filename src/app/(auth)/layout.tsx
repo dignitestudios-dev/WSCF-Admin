@@ -15,7 +15,7 @@ export default function AuthLayout({
           
           {/* Left Side: Image (Shared) */}
           <div className="hidden lg:flex w-1/2 justify-center items-center h-full xl:justify-start">
-            <div className="relative w-[682px] h-full rounded-[20px] overflow-hidden bg-[#EAEAEA] shadow-xl">
+            <div className="relative w-[682px] h-full rounded-[24px] overflow-hidden bg-[#EAEAEA] shadow-xl">
               <Image 
                 src="/images/admin.webp"
                 alt="Admin Background"

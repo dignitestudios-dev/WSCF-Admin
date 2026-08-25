@@ -4,7 +4,7 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { notificationService, NotificationsPage } from '../services/notification.service';
 
 const PAGE_SIZE = 15;
@@ -83,9 +83,60 @@ export function useMarkAllNotificationsRead() {
   });
 }
 
+/**
+ * Removes one notification, taking it off the list straight away.
+ *
+ * Waiting for the round trip left the row sitting there under the cursor for
+ * as long as the network took, which reads as a dead button. The row is pulled
+ * out of the cache first and put back if the request fails, so the only case
+ * that ever looks slow is the one that did not work.
+ */
 export function useRemoveNotification() {
-  return useNotificationMutation<string>((id) => notificationService.remove(id), {
-    errorMessage: 'Could not remove the notification',
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => notificationService.remove(id),
+
+    onMutate: async (id: string) => {
+      // Any in-flight refetch would land after this and undo it.
+      await queryClient.cancelQueries({ queryKey: notificationKeys.feed });
+
+      const previous = queryClient.getQueryData(notificationKeys.feed);
+
+      queryClient.setQueryData(notificationKeys.feed, (cached: any) => {
+        if (!cached?.pages) return cached;
+        return {
+          ...cached,
+          pages: cached.pages.map((page: NotificationsPage) => ({
+            ...page,
+            data: {
+              ...page.data,
+              notifications: page.data.notifications.filter(
+                (notification) => notification._id !== id
+              ),
+            },
+          })),
+        };
+      });
+
+      return { previous };
+    },
+
+    onError: (error: unknown, _id, context) => {
+      // Put it back exactly as it was, then say why.
+      if (context?.previous !== undefined) {
+        queryClient.setQueryData(notificationKeys.feed, context.previous);
+      }
+      const message =
+        (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Could not remove the notification';
+      toast.error(message);
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: notificationKeys.feed });
+      queryClient.invalidateQueries({ queryKey: notificationKeys.unread });
+    },
   });
 }
 

@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { authService } from '../services/auth.service';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 export function useResetPassword() {
   return useMutation<any, any, { data: { password: string }; token: string }>({

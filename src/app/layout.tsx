@@ -54,7 +54,7 @@ export default function RootLayout({
             {children}
           </OfflineProvider>
         </QueryProvider>
-        <Toaster position="top-right" richColors />
+        <Toaster closeButton />
       </body>
     </html>
   );

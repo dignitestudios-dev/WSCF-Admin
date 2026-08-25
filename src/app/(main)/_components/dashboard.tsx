@@ -11,6 +11,7 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { PageTransition } from '@/components/animations/page-transition';
+import { Loader2 } from "lucide-react";
 import { PieChart, Pie, Cell, Label } from "recharts";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { useDashboardKPIs } from '@/features/dashboard/hooks/use-dashboard-kpis';
@@ -43,13 +44,23 @@ export default function Dashboard() {
   const tournaments = tournamentsData?.data?.tournaments || [];
   const totalUpcoming = tournamentsData?.pagination?.totalItems || 0;
 
-  const totalTournaments = kpis ? kpis.tournaments.upcoming + kpis.tournaments.ongoing + kpis.tournaments.completed : 180;
+  const totalTournaments = kpis
+    ? kpis.tournaments.upcoming + kpis.tournaments.ongoing + kpis.tournaments.completed
+    : 0;
 
-  const pieData = [
-    { name: "completed", value: kpis?.tournaments.completed ?? 124, fill: "var(--color-completed)" },
-    { name: "inProgress", value: kpis?.tournaments.ongoing ?? 32, fill: "var(--color-inProgress)" },
-    { name: "upcoming", value: kpis?.tournaments.upcoming ?? 24, fill: "var(--color-upcoming)" }
+  const realSegments = [
+    { name: "completed", value: kpis?.tournaments.completed ?? 0, fill: "var(--color-completed)" },
+    { name: "inProgress", value: kpis?.tournaments.ongoing ?? 0, fill: "var(--color-inProgress)" },
+    { name: "upcoming", value: kpis?.tournaments.upcoming ?? 0, fill: "var(--color-upcoming)" }
   ].filter(d => d.value > 0);
+
+  // With nothing to plot, recharts draws nothing at all and the card comes out
+  // as an empty blue rectangle that reads as broken. A single flat grey arc
+  // says "no tournaments yet" instead, and the 0 in the middle says the rest.
+  const isChartEmpty = realSegments.length === 0;
+  const pieData = isChartEmpty
+    ? [{ name: "none", value: 1, fill: "rgba(255,255,255,0.18)" }]
+    : realSegments;
 
   return (
     <PageTransition>
@@ -103,7 +114,7 @@ export default function Dashboard() {
             <div className="flex flex-row gap-6 w-full flex-wrap justify-center sm:justify-start lg:flex-nowrap">
 
               {/* Card 1: Total Users */}
-              <div className="w-full sm:w-[236.5px] h-[240px] bg-[#083F92]/10 rounded-[16px] relative shadow-sm group hover:shadow-md transition-all duration-200 shrink-0">
+              <div className="w-full sm:w-[236.5px] h-[240px] bg-[#083F92]/10 rounded-[24px] relative shadow-sm group hover:shadow-md transition-all duration-200 shrink-0">
                 <span className="absolute left-[16px] top-[16px] font-poppins font-light text-[16px] leading-[24px] tracking-[-0.019em] text-[#000000]/70">
                   Total User's Count
                 </span>
@@ -133,7 +144,7 @@ export default function Dashboard() {
               </div>
 
               {/* Card 2: Active Users */}
-              <div className="w-full sm:w-[236.5px] h-[240px] bg-[#083F92]/10 rounded-[16px] relative shadow-sm group hover:shadow-md transition-all duration-200 shrink-0">
+              <div className="w-full sm:w-[236.5px] h-[240px] bg-[#083F92]/10 rounded-[24px] relative shadow-sm group hover:shadow-md transition-all duration-200 shrink-0">
                 <span className="absolute left-[16px] top-[16px] font-poppins font-light text-[16px] leading-[24px] tracking-[-0.019em] text-[#000000]/70">
                   Active User Count
                 </span>
@@ -165,22 +176,32 @@ export default function Dashboard() {
             </div>
 
             {/* Tournament Progress Card */}
-            <div className="h-[476px] bg-[#083F92] rounded-[32.9px] p-8 flex flex-col justify-between relative overflow-hidden shadow-lg text-white">
+            <div className="h-[476px] bg-[#083F92] rounded-[24px] p-8 flex flex-col justify-between relative overflow-hidden shadow-lg text-white">
               <span className="font-poppins font-semibold text-[16px] leading-[150%] tracking-[-0.019em] text-[#F6F6F6]/90 self-start z-10">
                 Tournament Progress
               </span>
 
               {/* Shadcn Stacked Radial Chart */}
               <div className="flex flex-col items-center justify-center relative w-full h-[150px] z-10 mt-8 mb-4">
+                {isLoadingKPIs ? (
+                  <div className="flex h-[150px] w-full max-w-[300px] flex-col items-center justify-center gap-3">
+                    <Loader2 className="h-7 w-7 animate-spin text-white/70" />
+                    <span className="font-poppins text-[12px] text-white/60">
+                      Loading tournaments...
+                    </span>
+                  </div>
+                ) : (
                 <ChartContainer
                   config={chartConfig}
                   className="mx-auto w-full max-w-[300px] h-[150px]"
                 >
                   <PieChart>
-                    <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent hideLabel />}
-                    />
+                    {isChartEmpty ? null : (
+                      <ChartTooltip
+                        cursor={false}
+                        content={<ChartTooltipContent hideLabel />}
+                      />
+                    )}
                     <Pie
                       data={pieData}
                       dataKey="value"
@@ -225,6 +246,7 @@ export default function Dashboard() {
                     </Pie>
                   </PieChart>
                 </ChartContainer>
+                )}
               </div>
 
               {/* Bottom Chart Legends */}
@@ -232,19 +254,19 @@ export default function Dashboard() {
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-[#FFFFFF] shrink-0" />
                   <span className="font-poppins font-medium text-[13px] leading-[18px] text-white">
-                    {kpis?.tournaments.completed ?? 124} Completed
+                    {kpis?.tournaments.completed ?? 0} Completed
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-[#FBBF24] shrink-0" />
                   <span className="font-poppins font-medium text-[13px] leading-[18px] text-white">
-                    {kpis?.tournaments.ongoing ?? 32} In-Progress
+                    {kpis?.tournaments.ongoing ?? 0} In-Progress
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-[#60A5FA] shrink-0" />
                   <span className="font-poppins font-medium text-[13px] leading-[18px] text-white">
-                    {kpis?.tournaments.upcoming ?? 24} Upcoming
+                    {kpis?.tournaments.upcoming ?? 0} Upcoming
                   </span>
                 </div>
               </div>
@@ -253,7 +275,7 @@ export default function Dashboard() {
           </div>
 
           {/* Right Side: Scrollable Upcoming Tournaments List */}
-          <div className="xl:col-span-6 w-full h-[740px] bg-white rounded-[16px] p-6 shadow-md flex flex-col">
+          <div className="xl:col-span-6 w-full h-[740px] bg-white rounded-[24px] p-6 shadow-md flex flex-col">
 
             {/* Header Row */}
             <div className="flex justify-between items-center w-full border-b pb-4 mb-4 shrink-0">

@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { notificationService, SendBulkNotificationRequest, SendBulkNotificationResponse, SendIndividualNotificationRequest, SendIndividualNotificationResponse } from '../services/notification.service';
 
 export function useSendNotification() {

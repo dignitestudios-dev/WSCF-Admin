@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import Image from 'next/image';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { resetPasswordSchema, ResetPasswordFormData } from '../schema/reset-password.schema';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useResetPassword } from '../hooks/use-reset-password';

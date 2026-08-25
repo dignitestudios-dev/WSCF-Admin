@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertTriangle, Trophy, Users } from 'lucide-react';
+import { AlertTriangle, FileText, Info, Trophy, Users } from 'lucide-react';
 import type { ResultPreview } from '../services/result.service';
 
 /**
@@ -17,6 +17,10 @@ export function ResultPreviewPanel({ preview }: { preview: ResultPreview }) {
   const totalUnmatched = preview.divisions.reduce((sum, d) => sum + d.unmatchedCount, 0);
   const unresolvedTeams = preview.divisions.flatMap((division) =>
     division.teams.filter((team) => !team.resolved)
+  );
+  const totalWithdrawn = preview.divisions.reduce(
+    (sum, division) => sum + (division.playerCount - division.printedCount),
+    0
   );
 
   return (
@@ -56,6 +60,18 @@ export function ResultPreviewPanel({ preview }: { preview: ResultPreview }) {
         </div>
       ) : null}
 
+      {totalWithdrawn > 0 ? (
+        <div className="flex items-start gap-3 rounded-[12px] border border-[#083F92]/20 bg-[#083F92]/5 px-4 py-3">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-[#083F92]" />
+          <p className="font-poppins text-[12px] leading-5 text-[#3D3775]">
+            <strong>{totalWithdrawn} player(s)</strong> withdrew and will not be
+            printed on the document. Their results are still recorded and their
+            ratings still updated, and the trophies below go to the first places
+            that do appear.
+          </p>
+        </div>
+      ) : null}
+
       {unresolvedTeams.length > 0 ? (
         <div className="flex items-start gap-3 rounded-[12px] border border-[#F5A524]/40 bg-[#FFF7E6] px-4 py-3">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#B54708]" />
@@ -71,10 +87,31 @@ export function ResultPreviewPanel({ preview }: { preview: ResultPreview }) {
         </div>
       ) : null}
 
+      {preview.attachments.length > 0 ? (
+        <div className="flex flex-col gap-2 rounded-[12px] border border-[#DADADA] bg-white px-5 py-4">
+          <p className="font-poppins text-[13px] font-semibold text-[#181818]">
+            Extra pages at the back —{' '}
+            {preview.attachments.reduce((sum, a) => sum + a.pageCount, 0)} page(s)
+          </p>
+          {preview.attachments.map((attachment, index) => (
+            <div
+              key={`${attachment.name}-${index}`}
+              className="flex items-center gap-3 font-poppins text-[12px] text-[#565656]"
+            >
+              <FileText className="h-3.5 w-3.5 shrink-0 text-[#083F92]" />
+              <span className="min-w-0 flex-1 truncate">{attachment.name}</span>
+              <span className="shrink-0 text-[#8C8C8C]">
+                {attachment.pageCount} page(s)
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
       {preview.divisions.map((division) => (
         <div
           key={division.divisionId}
-          className="overflow-hidden rounded-[16px] border border-[#DADADA] bg-white"
+          className="overflow-hidden rounded-[24px] border border-[#DADADA] bg-white"
         >
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#EFEFEF] px-5 py-4">
             <div className="flex items-center gap-3">
@@ -82,8 +119,11 @@ export function ResultPreviewPanel({ preview }: { preview: ResultPreview }) {
                 {division.divisionLabel}
               </span>
               <span className="font-poppins text-[12px] text-[#8C8C8C]">
-                {division.playerCount} players · {division.teamCount} teams ·{' '}
-                {division.roundLabels.length} rounds
+                {division.printedCount} players
+                {division.printedCount < division.playerCount
+                  ? ` (+${division.playerCount - division.printedCount} withdrawn)`
+                  : ''}{' '}
+                · {division.teamCount} teams · {division.roundLabels.length} rounds
               </span>
             </div>
 
@@ -119,7 +159,7 @@ export function ResultPreviewPanel({ preview }: { preview: ResultPreview }) {
                     .map((player) => (
                       <div
                         key={`${player.place}-${player.name}`}
-                        className="flex items-center gap-3 rounded-[10px] bg-[#F7F6FF] px-3 py-2"
+                        className="flex items-center gap-3 rounded-[12px] bg-[#F7F6FF] px-3 py-2"
                       >
                         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#083F92] font-poppins text-[11px] font-bold text-white">
                           {player.trophyPlace}
@@ -130,6 +170,11 @@ export function ResultPreviewPanel({ preview }: { preview: ResultPreview }) {
                         <span className="font-poppins text-[12px] text-[#565656]">
                           {player.points} pts · {player.rating ?? 'unrated'}
                         </span>
+                        {player.highlightLabel ? (
+                          <span className="shrink-0 rounded-full bg-[#F7F6FF] px-2 py-0.5 font-poppins text-[10px] font-semibold text-[#083F92]">
+                            {player.highlightLabel}
+                          </span>
+                        ) : null}
                         {!player.matched ? (
                           <span className="shrink-0 rounded-full bg-[#FFF4E5] px-2 py-0.5 font-poppins text-[10px] font-semibold text-[#B54708]">
                             not on system
@@ -157,7 +202,7 @@ export function ResultPreviewPanel({ preview }: { preview: ResultPreview }) {
                     .map((team) => (
                       <div
                         key={team.teamCode}
-                        className="flex items-center gap-3 rounded-[10px] bg-[#F7F6FF] px-3 py-2"
+                        className="flex items-center gap-3 rounded-[12px] bg-[#F7F6FF] px-3 py-2"
                       >
                         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#083F92] font-poppins text-[11px] font-bold text-white">
                           {team.trophyPlace}

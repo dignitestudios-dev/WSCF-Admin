@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { formService, CreateFormFieldRequest } from '../services/form.service';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 export function useCreateFormField() {
   const queryClient = useQueryClient();

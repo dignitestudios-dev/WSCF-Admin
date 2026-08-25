@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { schoolService } from '../services/school.service';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 export function useSchools(page = 1, limit = 10, search = '') {
   return useQuery({

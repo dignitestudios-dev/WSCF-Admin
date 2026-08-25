@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { authService } from '../services/auth.service';
 import { LoginFormData } from '../schema/login.schema';
 import { AuthResponse } from '../types';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { useRouter } from 'next/navigation';
 import { setCookie } from '@/lib/cookie';
 export function useLogin() {

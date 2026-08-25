@@ -11,7 +11,7 @@ import {
 import { PageTransition } from '@/components/animations/page-transition';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface FormField {

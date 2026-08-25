@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { tournamentService } from '../services/tournament.service';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 export function useUpdateTournament() {
   const queryClient = useQueryClient();

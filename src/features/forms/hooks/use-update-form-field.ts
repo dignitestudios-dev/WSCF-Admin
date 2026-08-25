@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { formService, UpdateFormFieldRequest } from '../services/form.service';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 interface UpdateParams {
   id: string;

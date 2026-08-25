@@ -380,7 +380,7 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
             // error surfaces as a toast.
             const isConditional = divType === 'conditional' || divType === 'exact';
             return (
-              <div key={field.id} className="flex flex-col gap-4 p-5 bg-white border border-[#DADADA]/60 shadow-[0_2px_10px_rgba(0,0,0,0.03)] rounded-[16px] relative overflow-hidden group transition-all hover:border-[#083F92]/30">
+              <div key={field.id} className="flex flex-col gap-4 p-5 bg-white border border-[#DADADA]/60 shadow-[0_2px_10px_rgba(0,0,0,0.03)] rounded-[24px] relative overflow-hidden group transition-all hover:border-[#083F92]/30">
                 <div className="absolute top-0 left-0 w-1 h-full bg-[#083F92] opacity-80" />
                 {divisionFields.length > 1 && (
                   <button
