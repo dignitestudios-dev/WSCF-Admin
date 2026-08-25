@@ -543,7 +543,7 @@ export default function ResultUploaderDetail({
                       />
                     </div>
 
-                    <button
+                    {/* <button
                       type="button"
                       disabled={isDownloading}
                       onClick={downloadPdf}
@@ -557,7 +557,7 @@ export default function ResultUploaderDetail({
                       {isDownloading
                         ? 'Preparing...'
                         : `Download ${published.pdfFileName || 'Results.pdf'}`}
-                    </button>
+                    </button> */}
                   </div>
                 ) : null}
               </div>
