@@ -796,12 +796,14 @@ export default function ResultUploaderDetail({
                         </div>
                       ) : null}
 
-                      {/* Two ordered steps rather than two buttons side by
-                          side. Publishing is irreversible, so it stays shut
-                          until the files have actually been read — and any
-                          change to the files sends the admin back to step
-                          one, because the check they passed no longer
-                          describes what they are about to publish. */}
+                      {/* Two ordered steps, with everything they produce in
+                          between: check the files, read the standings, tag
+                          whoever needs tagging, then publish. Publishing is
+                          irreversible, so it stays shut until the files have
+                          actually been read — and any change to the files
+                          sends the admin back to step one, because the check
+                          they passed no longer describes what they are about
+                          to publish. */}
                       <div className="flex flex-col gap-3 rounded-[12px] border border-[#DADADA] bg-white p-5">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                           <span
@@ -841,45 +843,6 @@ export default function ResultUploaderDetail({
                                 : "Check files"}
                           </button>
                         </div>
-
-                        <div className="h-px w-full bg-[#EFEFEF]" />
-
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                          <span
-                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-poppins text-[12px] font-bold ${
-                              preview
-                                ? "bg-[#083F92] text-white"
-                                : "bg-[#EFEFEF] text-[#A6A6A6]"
-                            }`}
-                          >
-                            2
-                          </span>
-
-                          <div className="flex min-w-0 flex-1 flex-col">
-                            <span
-                              className={`font-poppins text-[13px] font-semibold ${
-                                preview ? "text-[#181818]" : "text-[#A6A6A6]"
-                              }`}
-                            >
-                              Publish the results
-                            </span>
-                            <span className="font-poppins text-[11px] leading-4 text-[#636363]">
-                              {preview
-                                ? "Replaces ratings and generates the document. This cannot be undone."
-                                : "Available once the files have been checked."}
-                            </span>
-                          </div>
-
-                          <button
-                            type="button"
-                            disabled={!canSubmit || !preview || isPublishing}
-                            onClick={() => setIsConfirmOpen(true)}
-                            className="flex h-[44px] shrink-0 cursor-pointer items-center justify-center gap-2 rounded-[100px] bg-[#083F92] px-5 font-poppins text-[14px] font-semibold text-white shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            <CheckCircle2 className="h-4 w-4" />
-                            Publish results
-                          </button>
-                        </div>
                       </div>
 
                       {preview ? (
@@ -894,6 +857,46 @@ export default function ResultUploaderDetail({
                           />
                         </div>
                       ) : null}
+
+                      {/* Step two, kept at the very bottom: once the standings
+                          have been reviewed and the players tagged, the button
+                          is right there rather than back up the page. */}
+                      <div className="flex flex-col gap-3 rounded-[12px] border border-[#DADADA] bg-white p-5 sm:flex-row sm:items-center">
+                        <span
+                          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-poppins text-[12px] font-bold ${
+                            preview
+                              ? "bg-[#083F92] text-white"
+                              : "bg-[#EFEFEF] text-[#A6A6A6]"
+                          }`}
+                        >
+                          2
+                        </span>
+
+                        <div className="flex min-w-0 flex-1 flex-col">
+                          <span
+                            className={`font-poppins text-[13px] font-semibold ${
+                              preview ? "text-[#181818]" : "text-[#A6A6A6]"
+                            }`}
+                          >
+                            Publish the results
+                          </span>
+                          <span className="font-poppins text-[11px] leading-4 text-[#636363]">
+                            {preview
+                              ? "Replaces ratings and generates the document. This cannot be undone."
+                              : "Available once the files have been checked."}
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          disabled={!canSubmit || !preview || isPublishing}
+                          onClick={() => setIsConfirmOpen(true)}
+                          className="flex h-[44px] shrink-0 cursor-pointer items-center justify-center gap-2 rounded-[100px] bg-[#083F92] px-5 font-poppins text-[14px] font-semibold text-white shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <CheckCircle2 className="h-4 w-4" />
+                          Publish results
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
