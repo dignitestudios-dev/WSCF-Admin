@@ -77,7 +77,7 @@ export function ResultPreviewPanel({ preview }: { preview: ResultPreview }) {
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#B54708]" />
           <p className="font-poppins text-[12px] leading-5 text-[#7A4B00]">
             <strong>{unresolvedTeams.length} team(s)</strong> could not be matched to a
-            school, so the document will print their code (
+            team, so the document will print their code (
             {unresolvedTeams
               .slice(0, 4)
               .map((team) => team.teamCode)

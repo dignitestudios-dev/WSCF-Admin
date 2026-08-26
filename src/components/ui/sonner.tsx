@@ -3,15 +3,19 @@
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 
 /**
- * Toasts, styled to match the player app.
+ * Toasts, styled to match the player app exactly.
  *
- * Same corner, same solid green/red card, same heading-plus-detail shape and
- * the same dismiss button — the two interfaces are one product and should not
- * announce things in two different visual languages.
+ * `unstyled` is the important part. Sonner ships its own base styles on
+ * `[data-sonner-toast]`, and they outrank utility classes passed through
+ * `classNames` — set a background there and sonner's own still wins, which is
+ * why an earlier attempt at this looked unchanged. Turning its styling off
+ * entirely means the classes below are the only ones in play.
  *
- * `richColors` is deliberately off: it paints its own pale palette and would
- * fight the solid colours set below.
+ * Everything here mirrors `toast.tsx` in the player app: bottom right, a solid
+ * green or red card, a heading with the detail underneath, and a dismiss
+ * button.
  */
+
 function SuccessIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -40,9 +44,8 @@ function ErrorIcon() {
 const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
-      theme="light"
       position="bottom-right"
-      className="toaster group"
+      duration={4000}
       icons={{
         success: <SuccessIcon />,
         error: <ErrorIcon />,
@@ -50,18 +53,29 @@ const Toaster = ({ ...props }: ToasterProps) => {
         warning: <ErrorIcon />,
       }}
       toastOptions={{
+        // Without this, sonner's own styles win and none of the below applies.
+        unstyled: true,
         classNames: {
           toast:
-            "flex w-full max-w-sm items-start gap-3 rounded-xl px-4 py-3 text-white shadow-[0_8px_24px_rgba(15,23,42,0.2)] border-none font-poppins",
+            "flex w-full max-w-sm items-start gap-3 rounded-xl px-4 py-3 text-white font-poppins shadow-[0_8px_24px_rgba(15,23,42,0.2)]",
           success: "bg-emerald-600",
           error: "bg-red-600",
           info: "bg-[#083F92]",
           warning: "bg-amber-600",
-          icon: "shrink-0 text-white mt-0.5",
+          // No `default` entry on purpose. Sonner applies the default class
+          // *alongside* the type class, so two `bg-*` utilities would land on
+          // the same element and the winner would be decided by Tailwind's
+          // emission order rather than by intent — an error toast could come
+          // out blue after an unrelated change.
+          loading: "bg-[#083F92]",
+          icon: "mt-0.5 shrink-0 text-white",
+          content: "min-w-0 flex-1",
           title: "text-sm font-semibold text-white",
           description: "mt-0.5 text-sm leading-snug text-white/95",
           closeButton:
-            "bg-transparent border-none text-white/80 hover:bg-white/15 hover:text-white",
+            "shrink-0 rounded-md p-1 text-white/80 transition-colors hover:bg-white/15 hover:text-white",
+          actionButton: "rounded-md bg-white/20 px-2 py-1 text-xs font-semibold text-white",
+          cancelButton: "rounded-md px-2 py-1 text-xs font-semibold text-white/80",
         },
       }}
       {...props}

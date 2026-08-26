@@ -67,7 +67,7 @@ export interface PreviewTeam {
   place: number | null;
   teamCode: string;
   teamName: string;
-  /** False means the PDF will print the code rather than a school name. */
+  /** False means the PDF will print the code rather than a team name. */
   resolved: boolean;
   playerCount: number | null;
   score: number | null;

@@ -22,13 +22,6 @@ interface MemberPickerProps {
   excludedIds?: string[];
   /** What to call being already in it. */
   excludedLabel?: string;
-  /**
-   * Players already at this school are excluded wherever they appear.
-   *
-   * Resolved from each row rather than from a list of ids, so it holds across
-   * pages and searches without fetching the whole roster up front.
-   */
-  excludedSchoolId?: string;
 }
 
 /**
@@ -45,7 +38,6 @@ export function MemberPicker({
   disabled,
   excludedIds = [],
   excludedLabel = 'On this team',
-  excludedSchoolId,
 }: MemberPickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -149,7 +141,6 @@ export function MemberPicker({
                     grade?: string;
                     email?: string;
                     status?: string;
-                    school?: { _id: string; name: string } | null;
                   }) => {
                   // A row is a player — a child. Siblings share a surname and
                   // their parent's email, so the grade and membership id are
@@ -167,9 +158,7 @@ export function MemberPicker({
                     .join(' · ');
                   const isSelected = selectedIds.has(user._id);
                   const isOnTeam =
-                    excluded.has(user._id) ||
-                    (Boolean(excludedSchoolId) &&
-                      user.school?._id === excludedSchoolId);
+                    excluded.has(user._id);
                   // The API rejects players whose account is deactivated, so
                   // block them here rather than letting the batch come back
                   // with a failure.

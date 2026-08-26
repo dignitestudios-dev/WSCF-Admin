@@ -10,12 +10,10 @@ import {
   CreditCard,
   Upload,
   Bell,
-  FolderLock,
   UserPlus,
   LogOut,
   Loader2,
   X,
-  School,
   TicketPercent
 } from 'lucide-react';
 import Link from 'next/link';
@@ -40,7 +38,6 @@ export function Sidebar({ onClose }: SidebarProps) {
   const featuresNav = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
     { name: 'Users', href: '/users', icon: Users },
-    { name: 'Schools', href: '/schools', icon: School },
     { name: 'Tournaments', href: '/tournaments', icon: Trophy },
     { name: 'Teams', href: '/teams', icon: UserPlus },
     // Current Enrolled Users is hidden from navigation but the route and its
@@ -53,7 +50,6 @@ export function Sidebar({ onClose }: SidebarProps) {
 
   const generalNav = [
     { name: 'Push Notifications', href: '/notifications', icon: Bell },
-    { name: 'Form Management', href: '/forms', icon: FolderLock },
     { name: 'Logout', href: '/logout', icon: LogOut },
   ];
 

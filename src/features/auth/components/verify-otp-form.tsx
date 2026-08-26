@@ -192,6 +192,11 @@ export function VerifyOtpForm() {
 
       {/* Form */}
       <form onSubmit={onSubmit} className="flex flex-col items-center gap-[26px] w-full max-w-[421px]">
+        {/* Locked while the request is in flight: disabling only the
+            submit button leaves every field editable after the values
+            have already been sent. `contents` keeps the fieldset out
+            of the layout. */}
+        <fieldset disabled={isPending} className="contents">
         <div className="flex flex-col items-center gap-[26px] w-full">
 
           {/* OTP inputs container */}
@@ -250,7 +255,8 @@ export function VerifyOtpForm() {
             </p>
           </div>
         </div>
-      </form>
+      </fieldset>
+        </form>
     </div>
   );
 }

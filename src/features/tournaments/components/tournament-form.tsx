@@ -3,12 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Minus, Plus, X, CalendarIcon, Loader2 } from 'lucide-react';
+import { Plus, X, CalendarIcon, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { tournamentSchema, TournamentFormData } from '../schema/tournament.schema';
-import { useFormFields } from '@/features/forms/hooks/use-form-fields';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
@@ -42,14 +41,7 @@ export interface TournamentFormProps {
 const DIVISION_TYPES = ['K', 'K1', 'K2', 'K3', 'K4', 'K5', 'K6', 'K7', 'K8', 'K9', 'K10', 'K11', 'K12'];
 
 export function TournamentForm({ initialData, onSubmitAction, isPending, submitButtonText = "Save" }: TournamentFormProps) {
-  const [customFields, setCustomFields] = useState<Record<string, string[]>>({});
-  const [initialCustomFields, setInitialCustomFields] = useState<Record<string, string[]>>({});
-  const [customFieldInputs, setCustomFieldInputs] = useState<Record<string, string>>({});
-  const [customFieldErrors, setCustomFieldErrors] = useState<Record<string, string>>({});
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-
-  const { data: formFieldsData } = useFormFields(true);
-  const tournamentSpecificFields = formFieldsData?.data?.fields || [];
 
   const {
     register,
@@ -80,15 +72,6 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
 
   useEffect(() => {
     if (initialData) {
-      const initCustomFields: Record<string, string[]> = {};
-      if (initialData.customDropdownOptions) {
-        initialData.customDropdownOptions.forEach((opt: any) => {
-          initCustomFields[opt.fieldId] = opt.values || [];
-        });
-      }
-      setCustomFields(initCustomFields);
-      setInitialCustomFields(initCustomFields);
-
       const formattedDate = initialData.date ? new Date(initialData.date).toISOString().split('T')[0] : '';
 
       reset({
@@ -109,48 +92,7 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
     }
   }, [initialData, reset]);
 
-  const handleAddCustomField = (fieldId: string) => {
-    const input = customFieldInputs[fieldId] || '';
-    const trimmed = input.trim();
-    if (!trimmed) return;
-
-    setCustomFields(prev => {
-      const current = prev[fieldId] || [];
-      return { ...prev, [fieldId]: [...current, trimmed] };
-    });
-    setCustomFieldInputs(prev => ({ ...prev, [fieldId]: '' }));
-    setCustomFieldErrors(prev => ({ ...prev, [fieldId]: '' }));
-  };
-
-  const handleRemoveCustomField = (fieldId: string, index: number) => {
-    setCustomFields(prev => {
-      const current = prev[fieldId] || [];
-      return { ...prev, [fieldId]: current.filter((_, i) => i !== index) };
-    });
-  };
-
-  const handleCustomFieldInput = (fieldId: string, value: string) => {
-    setCustomFieldInputs(prev => ({ ...prev, [fieldId]: value }));
-  };
-
   const onSubmit = (data: TournamentFormData) => {
-    let hasError = false;
-    const newErrors: Record<string, string> = {};
-
-    tournamentSpecificFields.forEach(field => {
-      if (field.nature === 'mandatory') {
-        const values = customFields[field._id] || [];
-        if (values.length === 0) {
-          hasError = true;
-          newErrors[field._id] = `${field.fieldName} is mandatory. Please add at least one option.`;
-        }
-      }
-    });
-
-    if (hasError) {
-      setCustomFieldErrors(newErrors);
-      return;
-    }
 
     const payload = {
       title: data.title,
@@ -176,10 +118,6 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
           condition: d.condition === 'over' ? 'above' : (d.condition || 'under')
         };
       }),
-      customDropdownOptions: Object.keys(customFields).map(fieldId => ({
-        fieldId,
-        values: customFields[fieldId]
-      })).filter(opt => opt.values.length > 0)
     };
 
     onSubmitAction(payload);
@@ -235,6 +173,11 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-[22px] w-full">
+        {/* Locked while the request is in flight: disabling only the
+            submit button leaves every field editable after the values
+            have already been sent. `contents` keeps the fieldset out
+            of the layout. */}
+        <fieldset disabled={isPending} className="contents">
 
       {/* Main Grid for Inputs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-[22px] w-full">
@@ -542,74 +485,10 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
         </Button>
       </div>
 
-      {/* Dynamic Tournament Specific Fields */}
-      {tournamentSpecificFields.length > 0 && (
-        <div className="flex flex-col gap-4 border-t border-neutral-100 pt-4">
-          <Label className="font-poppins font-medium text-[16px] leading-[21px] text-[#083F92] capitalize m-0">
-            Tournament Specific Fields
-          </Label>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-[22px] w-full">
-          {tournamentSpecificFields.map(field => (
-            <div key={field._id} className="flex flex-col gap-2 w-full">
-              <Label
-                className="font-poppins font-medium text-[14px] leading-[21px] text-[#181818] capitalize"
-              >
-                Add {field.fieldName} {field.nature === 'mandatory' ? <span className="text-red-500">*</span> : '(Optional)'}
-              </Label>
-
-              {/* Field Input Row */}
-              <div className="relative h-[42px]! flex items-center w-full bg-white border border-[#3D3775] rounded-full overflow-hidden">
-                <Input
-                  placeholder={`Write ${field.fieldName.toLowerCase()}!`}
-                  maxLength={50}
-                  value={customFieldInputs[field._id] || ''}
-                  onChange={(e) => handleCustomFieldInput(field._id, e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomField(field._id); } }}
-                  className="w-full h-full flex-1 bg-transparent border-none pl-4 pr-[80px] font-general-sans text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleAddCustomField(field._id)}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 w-[92px] h-[92px] bg-[#083F92] rounded-full flex items-center justify-center hover:bg-[#083F92]/95 transition-colors shrink-0 z-10 focus:outline-none"
-                >
-                  <Plus className="w-[28px] h-[28px] text-white stroke-[2.5]" />
-                </button>
-              </div>
-              {customFieldErrors[field._id] && (
-                <p className="text-[12px] text-red-500 mt-[-6px]">{customFieldErrors[field._id]}</p>
-              )}
-
-              {/* Tags */}
-              {customFields[field._id]?.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {customFields[field._id].map((div, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-3 h-[42px]! px-4 pr-2.5 bg-white border border-[#3D3775] rounded-full"
-                    >
-                      <span className="font-general-sans font-medium text-[14px] text-[#181818]">{div}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveCustomField(field._id, i)}
-                        className="w-[24px] h-[24px] rounded-full bg-[#083F92] flex items-center justify-center text-white hover:opacity-90 transition-opacity focus:outline-none"
-                      >
-                        <Minus className="w-[14px] h-[14px] stroke-[3]" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-          </div>
-        </div>
-      )}
-
       {/* Submit Button */}
       <Button
         type="submit"
-        disabled={isPending || !isValid || duplicateIndices.size > 0 || (!!initialData && !isDirty && JSON.stringify(customFields) === JSON.stringify(initialCustomFields))}
+        disabled={isPending || !isValid || duplicateIndices.size > 0 || (!!initialData && !isDirty)}
         className="w-full h-[52px] bg-[#083F92] hover:bg-[#083F92]/90 rounded-full mt-8 disabled:opacity-50 shadow-md"
       >
         {isPending ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
@@ -617,6 +496,7 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
           {submitButtonText}
         </span>
       </Button>
-    </form>
+    </fieldset>
+        </form>
   );
 }

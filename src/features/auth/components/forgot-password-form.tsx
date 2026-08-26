@@ -50,6 +50,11 @@ export function ForgotPasswordForm() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col items-center gap-[26px] w-full max-w-[421px]">
+        {/* Locked while the request is in flight: disabling only the
+            submit button leaves every field editable after the values
+            have already been sent. `contents` keeps the fieldset out
+            of the layout. */}
+        <fieldset disabled={isPending} className="contents">
         <div className="w-full max-w-[343px] flex flex-col gap-[26px]">
 
           <div className="flex flex-col items-start gap-[8px] w-full">
@@ -86,7 +91,8 @@ export function ForgotPasswordForm() {
             </Button>
           </div>
         </div>
-      </form>
+      </fieldset>
+        </form>
     </div>
   );
 }

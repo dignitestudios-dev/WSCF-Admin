@@ -45,9 +45,11 @@ underscore).
 
 ```
 src/app/(auth)/…      login, forgot-password, verify-otp, reset-password
-src/app/(main)/…      dashboard, tournaments, users, schools, teams,
-                      forms, membership, notifications, result-uploader,
+src/app/(main)/…      dashboard, tournaments, users, teams, membership,
+                      notifications, result-uploader, coupons,
                       current-enrolled-users
+                      (also `forms`, still routed but hidden from the nav —
+                       the dynamic registration form is switched off)
 src/features/<x>/     components/ hooks/ schema/ services/ types/
 src/components/ui/    shadcn primitives
 src/components/layout admin-layout, sidebar, topbar
@@ -109,9 +111,8 @@ Base URL + `/…`, all admin endpoints. Current surface in use:
 |---|---|
 | auth | `/auth/admin/signin`, `/forgot-password`, `/verify-otp`, `/reset-password`, `/logout` |
 | dashboard | `/dashboard/kpis` |
-| tournaments | `/tournament`, `/tournament/{id}`, `/tournament/{id}/participants`, `…/participants/export`, `/tournament/form-fields`, `/tournament/user-history/{userId}` |
+| tournaments | `/tournament`, `/tournament/{id}`, `/tournament/{id}/participants`, `…/participants/export`, `/tournament/user-history/{userId}` |
 | users | `/user`, `/user/{id}`, `/user/{id}/activate`, `/user/{id}/deactivate`, `/user/export` |
-| schools | `/schools`, `/schools/{id}`, `/schools/{id}/assign-user` |
 | teams | `/team`, `/team/{id}`, `/team/{teamId}/members` (GET list, POST add, DELETE bulk remove), `/team/{teamId}/members/{userId}` |
 | membership | `/membership/admin/all`, `/membership/admin/export` |
 | notifications | `/notification/send-bulk`, `/notification/send-individual` |
@@ -134,3 +135,21 @@ These are real and worth knowing before changing related code.
 - **~58 explicit `any`** across services and hooks, concentrated in mutation
   payloads and error handlers, so request shapes are largely unchecked.
 - **No error boundaries.** Failures surface only as toasts.
+
+## Removed from the product
+
+- **Schools.** The module is gone from backend, admin and player, and the
+  `schools` collection was dropped. Teams are unrelated and unaffected.
+- **The dynamic registration form is switched off, not deleted.** Registration
+  collects a division and nothing else. The `/forms` screens, the
+  `/tournament/form-fields` endpoints and `registrationData` all still exist and
+  still work — nothing reaches them. The server accepts field answers if any are
+  sent but never requires them, so putting the UI back is all that is needed.
+
+## Toasts
+
+Both apps must look the same. `components/ui/sonner.tsx` sets `unstyled: true`
+— without it sonner's own base styles outrank the `classNames` and none of the
+styling applies. Call sites import `toast` from `@/lib/toast`, not from sonner
+directly; that wrapper supplies the "Success"/"Error" heading and puts the
+message in the description, matching the player app.

@@ -66,6 +66,11 @@ export function EditCouponDialog({ open, onOpenChange, coupon }: EditCouponDialo
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-4 flex flex-col gap-4">
+        {/* Locked while the request is in flight: disabling only the
+            submit button leaves every field editable after the values
+            have already been sent. `contents` keeps the fieldset out
+            of the layout. */}
+        <fieldset disabled={isPending} className="contents">
           <div className="flex flex-col gap-2">
             <Label className="font-poppins text-[14px] font-medium text-[#181818]">
               Coupon Code
@@ -117,6 +122,7 @@ export function EditCouponDialog({ open, onOpenChange, coupon }: EditCouponDialo
               {isPending ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
+        </fieldset>
         </form>
       </DialogContent>
     </Dialog>

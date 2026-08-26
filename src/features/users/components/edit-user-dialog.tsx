@@ -218,6 +218,11 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-0 px-8 pb-8 pt-4 overflow-y-auto no-scrollbar max-h-[80vh]">
+        {/* Locked while the request is in flight: disabling only the
+            submit button leaves every field editable after the values
+            have already been sent. `contents` keeps the fieldset out
+            of the layout. */}
+        <fieldset disabled={isPending} className="contents">
           <div className="flex flex-col gap-[22px]">
             {/* Name */}
             <div className="flex flex-col sm:flex-row gap-4">
@@ -522,6 +527,7 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
               {isPending ? 'Saving...' : 'Save Changes'}
             </span>
           </Button>
+        </fieldset>
         </form>
       </DialogContent>
     </Dialog>

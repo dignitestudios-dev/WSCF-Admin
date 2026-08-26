@@ -5,12 +5,10 @@ export function useUsers(
   page: number,
   limit: number,
   search: string = '',
-  schoolId?: string
 ) {
   return useQuery({
-    // schoolId must be part of the key, or the cached unfiltered list is served
-    queryKey: ['users', { page, limit, search, schoolId }],
-    queryFn: () => userService.getUsers(page, limit, search, schoolId),
+    queryKey: ['users', { page, limit, search }],
+    queryFn: () => userService.getUsers(page, limit, search),
     staleTime: 5 * 60 * 1000,
   });
 }

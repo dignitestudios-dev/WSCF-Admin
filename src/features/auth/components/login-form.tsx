@@ -42,6 +42,11 @@ export function LoginForm() {
 
       {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col items-center gap-[26px] w-full max-w-[421px]">
+        {/* Locked while the request is in flight: disabling only the
+            submit button leaves every field editable after the values
+            have already been sent. `contents` keeps the fieldset out
+            of the layout. */}
+        <fieldset disabled={isPending} className="contents">
         <div className="w-full max-w-[343px] flex flex-col gap-[26px]">
 
           {/* Email Input */}
@@ -120,7 +125,8 @@ export function LoginForm() {
             </Button>
           </div>
         </div>
-      </form>
+      </fieldset>
+        </form>
     </div>
   );
 }

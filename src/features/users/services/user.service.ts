@@ -66,7 +66,6 @@ export interface UserListItem {
   email: string | null;
   status: string | null;
 
-  school?: School | null;
   team?: {
     _id: string;
     name: string;
@@ -97,12 +96,6 @@ export interface ParentDetails {
   phone: string;
   email: string;
   isPrimary: boolean;
-}
-
-export interface School {
-  _id: string;
-  name: string;
-  address?: string;
 }
 
 export interface TeamSummary {
@@ -139,17 +132,10 @@ export const userService = {
   getUsers: async (
     page: number,
     limit: number,
-    search: string = '',
-    schoolId?: string
+    search: string = ''
   ): Promise<UsersResponse> => {
     const response = await axiosInstance.get<UsersResponse>('/user', {
-      params: {
-        page,
-        limit,
-        search,
-        // Omitted unless set, so the unfiltered list is unaffected
-        ...(schoolId ? { schoolId } : {}),
-      },
+      params: { page, limit, search },
     });
     return response.data;
   },

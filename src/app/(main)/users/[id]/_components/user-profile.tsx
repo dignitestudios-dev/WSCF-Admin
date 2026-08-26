@@ -108,7 +108,6 @@ export default function UserProfile() {
     userId: profile?.membershipId || profile?._id?.substring(0, 8).toUpperCase() || "...",
     grade: profile?.grade || "N/A",
     team: profile?.team?.name || "N/A",
-    school: profile?.school?.name || "N/A",
     rating: profile?.rating?.toString() || "0",
     city: account?.address?.city || "N/A",
     performance: {
@@ -264,14 +263,7 @@ export default function UserProfile() {
                   </div>
                 </div>
 
-                {/* Divider Line & Stats block - School */}
-                <div className="flex items-center md:items-start gap-0 md:gap-3 justify-center md:justify-start">
-                  <div className="hidden md:block w-[4px] h-[18px] bg-white rounded-full shrink-0" />
-                  <div className="flex flex-col items-center md:items-start text-center md:text-left">
-                    <span className="font-poppins font-normal text-[12px] leading-[18px] text-white/70">School</span>
-                    <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em]">{userData.school}</span>
-                  </div>
-                </div>
+
 
                 {/* Divider Line & Stats block - Rating */}
                 <div className="flex items-center md:items-start gap-0 md:gap-3 justify-center md:justify-start">

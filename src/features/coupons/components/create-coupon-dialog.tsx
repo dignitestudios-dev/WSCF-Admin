@@ -22,10 +22,11 @@ const createCouponSchema = z
       .trim()
       .min(3, 'Code must be at least 3 characters')
       .max(32, 'Code must be at most 32 characters')
-      .regex(
-        /^[A-Za-z0-9_-]+$/,
-        'Only letters, numbers, hyphens and underscores'
-      ),
+      // Matches the server rule: upper case, and no whitespace anywhere. The
+      // input formats as you type, so neither of these should ever be seen —
+      // they are the backstop for a paste that slips through.
+      .refine((value) => !/\s/.test(value), 'Spaces are not allowed')
+      .regex(/^[^a-z\s]+$/, 'Use upper case only'),
     validFrom: z.string().optional().or(z.literal('')),
     validUntil: z.string().optional().or(z.literal('')),
   })
@@ -51,6 +52,7 @@ export function CreateCouponDialog({ open, onOpenChange }: CreateCouponDialogPro
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<CreateCouponFormData>({
     resolver: zodResolver(createCouponSchema),
@@ -60,6 +62,21 @@ export function CreateCouponDialog({ open, onOpenChange }: CreateCouponDialogPro
   useEffect(() => {
     if (open) reset();
   }, [open, reset]);
+
+  /**
+   * Formats the code as it is typed: upper case, and no whitespace at all.
+   *
+   * Codes are read off a flyer and typed back in, so one that differs only by
+   * case — or that carries a space nobody can see — becomes a support ticket.
+   * Fixing it here means the admin never types an invalid code in the first
+   * place, rather than being told off after pressing save.
+   */
+  const formatCode = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const cleaned = event.target.value.toUpperCase().replace(/\s+/g, '');
+    if (cleaned !== event.target.value) {
+      setValue('code', cleaned, { shouldValidate: true });
+    }
+  };
 
   const onSubmit = async (data: CreateCouponFormData) => {
     try {
@@ -86,6 +103,11 @@ export function CreateCouponDialog({ open, onOpenChange }: CreateCouponDialogPro
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-4 flex flex-col gap-4">
+        {/* Locked while the request is in flight: disabling only the
+            submit button leaves every field editable after the values
+            have already been sent. `contents` keeps the fieldset out
+            of the layout. */}
+        <fieldset disabled={isPending} className="contents">
           <div className="flex flex-col gap-2">
             <Label htmlFor="code" className="font-poppins text-[14px] font-medium text-[#181818]">
               Coupon Code
@@ -94,11 +116,11 @@ export function CreateCouponDialog({ open, onOpenChange }: CreateCouponDialogPro
               id="code"
               placeholder="SUMMER25"
               autoComplete="off"
-              className="h-11 rounded-full border-[#3D3775] px-4 font-poppins"
-              {...register('code')}
+              className="h-11 rounded-full border-[#3D3775] px-4 font-poppins tracking-wide"
+              {...register('code', { onChange: formatCode })}
             />
             <p className="font-poppins text-[11px] text-[#8C8C8C]">
-              Case sensitive — SUMMER25 and summer25 are different codes. The code
+              Upper case only, no spaces — both are applied as you type. The code
               cannot be changed once created.
             </p>
             {errors.code ? (
@@ -163,6 +185,7 @@ export function CreateCouponDialog({ open, onOpenChange }: CreateCouponDialogPro
               {isPending ? 'Creating...' : 'Create Coupon'}
             </Button>
           </div>
+        </fieldset>
         </form>
       </DialogContent>
     </Dialog>
