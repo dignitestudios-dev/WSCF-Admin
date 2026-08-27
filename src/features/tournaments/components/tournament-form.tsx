@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, X, CalendarIcon, Loader2 } from 'lucide-react';
+import { Plus, X, CalendarIcon, GraduationCap, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -102,11 +102,12 @@ function GradeRangePicker({
       setSettled(false);
       return;
     }
-    // Second click widens from the anchor, whichever side it falls on.
+    // Second click widens from the anchor, whichever side it falls on. The
+    // panel deliberately stays open so the span can be re-picked without
+    // reopening it; closing is the admin's call.
     const anchor = min as number;
     onChange(Math.min(anchor, value), Math.max(anchor, value));
     setSettled(true);
-    setOpen(false);
   };
 
   // While a second click is pending, shade what the span would become.
@@ -133,10 +134,10 @@ function GradeRangePicker({
         <span className={cn(!label && "text-[#181818]/40")}>
           {label ?? "Select grade or range"}
         </span>
-        <CalendarIcon className="w-4 h-4 shrink-0 text-[#083F92]" />
+        <GraduationCap className="w-4 h-4 shrink-0 text-[#083F92]" />
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-auto p-3">
-        <div className="grid grid-cols-7 gap-1">
+      <PopoverContent align="start" className="w-auto min-w-0 p-2">
+        <div className="grid grid-cols-2 gap-1">
           {GRADE_OPTIONS.map((g) => {
             const selected = inSpan(g.value);
             const isEdge = g.value === previewLow || g.value === previewHigh;
@@ -149,7 +150,7 @@ function GradeRangePicker({
                 onMouseLeave={() => setHovered(null)}
                 title={gradeOptionLabel(g.value)}
                 className={cn(
-                  "h-9 w-9 rounded-md text-[13px] font-poppins font-medium transition-colors",
+                  "h-8 w-[4.5rem] rounded-md text-[13px] font-poppins font-medium transition-colors",
                   selected
                     ? isEdge
                       ? "bg-[#083F92] text-white"
@@ -157,16 +158,24 @@ function GradeRangePicker({
                     : "text-[#181818] hover:bg-[#083F92]/10"
                 )}
               >
-                {g.label}
+                {g.value === 0 ? 'K' : g.label}
               </button>
             );
           })}
         </div>
-        <p className="mt-3 text-[12px] leading-snug text-[#181818]/60 max-w-[15rem]">
+        <p className="mt-2 text-[11px] leading-snug text-[#181818]/60 w-[9.5rem]">
           {settled || !hasSelection
-            ? "Pick a grade. Pick a second one to cover a range."
-            : `Pick another grade to extend the range, or close to keep ${gradeSpanLabel(min, max)}.`}
+            ? "Pick a grade, then a second one for a range."
+            : "Pick another grade to extend the range."}
         </p>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="mt-2 w-full h-8 rounded-md bg-[#083F92] text-white text-[12px] font-poppins font-medium transition-colors hover:bg-[#083F92]/90 disabled:opacity-50"
+          disabled={!hasSelection}
+        >
+          Done
+        </button>
       </PopoverContent>
     </Popover>
   );
