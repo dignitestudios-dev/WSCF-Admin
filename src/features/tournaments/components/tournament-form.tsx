@@ -12,13 +12,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 
 const getLocalDateFromUtcString = (utcString: string) => {
   if (!utcString) return undefined;
@@ -56,26 +49,128 @@ const gradeLabel = (value?: number) => {
 const gradeOptionLabel = (value: number) =>
   value === 0 ? 'Kindergarten (K)' : `Grade ${value}`;
 
-/**
- * Base UI's Select.Value renders the raw value unless it is given a formatter,
- * so a grade select left to itself shows "0" for kindergarten. Every grade
- * dropdown here passes this.
- */
-const renderGradeValue = (placeholder: string) => (value: unknown) => {
-  if (value === null || value === undefined || value === '') return placeholder;
-  const asNumber = Number(value);
-  return Number.isNaN(asNumber) ? placeholder : gradeOptionLabel(asNumber);
+/** How a chosen span reads once it is set. */
+const gradeSpanLabel = (min?: number, max?: number) => {
+  const a = gradeLabel(min);
+  const b = gradeLabel(max);
+  if (a === null || b === null) return null;
+  return a === b ? `Grade ${a}` : `Grades ${a}\u2013${b}`;
 };
 
 /** A blank division, ready for the admin to name. */
 const emptyDivision = () => ({
   name: '',
-  gradeMode: 'single' as const,
   gradeMin: undefined,
   gradeMax: undefined,
   rating: undefined,
   condition: undefined,
 });
+
+/**
+ * Picks either one grade or a span of them, in a single control.
+ *
+ * Modelled on a date-range picker: the first click sets both ends, so one
+ * click is a complete single-grade selection; a second click widens the span
+ * from whichever end is further away. A third starts over. There is no mode to
+ * switch, which is the point -- "grade 3" and "grades K-3" are the same
+ * gesture, one click apart.
+ */
+function GradeRangePicker({
+  min,
+  max,
+  onChange,
+  disabled,
+}: {
+  min?: number;
+  max?: number;
+  onChange: (min: number, max: number) => void;
+  disabled?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  // Set once a span is complete, so the next click starts a fresh selection
+  // instead of widening the old one.
+  const [settled, setSettled] = useState(true);
+  const [hovered, setHovered] = useState<number | null>(null);
+
+  const hasSelection = min !== undefined && !Number.isNaN(min) && max !== undefined && !Number.isNaN(max);
+  const label = gradeSpanLabel(min, max);
+
+  const pick = (value: number) => {
+    if (!hasSelection || settled) {
+      // First click of a selection: a complete, single-grade span.
+      onChange(value, value);
+      setSettled(false);
+      return;
+    }
+    // Second click widens from the anchor, whichever side it falls on.
+    const anchor = min as number;
+    onChange(Math.min(anchor, value), Math.max(anchor, value));
+    setSettled(true);
+    setOpen(false);
+  };
+
+  // While a second click is pending, shade what the span would become.
+  const previewLow = !settled && hasSelection && hovered !== null ? Math.min(min as number, hovered) : min;
+  const previewHigh = !settled && hasSelection && hovered !== null ? Math.max(min as number, hovered) : max;
+  const inSpan = (value: number) =>
+    previewLow !== undefined && previewHigh !== undefined &&
+    !Number.isNaN(previewLow) && !Number.isNaN(previewHigh) &&
+    value >= previewLow && value <= previewHigh;
+
+  return (
+    <Popover
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        // Leaving mid-selection keeps the single grade already chosen.
+        if (!next) { setSettled(true); setHovered(null); }
+      }}
+    >
+      <PopoverTrigger
+        disabled={disabled}
+        className="w-full h-[42px] bg-white border border-[#3D3775] rounded-full px-4 font-poppins font-normal text-[14px] text-left text-[#181818] outline-none focus:ring-0 focus-visible:ring-0 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-between gap-2"
+      >
+        <span className={cn(!label && "text-[#181818]/40")}>
+          {label ?? "Select grade or range"}
+        </span>
+        <CalendarIcon className="w-4 h-4 shrink-0 text-[#083F92]" />
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-auto p-3">
+        <div className="grid grid-cols-7 gap-1">
+          {GRADE_OPTIONS.map((g) => {
+            const selected = inSpan(g.value);
+            const isEdge = g.value === previewLow || g.value === previewHigh;
+            return (
+              <button
+                key={g.value}
+                type="button"
+                onClick={() => pick(g.value)}
+                onMouseEnter={() => setHovered(g.value)}
+                onMouseLeave={() => setHovered(null)}
+                title={gradeOptionLabel(g.value)}
+                className={cn(
+                  "h-9 w-9 rounded-md text-[13px] font-poppins font-medium transition-colors",
+                  selected
+                    ? isEdge
+                      ? "bg-[#083F92] text-white"
+                      : "bg-[#083F92]/15 text-[#083F92]"
+                    : "text-[#181818] hover:bg-[#083F92]/10"
+                )}
+              >
+                {g.label}
+              </button>
+            );
+          })}
+        </div>
+        <p className="mt-3 text-[12px] leading-snug text-[#181818]/60 max-w-[15rem]">
+          {settled || !hasSelection
+            ? "Pick a grade. Pick a second one to cover a range."
+            : `Pick another grade to extend the range, or close to keep ${gradeSpanLabel(min, max)}.`}
+        </p>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 export function TournamentForm({ initialData, onSubmitAction, isPending, submitButtonText = "Save" }: TournamentFormProps) {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -119,10 +214,6 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
           // instead of replacing it and orphaning its participants.
           _id: d._id,
           name: d.name || '',
-          // A division covering one grade stores the same number twice, which
-          // is exactly what the Single toggle means - so the mode is read back
-          // off the values rather than stored alongside them.
-          gradeMode: d.gradeMin === d.gradeMax ? 'single' : 'range',
           gradeMin: typeof d.gradeMin === 'number' ? d.gradeMin : undefined,
           gradeMax: typeof d.gradeMax === 'number' ? d.gradeMax : undefined,
           rating: typeof d.rating === 'number' ? d.rating : undefined,
@@ -144,18 +235,13 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
         // Only send _id for divisions that already exist server-side.
         const identity = d._id ? { _id: d._id } : {};
 
-        // gradeMode is a form control, not part of the API shape. A single
-        // grade is sent as the same number twice.
-        const gradeMin = d.gradeMin;
-        const gradeMax = d.gradeMode === 'single' ? d.gradeMin : d.gradeMax;
-
         const hasRating = d.rating !== undefined && !Number.isNaN(d.rating);
 
         return {
           ...identity,
           name: (d.name || '').trim(),
-          gradeMin,
-          gradeMax,
+          gradeMin: d.gradeMin,
+          gradeMax: d.gradeMax,
           // null, not 0 - a division with no rating limit is not one that caps
           // ratings at zero.
           rating: hasRating ? d.rating : null,
@@ -178,18 +264,10 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
     const div = watch(`divisions.${index}`);
     if (!div) return '';
 
-    const min = gradeLabel(div.gradeMin);
-    if (min === null) return 'Choose a grade';
+    const span = gradeSpanLabel(div.gradeMin, div.gradeMax);
+    if (span === null) return 'Choose a grade';
 
-    const parts: string[] = [];
-
-    if (div.gradeMode === 'single') {
-      parts.push(`Grade ${min}`);
-    } else {
-      const max = gradeLabel(div.gradeMax);
-      if (max === null) return 'Choose an end grade';
-      parts.push(`Grades ${min}\u2013${max}`);
-    }
+    const parts: string[] = [span];
 
     if (div.rating !== undefined && !Number.isNaN(div.rating)) {
       // Which side of the limit qualifies decides who may enter, so the
@@ -379,8 +457,6 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
             // participants, and that error surfaces as a toast. Renaming is
             // always allowed - the name is display text that eligibility
             // never reads.
-            const gradeMode = watch(`divisions.${index}.gradeMode`) ?? 'single';
-            const isRange = gradeMode === 'range';
             return (
               <div key={field.id} className="flex flex-col gap-4 p-5 bg-white border border-[#DADADA]/60 shadow-[0_2px_10px_rgba(0,0,0,0.03)] rounded-[24px] relative overflow-hidden group transition-all hover:border-[#083F92]/30">
                 <div className="absolute top-0 left-0 w-1 h-full bg-[#083F92] opacity-80" />
@@ -412,106 +488,23 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
                     )}
                   </div>
 
-                  {/* Grades. One grade or a span, chosen the way a date
-                      picker chooses a day or a date range. */}
+                  {/* Grades. One control, the way a date picker takes either
+                      a single date or a range: the first grade sets both ends,
+                      a second widens the span. */}
                   <div className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                      <Label className="font-poppins font-medium text-[14px] text-[#181818]">Grades</Label>
-                      <div className="inline-flex items-center p-1 bg-[#F1F5F9] rounded-full">
-                        {(['single', 'range'] as const).map((mode) => (
-                          <button
-                            key={mode}
-                            type="button"
-                            onClick={() => {
-                              setValue(`divisions.${index}.gradeMode`, mode, { shouldDirty: true, shouldValidate: true });
-                              // Leaving a stale end grade behind would submit
-                              // a span the admin can no longer see.
-                              if (mode === 'single') {
-                                setValue(`divisions.${index}.gradeMax`, undefined, { shouldDirty: true, shouldValidate: true });
-                              }
-                            }}
-                            className={cn(
-                              "px-4 py-1.5 rounded-full text-[13px] font-poppins font-medium transition-colors disabled:cursor-not-allowed",
-                              gradeMode === mode
-                                ? "bg-white text-[#083F92] shadow-sm"
-                                : "text-[#181818]/60 hover:text-[#083F92]"
-                            )}
-                          >
-                            {mode === 'single' ? 'Single grade' : 'Grade range'}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className={cn("grid gap-4", isRange ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1")}>
-                      <div className="flex flex-col gap-2">
-                        {isRange && (
-                          <Label className="font-poppins font-normal text-[13px] text-[#181818]/60">From</Label>
-                        )}
-                        <Select
-                          value={
-                            watch(`divisions.${index}.gradeMin`) !== undefined && !Number.isNaN(watch(`divisions.${index}.gradeMin`))
-                              ? String(watch(`divisions.${index}.gradeMin`))
-                              : undefined
-                          }
-                          onValueChange={(val) => {
-                            if (val !== undefined && val !== '') {
-                              setValue(`divisions.${index}.gradeMin`, Number(val), { shouldDirty: true, shouldValidate: true });
-                            }
-                          }}
-                        >
-                          <SelectTrigger className="w-full h-[42px]! bg-white border border-[#3D3775] rounded-full px-4 font-poppins font-normal text-[14px] text-[#181818] outline-none focus:ring-0 focus-visible:ring-0 disabled:opacity-50 disabled:cursor-not-allowed">
-                            <SelectValue placeholder={isRange ? "Start grade" : "Select grade"}>
-                              {renderGradeValue(isRange ? "Start grade" : "Select grade")}
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent alignItemWithTrigger={false}>
-                            {GRADE_OPTIONS.map(g => (
-                              <SelectItem key={g.value} value={String(g.value)}>
-                                {gradeOptionLabel(g.value)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {errors.divisions?.[index]?.gradeMin && (
-                          <p className="text-[12px] text-red-500 mt-[-6px]">{errors.divisions[index]?.gradeMin?.message}</p>
-                        )}
-                      </div>
-
-                      {isRange && (
-                        <div className="flex flex-col gap-2">
-                          <Label className="font-poppins font-normal text-[13px] text-[#181818]/60">To</Label>
-                          <Select
-                            value={
-                              watch(`divisions.${index}.gradeMax`) !== undefined && !Number.isNaN(watch(`divisions.${index}.gradeMax`))
-                                ? String(watch(`divisions.${index}.gradeMax`))
-                                : undefined
-                            }
-                            onValueChange={(val) => {
-                              if (val !== undefined && val !== '') {
-                                setValue(`divisions.${index}.gradeMax`, Number(val), { shouldDirty: true, shouldValidate: true });
-                              }
-                            }}
-                          >
-                            <SelectTrigger className="w-full h-[42px]! bg-white border border-[#3D3775] rounded-full px-4 font-poppins font-normal text-[14px] text-[#181818] outline-none focus:ring-0 focus-visible:ring-0 disabled:opacity-50 disabled:cursor-not-allowed">
-                              <SelectValue placeholder="End grade">
-                                {renderGradeValue("End grade")}
-                              </SelectValue>
-                            </SelectTrigger>
-                            <SelectContent alignItemWithTrigger={false}>
-                              {GRADE_OPTIONS.map(g => (
-                                <SelectItem key={g.value} value={String(g.value)}>
-                                  {gradeOptionLabel(g.value)}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          {errors.divisions?.[index]?.gradeMax && (
-                            <p className="text-[12px] text-red-500 mt-[-6px]">{errors.divisions[index]?.gradeMax?.message}</p>
-                          )}
-                        </div>
-                      )}
-                    </div>
+                    <Label className="font-poppins font-medium text-[14px] text-[#181818]">Grades</Label>
+                    <GradeRangePicker
+                      min={watch(`divisions.${index}.gradeMin`)}
+                      max={watch(`divisions.${index}.gradeMax`)}
+                      disabled={isPending}
+                      onChange={(nextMin, nextMax) => {
+                        setValue(`divisions.${index}.gradeMin`, nextMin, { shouldDirty: true, shouldValidate: true });
+                        setValue(`divisions.${index}.gradeMax`, nextMax, { shouldDirty: true, shouldValidate: true });
+                      }}
+                    />
+                    {errors.divisions?.[index]?.gradeMin && (
+                      <p className="text-[12px] text-red-500 mt-[-6px]">{errors.divisions[index]?.gradeMin?.message}</p>
+                    )}
                   </div>
 
                   {/* Rating. Optional - leaving it blank means the division

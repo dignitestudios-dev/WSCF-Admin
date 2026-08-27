@@ -5,14 +5,13 @@ import { z } from 'zod';
  * rating bound. There is no division "type" any more — a division spanning
  * K–12 with no rating is the open section.
  *
- * `gradeMode` is UI-only and is not sent. It drives whether the form shows one
- * grade select or two; a single grade submits as gradeMin === gradeMax, the
- * same way a date-range picker stores a single date.
+ * Grades are picked in one control, the way a date picker takes either a single
+ * date or a range: one grade sets both ends, a second widens the span. So a
+ * single grade is simply gradeMin === gradeMax, with no mode to track.
  */
 export const divisionSchema = z.object({
   _id: z.string().optional(),
   name: z.string().trim().min(1, 'Division name is required').max(40, 'Max 40 characters'),
-  gradeMode: z.enum(['single', 'range']),
   gradeMin: z.number().int().min(0).max(12).or(z.nan()).optional(),
   gradeMax: z.number().int().min(0).max(12).or(z.nan()).optional(),
   rating: z.number().or(z.nan()).optional(),
@@ -22,28 +21,20 @@ export const divisionSchema = z.object({
   const hasMin = data.gradeMin !== undefined && !Number.isNaN(data.gradeMin);
   const hasMax = data.gradeMax !== undefined && !Number.isNaN(data.gradeMax);
 
-  if (!hasMin) {
+  // The picker always writes both ends together, so either both are set or
+  // nothing has been chosen yet.
+  if (!hasMin || !hasMax) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ['gradeMin'],
-      message: data.gradeMode === 'single' ? 'Grade is required' : 'Start grade is required',
+      message: 'Grade is required',
     });
-  }
-
-  if (data.gradeMode === 'range') {
-    if (!hasMax) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['gradeMax'],
-        message: 'End grade is required',
-      });
-    } else if (hasMin && (data.gradeMax as number) < (data.gradeMin as number)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['gradeMax'],
-        message: 'End grade must be at or after the start grade',
-      });
-    }
+  } else if ((data.gradeMax as number) < (data.gradeMin as number)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['gradeMin'],
+      message: 'Grade range must end at or after it starts',
+    });
   }
 
   // Rating is optional. Once it is set it needs a direction, or the division
