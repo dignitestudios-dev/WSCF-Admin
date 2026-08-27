@@ -46,11 +46,12 @@ import {
 } from '@/features/results/services/result.service';
 
 /**
- * The results sheets name a division "K3", not "K3u800" — the rating bound is
- * a registration rule, and the people reading the standings do not need it.
+ * A division is called whatever the admin named it. The grade span and rating
+ * bound are registration rules, and the people reading the standings do not
+ * need them.
  */
 const divisionLabel = (division: any): string =>
-  division?.type === 'open' ? 'Open' : division?.divisionName || 'Division';
+  division?.name || division?.label || 'Division';
 
 /**
  * Guesses which division a file belongs to from its name.

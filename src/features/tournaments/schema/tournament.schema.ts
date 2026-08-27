@@ -1,92 +1,108 @@
 import { z } from 'zod';
 
+/**
+ * A division is a name the admin types, a span of grades, and an optional
+ * rating bound. There is no division "type" any more — a division spanning
+ * K–12 with no rating is the open section.
+ *
+ * `gradeMode` is UI-only and is not sent. It drives whether the form shows one
+ * grade select or two; a single grade submits as gradeMin === gradeMax, the
+ * same way a date-range picker stores a single date.
+ */
+export const divisionSchema = z.object({
+  _id: z.string().optional(),
+  name: z.string().trim().min(1, 'Division name is required').max(40, 'Max 40 characters'),
+  gradeMode: z.enum(['single', 'range']),
+  gradeMin: z.number().int().min(0).max(12).or(z.nan()).optional(),
+  gradeMax: z.number().int().min(0).max(12).or(z.nan()).optional(),
+  rating: z.number().or(z.nan()).optional(),
+  // The UI says "Over", the API says "above"; tournament-form.tsx translates.
+  condition: z.enum(['under', 'over']).optional(),
+}).superRefine((data, ctx) => {
+  const hasMin = data.gradeMin !== undefined && !Number.isNaN(data.gradeMin);
+  const hasMax = data.gradeMax !== undefined && !Number.isNaN(data.gradeMax);
+
+  if (!hasMin) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['gradeMin'],
+      message: data.gradeMode === 'single' ? 'Grade is required' : 'Start grade is required',
+    });
+  }
+
+  if (data.gradeMode === 'range') {
+    if (!hasMax) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['gradeMax'],
+        message: 'End grade is required',
+      });
+    } else if (hasMin && (data.gradeMax as number) < (data.gradeMin as number)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['gradeMax'],
+        message: 'End grade must be at or after the start grade',
+      });
+    }
+  }
+
+  // Rating is optional. Once it is set it needs a direction, or the division
+  // silently admits everyone instead of the group that was meant.
+  const hasRating = data.rating !== undefined && !Number.isNaN(data.rating);
+  if (hasRating) {
+    if ((data.rating as number) < 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['rating'],
+        message: 'Rating cannot be negative',
+      });
+    } else if ((data.rating as number) > 10000) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['rating'],
+        message: 'Max rating is 10000',
+      });
+    }
+
+    if (!data.condition) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['condition'],
+        message: 'Choose Under or Over',
+      });
+    }
+  }
+});
+
 export const tournamentSchema = z.object({
   title: z.string().min(3, 'Tournament title must be at least 3 characters').max(100, 'Tournament title must be at most 100 characters'),
   date: z.string().min(1, 'Date is required'),
   location: z.string().min(2, 'Location is required').max(100, 'Location must be at most 100 characters'),
   entryFee: z.string().min(1, 'Entry fee is required').refine(val => !isNaN(parseFloat(val)) && parseFloat(val) > 0, 'Entry fee must be greater than 0'),
-  divisions: z.array(z.object({
-    // `exact` is a UI-only value: it submits as a conditional division
-    // with gradeRule 'exact', which is how the API models it.
-    type: z.enum(['open', 'conditional', 'exact']),
-    _id: z.string().optional(),
-    divisionType: z.string().optional(),
-    rating: z.number().or(z.nan()).optional(),
-    condition: z.enum(['under', 'over']).optional(),
-    divisionName: z.string().optional()
-  }).superRefine((data, ctx) => {
-    if (data.type === 'conditional' || data.type === 'exact') {
-      if (!data.divisionType) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['divisionType'],
-          message: 'Division type is required',
-        });
-      } else if (data.divisionType.length > 20) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['divisionType'],
-          message: 'Max 20 characters',
-        });
-      }
+  divisions: z.array(divisionSchema)
+    .min(1, 'At least one division is required')
+    .superRefine((divisions, ctx) => {
+      // Names are free text now, so they are what a duplicate is measured by.
+      // Two divisions differing only in case would be indistinguishable to a
+      // parent reading the registration screen.
+      const seen = new Map<string, number>();
 
-      if (!data.condition) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['condition'],
-          message: 'Condition is required',
-        });
-      }
+      divisions.forEach((d, index) => {
+        const key = (d.name || '').trim().toLowerCase();
+        if (!key) return;
 
-      if (data.rating === undefined || Number.isNaN(data.rating)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['rating'],
-          message: 'Rating limit is required',
-        });
-      } else if (data.rating < 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['rating'],
-          message: 'Rating cannot be negative',
-        });
-      } else if (data.rating > 10000) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['rating'],
-          message: 'Max rating is 10000',
-        });
-      }
-    }
-  }))
-  .min(1, 'At least one division is required')
-  .superRefine((divisions, ctx) => {
-    let openCount = 0;
-    const conditionalNames = new Set<string>();
-
-    divisions.forEach((d, index) => {
-      if (d.type === 'open') {
-        openCount++;
-        if (openCount > 1) {
+        if (seen.has(key)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: 'Only one Open division is allowed',
-            path: [index, 'type'],
+            message: 'A division with this name already exists',
+            path: [index, 'name'],
           });
+        } else {
+          seen.set(key, index);
         }
-      } else if (d.type === 'conditional' && d.divisionType && d.condition && d.rating !== undefined && !Number.isNaN(d.rating)) {
-        const name = `${d.divisionType} ${d.condition === 'over' ? 'O' : 'U'} ${d.rating}`;
-        if (conditionalNames.has(name)) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: 'This conditional division already exists',
-            path: [index, 'divisionType'],
-          });
-        }
-        conditionalNames.add(name);
-      }
-    });
-  }),
+      });
+    }),
 });
 
 export type TournamentFormData = z.infer<typeof tournamentSchema>;
+export type DivisionFormData = z.infer<typeof divisionSchema>;

@@ -7,21 +7,21 @@ import { resultService } from '../services/result.service';
 
 interface Division {
   _id: string;
-  type?: string;
-  divisionName?: string;
+  name?: string;
+  label?: string;
 }
 
-/** The results sheets and the entry files both name a division "K3". */
+/** The results sheets and the entry files both use the admin's own name. */
 const labelFor = (division: Division) =>
-  division.type === 'open' ? 'Open' : division.divisionName || 'Division';
+  division.name || division.label || 'Division';
 
 /**
  * The entry lists handed to WinTD before the tournament is played.
  *
  * One file per division, because WinTD imports a section at a time. Each file
  * carries the players' ratings, which is what WinTD ranks and pairs on — so
- * this is offered for every division, including open ones that have no rating
- * rule of their own.
+ * this is offered for every division, including ones that set no rating rule
+ * of their own.
  */
 export function WinTdExportCard({
   tournamentId,

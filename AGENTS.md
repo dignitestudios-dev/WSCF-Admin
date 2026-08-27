@@ -127,14 +127,50 @@ These are real and worth knowing before changing related code.
 - **Free tournaments cannot be created.** `tournament-form.tsx` hardcodes
   `isPaid: true` on submit, and the Zod schema requires `entryFee > 0`. The
   backend supports `isPaid: false` with `entryFee: 0`.
-- **`divisionName: d.divisionType || 'Unknown'`** — `'Unknown'` is not in the
-  backend enum (`K`, `K1` … `K12`), so an incomplete conditional division is
-  rejected server-side rather than caught in the form.
 - **`condition` differs across the boundary.** The UI uses `over`, the API uses
   `above`; `tournament-form.tsx` translates both ways. Keep that mapping intact.
+- **Base UI `Select.Value` renders the raw value, not the item's label.** This
+  is Base UI (`@base-ui/react`), not Radix. Most selects here happen to use the
+  label as the value so it never showed; a select whose values differ from its
+  labels must pass a formatter as `children` — otherwise the closed trigger
+  shows the value. The grade selects in `tournament-form.tsx` do this via
+  `renderGradeValue`, and without it kindergarten reads as `0`.
 - **~58 explicit `any`** across services and hooks, concentrated in mutation
   payloads and error handlers, so request shapes are largely unchecked.
 - **No error boundaries.** Failures surface only as toasts.
+
+## Divisions
+
+A division is a **name the admin types**, a span of grades, and an **optional**
+rating bound:
+
+```ts
+{ name: string,        // free text, max 40 — display only, never parsed
+  gradeMin: number,    // 0 = kindergarten … 12
+  gradeMax: number,    // >= gradeMin
+  rating?: number|null,          // null = no rating restriction
+  condition?: 'under'|'above'|null }  // required whenever rating is set
+```
+
+- **There is no division `type` any more.** No `open`/`conditional`, no
+  `divisionName` enum, no `gradeRule`. A division spanning grades 0–12 with no
+  rating is the open section, and needs no special case anywhere.
+- **A single grade is `gradeMin === gradeMax`.** The form's Single/Range toggle
+  (`gradeMode`) is UI-only and is never sent; on edit the mode is inferred from
+  whether the two values match, the way a date-range picker treats a single
+  date.
+- **Rating bounds are inclusive** despite the wording: `under 600` admits a
+  player rated exactly 600.
+- **Eligibility lives in one place** — `checkDivisionEligibility()` in the
+  backend's `division.helper.js`. Both the eligible-division listing and the
+  registration check call it, so they cannot disagree. Do not re-derive it.
+- **The name may be changed even after players have registered**; the grade span
+  and rating may not. The name is display text that eligibility never reads, so
+  renaming cannot move or disqualify anyone — see `assertDivisionEditsAreSafe`,
+  whose changed-field list deliberately omits `name`.
+- The API also returns a `criteria` string per division ("Grades K–3 · Rating
+  under 600"). The player app shows it under the name, because a free-text name
+  like "Section B" tells a parent nothing on its own.
 
 ## Removed from the product
 

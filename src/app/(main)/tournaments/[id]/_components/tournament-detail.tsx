@@ -36,12 +36,9 @@ export default function TournamentDetail() {
   const tournamentTitle = tournament?.title || "Tournament";
 
 
-  const getDivisionLabel = (d: any) => {
-    if (d.type === 'conditional') {
-      return `${d.divisionName}${(d.condition === 'over' || d.condition === 'above') ? 'o' : 'u'}${d.rating}`;
-    }
-    return 'Open';
-  };
+  // The name the admin gave it. Nothing is derived from the grade or rating
+  // any more — those are the rules behind the name, not the name itself.
+  const getDivisionLabel = (d: any) => d?.name || d?.label || 'Division';
 
   const divisions = tournament?.divisions?.length > 0 
     ? tournament.divisions.map((d: any) => getDivisionLabel(d)).join(', ')
