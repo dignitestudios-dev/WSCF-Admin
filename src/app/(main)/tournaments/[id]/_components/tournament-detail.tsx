@@ -56,7 +56,7 @@ export default function TournamentDetail() {
 
   const tournamentDetails = {
     location: tournament?.location || "N/A",
-    entryFee: tournament?.isPaid ? `$${tournament?.entryFee}` : 'Free',
+    entryFee: `$${tournament?.entryFee}`,
     date: formatDate(tournament?.date),
     division: divisions,
 

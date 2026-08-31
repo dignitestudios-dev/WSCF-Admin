@@ -7,9 +7,7 @@ export interface Tournament {
   date: string;
   location: string;
   entryFee: number;
-  isPaid: boolean;
   status: string; // 'upcoming' | 'completed' etc
-  customDropdownOptions: any[];
   createdBy: string;
   createdAt: string;
   updatedAt: string;

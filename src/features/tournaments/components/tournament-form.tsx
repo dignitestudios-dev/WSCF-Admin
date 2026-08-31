@@ -239,7 +239,6 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
       date: new Date(data.date).toISOString(),
       location: data.location,
       entryFee: parseFloat(data.entryFee || '0') || 0,
-      isPaid: true,
       divisions: (data.divisions || []).map((d: any) => {
         // Only send _id for divisions that already exist server-side.
         const identity = d._id ? { _id: d._id } : {};
