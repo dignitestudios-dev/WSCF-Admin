@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import { Plus, Edit, Ban, Star, Users } from 'lucide-react';
 import { SearchInput } from '@/components/ui/search-input';
-import { useDebounce } from '@/hooks/use-debounce';
 import { PageTransition } from '@/components/animations/page-transition';
 import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,6 +14,8 @@ import type { Coupon } from '@/features/coupons/services/coupon.service';
 import { CreateCouponDialog } from '@/features/coupons/components/create-coupon-dialog';
 import { EditCouponDialog } from '@/features/coupons/components/edit-coupon-dialog';
 import { CouponUsageDialog } from '@/features/coupons/components/coupon-usage-dialog';
+import { useListParams } from '@/hooks/use-list-params';
+import { Highlight } from '@/components/ui/highlight';
 
 /**
  * A coupon is in exactly one state at a time, and the reason matters more than
@@ -35,9 +36,13 @@ const dateLabel = (value: string | null) =>
   value ? format(new Date(value), 'dd MMM yyyy') : '—';
 
 export default function Coupons() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const debouncedSearchQuery = useDebounce(searchQuery, 500);
-  const [currentPage, setCurrentPage] = useState(1);
+  const {
+    page: currentPage,
+    setPage: setCurrentPage,
+    searchInput: searchQuery,
+    setSearchInput: setSearchQuery,
+    search: debouncedSearchQuery,
+  } = useListParams();
   const itemsPerPage = 10;
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -86,7 +91,7 @@ export default function Coupons() {
               <SearchInput
                 value={searchQuery}
                 onChangeValue={handleSearch}
-                placeholder="Search by code"
+                placeholder="Search by coupon code"
               />
             </div>
           </div>
@@ -153,7 +158,9 @@ export default function Coupons() {
                         <td className={`px-6 py-3 ${isEven ? 'font-bold' : 'font-semibold'}`}>
                           {/* Monospaced so a code can be read back character by
                               character — it is case sensitive. */}
-                          <span className="font-mono tracking-wide">{coupon.code}</span>
+                          <span className="font-mono tracking-wide">
+                            <Highlight text={coupon.code} query={debouncedSearchQuery} />
+                          </span>
                         </td>
                         <td className="px-6 py-3 font-semibold">
                           {coupon.discountType === 'percentage'

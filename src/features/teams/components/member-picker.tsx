@@ -113,7 +113,7 @@ export function MemberPicker({
           <div className="flex w-full flex-col">
             <div className="border-b border-[#DADADA]/50 px-3 py-2">
               <Input
-                placeholder="Search by name or email..."
+                placeholder="Search by first name, last name or member ID"
                 value={search}
                 onChange={(event) => handleSearchChange(event.target.value)}
                 className="h-8 border-none px-0 font-poppins text-sm shadow-none focus-visible:ring-0"

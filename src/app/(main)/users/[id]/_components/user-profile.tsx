@@ -8,7 +8,6 @@ import {
   Ban,
   MapPin,
   Calendar,
-  Armchair,
   Tag,
   ArrowRight,
   Crown,
@@ -28,13 +27,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useUserTournamentHistory } from '@/features/tournaments/hooks/use-user-tournament-history';
 import { Pagination } from '@/components/ui/pagination';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface TournamentItem {
   id: number;
   title: string;
   location: string;
   date: string;
-  seats: string;
   price: string;
   status: 'Upcoming' | 'Completed';
 }
@@ -496,10 +495,6 @@ export default function UserProfile() {
                                 </span>
                               </div>
                               {/* <div className="flex items-center gap-1.5 shrink-0">
-                                <Armchair className="w-4 h-4 text-[#083F92]" />
-                                <span className="font-poppins font-normal text-[13px] md:text-[14px]">{t.tournament?.seats || 'N/A'}</span>
-                              </div> */}
-                              {/* <div className="flex items-center gap-1.5 shrink-0">
                                 <Tag className="w-4 h-4 text-[#083F92]" />
                                 <span className="font-poppins font-normal text-[13px] md:text-[14px]">{t.tournament?.entryFee ? `$${t.tournament.entryFee}` : 'N/A'}</span>
                               </div> */}
@@ -520,7 +515,7 @@ export default function UserProfile() {
                       </Link>
                     ))
                   ) : (
-                    <div className="text-center py-8 text-[#787878] font-poppins">No tournaments found for this status.</div>
+                    <EmptyState icon={Trophy} title="Nothing in this status" description="This player has no tournaments here yet." />
                   )}
                 </div>
 

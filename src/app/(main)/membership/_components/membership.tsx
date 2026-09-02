@@ -12,7 +12,6 @@ import { SearchInput } from '@/components/ui/search-input';
 import Link from 'next/link';
 import { Pagination } from '@/components/ui/pagination';
 import { PageTransition } from '@/components/animations/page-transition';
-import { useDebounce } from '@/hooks/use-debounce';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { toast } from '@/lib/toast';
 import { useMemberships, useExportMemberships } from '@/features/memberships/hooks/use-memberships';
@@ -21,6 +20,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { useListParams } from '@/hooks/use-list-params';
+import { Highlight } from '@/components/ui/highlight';
 
 const notificationSchema = z.object({
   message: z.string().min(4, "Notification text must be at least 4 characters").max(200, "Notification text must not exceed 200 characters"),
@@ -41,9 +42,13 @@ interface Member {
 }
 
 export default function Membership() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const debouncedSearchQuery = useDebounce(searchQuery, 500);
-  const [currentPage, setCurrentPage] = useState(1);
+  const {
+    page: currentPage,
+    setPage: setCurrentPage,
+    searchInput: searchQuery,
+    setSearchInput: setSearchQuery,
+    search: debouncedSearchQuery,
+  } = useListParams();
   const [sortField, setSortField] = useState<'status' | 'lastActive' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   
@@ -155,6 +160,7 @@ export default function Membership() {
                   setSearchQuery(val);
                   setCurrentPage(1);
                 }} 
+                placeholder="Search by name, member ID or parent name"
                 disabled={isLoading}
                 containerClassName={isLoading ? 'opacity-50 pointer-events-none' : ''}
               />
@@ -237,8 +243,12 @@ export default function Membership() {
                           isAltRow ? 'bg-[#F4F4F4]' : 'bg-white'
                         }`}
                       >
-                        <td className="px-6 py-3 font-semibold select-text">{member.membershipId}</td>
-                        <td className="px-6 py-3 font-bold text-[#636363] select-text">{member.name}</td>
+                        <td className="px-6 py-3 font-semibold select-text">
+                          <Highlight text={member.membershipId} query={debouncedSearchQuery} />
+                        </td>
+                        <td className="px-6 py-3 font-bold text-[#636363] select-text">
+                          <Highlight text={member.name} query={debouncedSearchQuery} />
+                        </td>
                         <td className="px-6 py-3 font-semibold text-[#636363] select-text">{displayDate}</td>
                         <td className="px-6 py-3 font-semibold select-text">{displayStatus}</td>
                         

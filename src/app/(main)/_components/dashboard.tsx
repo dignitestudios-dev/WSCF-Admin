@@ -35,6 +35,17 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+/**
+ * A count we do not have is shown as a dash, never as a number.
+ *
+ * These cards used to fall back to 6420 / 5320 when the request failed, which
+ * meant a broken dashboard displayed confident, entirely invented figures with
+ * nothing to mark them as fake.
+ */
+function formatCount(value?: number) {
+  return typeof value === 'number' ? value.toLocaleString() : '—';
+}
+
 export default function Dashboard() {
   const router = useRouter();
   const { data: kpiData, isLoading: isLoadingKPIs } = useDashboardKPIs();
@@ -116,9 +127,13 @@ export default function Dashboard() {
               {/* Card 1: Total Users */}
               <div className="w-full sm:w-[236.5px] h-[240px] bg-[#083F92]/10 rounded-[24px] relative shadow-sm group hover:shadow-md transition-all duration-200 shrink-0">
                 <span className="absolute left-[16px] top-[16px] font-poppins font-light text-[16px] leading-[24px] tracking-[-0.019em] text-[#000000]/70">
-                  Total User's Count
+                  Total Players
                 </span>
-                <button className="absolute right-[8px] top-[8px] w-[42px] h-[42px] bg-[#083F92] text-white rounded-full flex items-center justify-center shadow-md group-hover:scale-105 transition-transform duration-200">
+                <button
+                  type="button"
+                  onClick={() => router.push('/users')}
+                  aria-label="View all users"
+                  className="absolute right-[8px] top-[8px] w-[42px] h-[42px] bg-[#083F92] text-white rounded-full flex items-center justify-center shadow-md group-hover:scale-105 transition-transform duration-200 hover:bg-[#062f6f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#083F92] cursor-pointer">
                   <ArrowUpRight className="w-5 h-5" />
                 </button>
 
@@ -126,29 +141,26 @@ export default function Dashboard() {
                   <Skeleton className="absolute left-[16px] top-[93px] h-[54px] w-[120px] rounded-lg" />
                 ) : (
                   <h2 className="absolute left-[16px] top-[93px] h-[54px] font-poppins font-semibold text-[44px] leading-[54px] tracking-[-0.019em] text-[#083F92] flex items-center">
-                    {kpis?.totalUsers ?? 6420}
+                    {formatCount(kpis?.totalUsers)}
                   </h2>
                 )}
 
-                <div className="absolute left-[14px] top-[202px] flex items-center gap-[4px] h-[24px]">
-                  <div className="w-[45px] h-[24px] bg-[#083F92] rounded-[8px] flex items-center justify-center gap-[2px] px-[6px] py-[3px] text-white">
-                    <span className="font-poppins font-normal text-[12px] leading-[18px]">34</span>
-                    <svg width="8" height="8" viewBox="0 0 8 8" fill="none" className="w-[8px] h-[8px] fill-current">
-                      <path d="M4 1L8 7H0L4 1Z" />
-                    </svg>
-                  </div>
-                  <span className="font-poppins font-normal text-[12px] leading-[18px] tracking-[-0.02em] text-[#000000]">
-                    Increased from last month
-                  </span>
-                </div>
+                <span className="absolute left-[16px] top-[204px] font-poppins font-normal text-[12px] leading-[18px] tracking-[-0.02em] text-[#000000]/60">
+                  Every player profile on the platform
+                </span>
+
               </div>
 
               {/* Card 2: Active Users */}
               <div className="w-full sm:w-[236.5px] h-[240px] bg-[#083F92]/10 rounded-[24px] relative shadow-sm group hover:shadow-md transition-all duration-200 shrink-0">
                 <span className="absolute left-[16px] top-[16px] font-poppins font-light text-[16px] leading-[24px] tracking-[-0.019em] text-[#000000]/70">
-                  Active User Count
+                  Active Players
                 </span>
-                <button className="absolute right-[8.5px] top-[8px] w-[42px] h-[42px] bg-[#083F92] text-white rounded-full flex items-center justify-center shadow-md group-hover:scale-105 transition-transform duration-200">
+                <button
+                  type="button"
+                  onClick={() => router.push('/users')}
+                  aria-label="View all users"
+                  className="absolute right-[8.5px] top-[8px] w-[42px] h-[42px] bg-[#083F92] text-white rounded-full flex items-center justify-center shadow-md group-hover:scale-105 transition-transform duration-200 hover:bg-[#062f6f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#083F92] cursor-pointer">
                   <ArrowUpRight className="w-5 h-5" />
                 </button>
 
@@ -156,21 +168,14 @@ export default function Dashboard() {
                   <Skeleton className="absolute left-[16px] top-[93px] h-[54px] w-[120px] rounded-lg" />
                 ) : (
                   <h2 className="absolute left-[16px] top-[93px] h-[54px] font-poppins font-semibold text-[44px] leading-[54px] tracking-[-0.019em] text-[#083F92] flex items-center">
-                    {kpis?.activeUsers ?? 5320}
+                    {formatCount(kpis?.activeUsers)}
                   </h2>
                 )}
 
-                <div className="absolute left-[14.5px] top-[202px] flex items-center gap-[4px] h-[24px]">
-                  <div className="w-[45px] h-[24px] bg-[#083F92] rounded-[8px] flex items-center justify-center gap-[2px] px-[6px] py-[3px] text-white">
-                    <span className="font-poppins font-normal text-[12px] leading-[18px]">34</span>
-                    <svg width="8" height="8" viewBox="0 0 8 8" fill="none" className="w-[8px] h-[8px] fill-current">
-                      <path d="M4 1L8 7H0L4 1Z" />
-                    </svg>
-                  </div>
-                  <span className="font-poppins font-normal text-[12px] leading-[18px] tracking-[-0.02em] text-[#000000]">
-                    Increased from last month
-                  </span>
-                </div>
+                <span className="absolute left-[16px] top-[204px] font-poppins font-normal text-[12px] leading-[18px] tracking-[-0.02em] text-[#000000]/60">
+                  Active memberships
+                </span>
+
               </div>
 
             </div>

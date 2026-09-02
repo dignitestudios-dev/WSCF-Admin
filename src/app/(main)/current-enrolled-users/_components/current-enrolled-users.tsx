@@ -15,11 +15,19 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronDown } from 'lucide-react';
 import { tournamentService } from '@/features/tournaments/services/tournament.service';
 import { toast } from '@/lib/toast';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Trophy } from 'lucide-react';
+import { useListParams } from '@/hooks/use-list-params';
+import { Highlight } from '@/components/ui/highlight';
 
 export default function CurrentEnrolledUsers() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const debouncedSearchQuery = useDebounce(searchQuery, 500);
-  const [currentPage, setCurrentPage] = useState(1);
+  const {
+    page: currentPage,
+    setPage: setCurrentPage,
+    searchInput: searchQuery,
+    setSearchInput: setSearchQuery,
+    search: debouncedSearchQuery,
+  } = useListParams();
   const [selectedTournamentId, setSelectedTournamentId] = useState<string>('');
   
   // Tournament Dialog State
@@ -108,7 +116,11 @@ export default function CurrentEnrolledUsers() {
       <div className="flex flex-col md:flex-row justify-between gap-4 items-center w-full">
         {/* Search Input Box */}
         <div className="w-full md:w-[350px]">
-          <SearchInput value={searchQuery} onChangeValue={setSearchQuery} />
+          <SearchInput
+            value={searchQuery}
+            onChangeValue={setSearchQuery}
+            placeholder="Search by player name, member ID or team"
+          />
         </div>
         
         {/* Tournament Selection Button */}
@@ -199,10 +211,17 @@ export default function CurrentEnrolledUsers() {
                         isAltRow ? 'bg-[#083F92]/10 hover:bg-[#083F92]/15' : 'bg-white hover:bg-black/5'
                       }`}
                     >
-                      <td className="px-6 py-3 font-semibold select-text">{user.playerProfile?.membershipId || 'N/A'}</td>
+                      <td className="px-6 py-3 font-semibold select-text">
+                        <Highlight
+                          text={user.playerProfile?.membershipId || 'N/A'}
+                          query={debouncedSearchQuery}
+                        />
+                      </td>
                       <td className="px-6 py-3 font-bold text-[#636363] select-text">{user.user?.name || 'N/A'}</td>
                       <td className="px-6 py-3 font-bold text-[#636363] select-text">{user.playerProfile?.grade || 'N/A'}</td>
-                      <td className="px-6 py-3 font-medium tracking-[-0.02em] select-text">{user.team?.name || 'N/A'}</td>
+                      <td className="px-6 py-3 font-medium tracking-[-0.02em] select-text">
+                        <Highlight text={user.team?.name || 'N/A'} query={debouncedSearchQuery} />
+                      </td>
                       <td className="px-6 py-3 font-semibold select-text">{user.playerProfile?.rating ?? 0}</td>
                       <td className="px-6 py-3 font-semibold select-text">{user.division?.label || 'N/A'}</td>
                       <td className="px-6 py-3 font-semibold tracking-[-0.02em] select-text pr-2 max-w-[170px] truncate">
@@ -254,7 +273,11 @@ export default function CurrentEnrolledUsers() {
             </DialogTitle>
             
             <div className="w-full shrink-0">
-              <SearchInput value={tournamentSearch} onChangeValue={setTournamentSearch} />
+              <SearchInput
+                value={tournamentSearch}
+                onChangeValue={setTournamentSearch}
+                placeholder="Search by tournament name"
+              />
             </div>
 
             <div className="flex flex-col gap-2 overflow-y-auto min-h-[300px] flex-1">
@@ -266,7 +289,7 @@ export default function CurrentEnrolledUsers() {
                   </div>
                 ))
               ) : tournaments.length === 0 ? (
-                <div className="py-8 text-center text-[#636363] font-poppins">No tournaments found.</div>
+                <EmptyState icon={Trophy} title="No tournaments yet" description="Tournaments you create will be listed here." />
               ) : (
                 tournaments.map((t: any) => (
                   <div 
@@ -275,7 +298,7 @@ export default function CurrentEnrolledUsers() {
                     className="flex items-center justify-between gap-4 p-4 bg-[#083F92]/5 hover:bg-[#083F92]/10 rounded-[12px] cursor-pointer transition-colors border border-transparent hover:border-[#083F92]/20 w-full overflow-hidden"
                   >
                     <span className="font-poppins font-semibold text-[15px] text-[#083F92] truncate flex-1 min-w-0" title={t.title}>
-                      {t.title}
+                      <Highlight text={t.title} query={debouncedTournamentSearch} />
                     </span>
                     <span className="text-[13px] text-[#636363] font-medium shrink-0 whitespace-nowrap">
                       {t.date ? new Date(t.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }) : 'N/A'}

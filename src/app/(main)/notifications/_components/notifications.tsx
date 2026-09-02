@@ -132,7 +132,7 @@ export default function Notifications() {
                   <div className="flex flex-col w-full">
                     <div className="px-3 py-2 border-b border-[#DADADA]/50">
                       <Input
-                        placeholder="Search tournaments..."
+                        placeholder="Search by tournament name"
                         value={tournamentSearch}
                         onChange={(e) => setTournamentSearch(e.target.value)}
                         className="h-8 border-none focus-visible:ring-0 shadow-none font-poppins text-sm px-0"

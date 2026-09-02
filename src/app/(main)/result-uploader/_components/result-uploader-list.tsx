@@ -50,7 +50,7 @@ export default function ResultUploaderList() {
             <SearchInput
               value={searchQuery}
               onChangeValue={setSearchQuery}
-              placeholder="Search tournaments"
+              placeholder="Search by tournament name"
             />
           </div>
         </div>

@@ -5,13 +5,16 @@ import {
   FileSpreadsheet
 } from 'lucide-react';
 import { SearchInput } from '@/components/ui/search-input';
-import { useDebounce } from '@/hooks/use-debounce';
 import Link from 'next/link';
 import { PageTransition } from '@/components/animations/page-transition';
 import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUsers } from '@/features/users/hooks/use-users';
 import { userService } from '@/features/users/services/user.service';
+import { EmptyState } from '@/components/ui/empty-state';
+import { UserRound } from 'lucide-react';
+import { useListParams } from '@/hooks/use-list-params';
+import { Highlight } from '@/components/ui/highlight';
 
 interface UserRow {
   userId: string;
@@ -23,9 +26,15 @@ interface UserRow {
 }
 
 export default function Users() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const debouncedSearchQuery = useDebounce(searchQuery, 500);
-  const [currentPage, setCurrentPage] = useState(1);
+  // Page and search live in the URL, so a filtered list survives opening a
+  // user and coming back — and can be bookmarked or shared.
+  const {
+    page: currentPage,
+    setPage: setCurrentPage,
+    searchInput: searchQuery,
+    setSearchInput: setSearchQuery,
+    search: debouncedSearchQuery,
+  } = useListParams();
   const itemsPerPage = 10;
   const [isExporting, setIsExporting] = useState(false);
 
@@ -82,7 +91,7 @@ export default function Users() {
               <SearchInput
                 value={searchQuery}
                 onChangeValue={setSearchQuery}
-                placeholder="Search by membership ID, first or last name"
+                placeholder="Search by first name, last name or member ID"
               />
             </div>
           </div>
@@ -152,12 +161,14 @@ export default function Users() {
                         className={`h-[50px] border-b border-[#DADADA]/30 font-poppins text-[13px] text-[#636363] ${isEven ? 'bg-[#083F92]/10' : 'bg-white'
                           }`}
                       >
-                        <td className="px-6 py-3 font-semibold text-nowrap">{user.userId}</td>
+                        <td className="px-6 py-3 font-semibold text-nowrap">
+                          <Highlight text={user.userId} query={debouncedSearchQuery} />
+                        </td>
                         <td className={`max-w-[130px] truncate px-6 py-3 ${isEven ? 'font-bold' : 'font-semibold'}`} title={user.firstName}>
-                          {user.firstName}
+                          <Highlight text={user.firstName} query={debouncedSearchQuery} />
                         </td>
                         <td className={`max-w-[130px] truncate px-6 py-3 ${isEven ? 'font-bold' : 'font-semibold'}`} title={user.lastName}>
-                          {user.lastName}
+                          <Highlight text={user.lastName} query={debouncedSearchQuery} />
                         </td>
                         <td className={`px-6 py-3 ${isEven ? 'font-bold' : 'font-semibold'}`}>
                           {user.grade}
@@ -181,8 +192,12 @@ export default function Users() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={7} className="text-center py-16 text-[#787878] font-poppins">
-                      No users found.
+                    <td colSpan={7}>
+                      <EmptyState
+                        icon={UserRound}
+                        title="No users found"
+                        description="Try a different search, or clear it to see everyone."
+                      />
                     </td>
                   </tr>
                 )}
