@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from '@/lib/toast';
-import { useForgotPassword } from '../hooks/use-forgot-password';
+import { useResendOtp } from '../hooks/use-resend-otp';
 import { useVerifyOtp } from '../hooks/use-verify-otp';
 
 export function VerifyOtpForm() {
@@ -15,11 +15,15 @@ export function VerifyOtpForm() {
   const email = searchParams.get('email') || 'leo@admin.com';
   const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
   const [hasError, setHasError] = useState(false);
+  // Kept set once a code is accepted. The redirect is not instant, and the
+  // fieldset would otherwise unlock the moment the request finished — letting
+  // a second code be submitted against one the server has already spent.
+  const [isVerified, setIsVerified] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
   const [timer, setTimer] = useState(0);
   const inputRefs = useRef<HTMLInputElement[]>([]);
 
-  const { mutate: resendOtp, isPending: isResending } = useForgotPassword();
+  const { mutate: resendOtp, isPending: isResending } = useResendOtp();
   const { mutate: verifyOtp, isPending } = useVerifyOtp();
 
   // Auto-focus first input on mount
@@ -59,12 +63,14 @@ export function VerifyOtpForm() {
   const handleResend = () => {
     if (timer > 0 || isResending) return;
     resendOtp(
-      { email },
+      { email, purpose: 'reset' },
       {
         onSuccess: () => {
           setTimer(60);
           setOtp(['', '', '', '', '', '']);
           setHasError(false);
+          // A fresh code makes the form usable again after a successful verify.
+          setIsVerified(false);
           if (inputRefs.current[0]) {
             inputRefs.current[0].focus();
           }
@@ -135,10 +141,15 @@ export function VerifyOtpForm() {
       return;
     }
 
+    if (isPending || isVerified) return;
+
     verifyOtp(
       { email, otp: code },
       {
+        onSuccess: () => setIsVerified(true),
         onError: () => {
+          // Only a rejected code unlocks the form, so the user can correct it.
+
           setHasError(true);
           setIsShaking(true);
           setTimeout(() => setIsShaking(false), 400);
@@ -196,7 +207,7 @@ export function VerifyOtpForm() {
             submit button leaves every field editable after the values
             have already been sent. `contents` keeps the fieldset out
             of the layout. */}
-        <fieldset disabled={isPending} className="contents">
+        <fieldset disabled={isPending || isVerified} className="contents">
         <div className="flex flex-col items-center gap-[26px] w-full">
 
           {/* OTP inputs container */}
@@ -230,11 +241,11 @@ export function VerifyOtpForm() {
           <div className="flex flex-col items-center gap-[12px] w-full max-w-[343px] mt-[12px]">
             <Button
               type="submit"
-              disabled={isPending}
+              disabled={isPending || isVerified}
               className="w-full h-[48px] bg-[#083F92] hover:bg-[#083F92]/90 rounded-[24px] flex justify-center items-center disabled:opacity-50 shadow-[0px_4px_4px_rgba(61,55,117,0.25)]"
             >
               <span className="font-semibold text-[14px] leading-[19px] text-center capitalize text-white">
-                {isPending ? 'Verifying...' : 'Verify'}
+                {isPending ? 'Verifying...' : isVerified ? 'Verified' : 'Verify'}
               </span>
             </Button>
 

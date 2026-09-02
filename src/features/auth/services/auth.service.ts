@@ -15,6 +15,15 @@ export const authService = {
     const response = await axiosInstance.post('/auth/admin/forgot-password', data);
     return response.data;
   },
+  // Re-issues the code without the navigation forgotPassword performs — the
+  // user is already on the verify screen when they press Resend.
+  resendOtp: async (data: {
+    email: string;
+    purpose?: 'verify' | 'reset';
+  }): Promise<any> => {
+    const response = await axiosInstance.post('/auth/admin/resend-otp', data);
+    return response.data;
+  },
   verifyOtp: async (data: { email: string; otp: string }): Promise<any> => {
     const response = await axiosInstance.post('/auth/admin/verify-otp', data);
     return response.data;
