@@ -39,9 +39,9 @@ export function AssignRatingDialog({
   const [search, setSearch] = useState('');
   const debounced = useDebounce(search, 400);
   const [confirming, setConfirming] = useState<{
-    recordId: string;
+    recordId: string | null;
     label: string;
-    rating: number;
+    rating: number | string;
   } | null>(null);
 
   const { data, isLoading } = useMasterFileSearch(open ? debounced : '');
@@ -63,12 +63,17 @@ export function AssignRatingDialog({
     if (!confirming || !player) return;
 
     try {
+      const payload =
+        confirming.recordId === null
+          ? { noRating: true as const, confirmReassign: isReassignment }
+          : {
+              masterPlayerId: confirming.recordId,
+              confirmReassign: isReassignment,
+            };
+
       await assign({
         childId: player._id,
-        payload: {
-          masterPlayerId: confirming.recordId,
-          confirmReassign: isReassignment,
-        },
+        payload,
       });
       setConfirming(null);
       onOpenChange(false);
@@ -114,11 +119,23 @@ export function AssignRatingDialog({
                 ))}
               </div>
             ) : records.length === 0 ? (
-              <p className="py-10 text-center font-poppins text-[13px] text-[#8C8C8C]">
-                {debounced.trim()
-                  ? `No master file record matches "${debounced}". If this player is genuinely new, close this and use Start with no rating.`
-                  : 'Type a name or USCF ID to search the master file.'}
-              </p>
+              <div className="py-10 text-center font-poppins text-[13px] text-[#8C8C8C]">
+                {debounced.trim() ? (
+                  <div className="flex flex-col items-center">
+                    <span>No master file record matches &quot;{debounced}&quot;.</span>
+                    <button
+                      type="button"
+                      disabled={isSaving}
+                      onClick={() => setConfirming({ recordId: null, label: 'Unrated', rating: 'Unrated' })}
+                      className="mt-4 rounded-[100px] bg-[#083F92] px-6 py-2.5 font-poppins text-[13px] font-semibold text-white transition-colors hover:bg-[#062c68] disabled:opacity-50"
+                    >
+                      Start with no rating
+                    </button>
+                  </div>
+                ) : (
+                  'Type a name or USCF ID to search the master file.'
+                )}
+              </div>
             ) : (
               <div className="flex flex-col gap-2">
                 {records.map((record) => {
@@ -160,6 +177,16 @@ export function AssignRatingDialog({
                     </button>
                   );
                 })}
+                <div className="mt-4 flex justify-center border-t border-[#DADADA]/50 pt-4">
+                  <button
+                    type="button"
+                    disabled={isSaving}
+                    onClick={() => setConfirming({ recordId: null, label: 'Unrated', rating: 'Unrated' })}
+                    className="rounded-[100px] border border-[#083F92] px-6 py-2 font-poppins text-[13px] font-semibold text-[#083F92] transition-colors hover:bg-[#083F92]/5 disabled:opacity-50"
+                  >
+                    Player not in list? Start with no rating
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -169,13 +196,15 @@ export function AssignRatingDialog({
       <ConfirmDialog
         open={Boolean(confirming)}
         onOpenChange={(open: boolean) => !open && setConfirming(null)}
-        title={isReassignment ? 'Change this rating?' : 'Assign this rating?'}
+        title={confirming?.recordId === null ? 'Start with no rating?' : isReassignment ? 'Change this rating?' : 'Assign this rating?'}
         description={
           confirming && player
-            ? `${player.firstName} will be rated ${confirming.rating}, taken from ${confirming.label}. This decides which divisions they can enter, and the record cannot then go to anyone else.`
+            ? confirming.recordId === null
+              ? `${player.firstName} will start unrated. They can still enter tournaments, but not divisions with a minimum rating.`
+              : `${player.firstName} will be rated ${confirming.rating}, taken from ${confirming.label}. This decides which divisions they can enter, and the record cannot then go to anyone else.`
             : ''
         }
-        confirmText={isReassignment ? 'Change rating' : 'Assign rating'}
+        confirmText={confirming?.recordId === null ? 'Confirm' : isReassignment ? 'Change rating' : 'Assign rating'}
         onConfirm={commit}
         isLoading={isSaving}
       />
