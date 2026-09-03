@@ -177,19 +177,22 @@ export function AssignRatingDialog({
                     </button>
                   );
                 })}
-                <div className="mt-4 flex justify-center border-t border-[#DADADA]/50 pt-4">
-                  <button
-                    type="button"
-                    disabled={isSaving}
-                    onClick={() => setConfirming({ recordId: null, label: 'Unrated', rating: 'Unrated' })}
-                    className="rounded-[100px] border border-[#083F92] px-6 py-2 font-poppins text-[13px] font-semibold text-[#083F92] transition-colors hover:bg-[#083F92]/5 disabled:opacity-50"
-                  >
-                    Player not in list? Start with no rating
-                  </button>
-                </div>
               </div>
             )}
           </div>
+
+          {records.length > 0 && (
+            <div className="mt-4 flex justify-center border-t border-[#DADADA]/50 pt-4">
+              <button
+                type="button"
+                disabled={isSaving}
+                onClick={() => setConfirming({ recordId: null, label: 'Unrated', rating: 'Unrated' })}
+                className="rounded-[100px] border border-[#083F92] px-6 py-2 font-poppins text-[13px] font-semibold text-[#083F92] transition-colors hover:bg-[#083F92]/5 disabled:opacity-50"
+              >
+                Player not in list? Start with no rating
+              </button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
