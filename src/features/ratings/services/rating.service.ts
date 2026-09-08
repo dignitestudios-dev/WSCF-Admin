@@ -12,7 +12,15 @@ export interface RatingRequestPlayer {
   ratingAssignedAt: string | null;
   createdAt: string;
   /** The parent account, populated by the API. */
-  userId: { _id: string; name: string; email: string } | null;
+  userId: {
+    _id: string;
+    name: string;
+    email: string;
+    parents?: {
+      father?: { name?: string; email?: string; phone?: string; isPrimary?: boolean };
+      mother?: { name?: string; email?: string; phone?: string; isPrimary?: boolean };
+    };
+  } | null;
   /** The linked master file record, populated once assigned. */
   masterPlayerId: {
     _id: string;
@@ -79,14 +87,14 @@ export const ratingService = {
   },
 
   /**
-   * Send `masterPlayerId` to link a record, or `noRating` to record that there
-   * is nothing to link. `confirmReassign` is required when the player already
-   * has a rating — the API refuses without it, so a correction cannot happen
-   * by accident from the pending queue.
+   * Send `rating` to manually set a whole number rating, `masterPlayerId` to
+   * link a record, or `noRating` to record that there is nothing to link.
+   * `confirmReassign` is required when the player already has a rating.
    */
   assignRating: async (
     childId: string,
     payload:
+      | { rating: number; confirmReassign?: boolean }
       | { masterPlayerId: string; confirmReassign?: boolean }
       | { noRating: true; confirmReassign?: boolean }
   ): Promise<{ message: string }> => {

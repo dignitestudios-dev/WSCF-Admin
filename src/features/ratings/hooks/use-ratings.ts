@@ -50,10 +50,11 @@ export function useAssignRating() {
     }) => ratingService.assignRating(childId, payload),
 
     onSuccess: (response) => {
-      // The queue, the badge and the master file all change together: the
-      // player leaves Pending, and the record they took is now claimed.
+      // The queue, the badge, the master file and user profiles all update
       queryClient.invalidateQueries({ queryKey: ['rating-requests'] });
       queryClient.invalidateQueries({ queryKey: ['master-file'] });
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
       toast.success(response?.message || 'Rating assigned');
     },
 

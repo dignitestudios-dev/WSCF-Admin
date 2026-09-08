@@ -16,12 +16,14 @@ import {
   Star,
   Users as UsersIcon,
   Phone,
-  Mail
+  Mail,
+  Award
 } from 'lucide-react';
 import { PageTransition } from '@/components/animations/page-transition';
 import Link from 'next/link';
 import { useUserDetails, useDeactivateUser, useActivateUser } from '@/features/users/hooks/use-users';
 import { EditUserDialog } from '@/features/users/components/edit-user-dialog';
+import { EditPlayerRatingDialog } from '@/features/ratings/components/edit-player-rating-dialog';
 import { toast } from '@/lib/toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUserTournamentHistory } from '@/features/tournaments/hooks/use-user-tournament-history';
@@ -47,6 +49,7 @@ export default function UserProfile() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showEditRatingDialog, setShowEditRatingDialog] = useState(false);
 
   const { data: historyData, isLoading: isLoadingHistory } = useUserTournamentHistory(
     id,
@@ -101,19 +104,25 @@ export default function UserProfile() {
   // Deactivation lives on the player now, not on the account they belong to.
   const playerStatus = profile?.status ?? 'active';
 
+  // Edit rating is only allowed once the player has passed/cleared rating assignment
+  const isRatingCleared =
+    profile?.ratingStatus === 'assigned' ||
+    profile?.ratingStatus === 'unrated' ||
+    (profile?.ratingStatus !== 'pending' && (profile?.rating ?? 0) > 0);
+
   const userData = {
     name: profile?.name || "Loading...",
     email: account?.email || "...",
     userId: profile?.membershipId || profile?._id?.substring(0, 8).toUpperCase() || "...",
     grade: profile?.grade || "N/A",
     team: profile?.team?.name || "N/A",
-    rating: profile?.rating?.toString() || "0",
+    rating: profile?.ratingStatus === 'unrated' ? "Unrated" : (profile?.rating?.toString() || "0"),
     city: account?.address?.city || "N/A",
     performance: {
       totalTournaments: profile?.totalTournaments?.toString() || "0",
       totalWins: profile?.totalWins?.toString() || "0",
       quickestWin: "N/A",
-      currentRating: profile?.rating?.toString() || "0"
+      currentRating: profile?.ratingStatus === 'unrated' ? "Unrated" : (profile?.rating?.toString() || "0")
     },
     parentDetail: {
       name: account?.parents?.mother?.name || account?.parents?.father?.name || account?.name || "N/A",
@@ -163,6 +172,21 @@ export default function UserProfile() {
                 Edit
               </span>
             </button>
+
+            {/* Edit Rating Button - Only shown if user has cleared rating assignment */}
+            {isRatingCleared && (
+              <button
+                onClick={() => setShowEditRatingDialog(true)}
+                className="flex items-center gap-2 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm px-5 justify-center shrink-0 cursor-pointer"
+              >
+                <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md shrink-0">
+                  <Award className="w-4 h-4 text-white" />
+                </div>
+                <span className="font-poppins font-medium text-[14px] leading-[20px] tracking-[-0.019em]">
+                  Edit Rating
+                </span>
+              </button>
+            )}
 
             {/* Vertical divider */}
             <div className="w-[2px] h-6 bg-[#083F92] shrink-0" />
@@ -269,7 +293,19 @@ export default function UserProfile() {
                   <div className="hidden md:block w-[4px] h-[18px] bg-white rounded-full shrink-0" />
                   <div className="flex flex-col items-center md:items-start text-center md:text-left">
                     <span className="font-poppins font-normal text-[12px] leading-[18px] text-white/70">Rating</span>
-                    <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em]">{userData.rating}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em]">{userData.rating}</span>
+                      {isRatingCleared && (
+                        <button
+                          type="button"
+                          onClick={() => setShowEditRatingDialog(true)}
+                          className="text-white/70 hover:text-white transition-colors cursor-pointer"
+                          title="Edit Rating"
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -376,7 +412,19 @@ export default function UserProfile() {
                       </div>
                       <div className="flex flex-col">
                         <span className="font-poppins font-normal text-[14px] leading-[21px] text-[#797979]">Current Rating</span>
-                        <span className="font-poppins font-medium text-[20px] leading-[30px] text-[#083F92]">{userData.performance.currentRating}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-poppins font-medium text-[20px] leading-[30px] text-[#083F92]">{userData.performance.currentRating}</span>
+                          {isRatingCleared && (
+                            <button
+                              type="button"
+                              onClick={() => setShowEditRatingDialog(true)}
+                              className="text-[#083F92]/70 hover:text-[#083F92] transition-colors p-1 cursor-pointer"
+                              title="Edit Rating"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
 
@@ -544,6 +592,14 @@ export default function UserProfile() {
         onOpenChange={setShowEditDialog}
         userId={id}
         initialData={data?.data || null}
+      />
+
+      <EditPlayerRatingDialog
+        open={showEditRatingDialog}
+        onOpenChange={setShowEditRatingDialog}
+        playerId={profile?._id || id}
+        playerName={userData.name}
+        currentRating={Number(profile?.rating) || 0}
       />
 
       <ConfirmDialog

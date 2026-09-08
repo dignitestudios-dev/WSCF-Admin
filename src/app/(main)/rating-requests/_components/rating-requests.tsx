@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Ban } from 'lucide-react';
+import { Award, Ban } from 'lucide-react';
 import { SearchInput } from '@/components/ui/search-input';
 import { PageTransition } from '@/components/animations/page-transition';
 import { Pagination } from '@/components/ui/pagination';
@@ -17,11 +17,6 @@ import {
 import { AssignRatingDialog } from '@/features/ratings/components/assign-rating-dialog';
 import type { RatingRequestPlayer } from '@/features/ratings/services/rating.service';
 
-const TABS = [
-  { key: 'pending', label: 'Pending' },
-  { key: 'assigned', label: 'Assigned' },
-] as const;
-
 /** How long this family has been waiting on someone here. */
 function waitingFor(since: string) {
   const days = Math.floor(
@@ -35,6 +30,25 @@ function waitingFor(since: string) {
 const fullName = (player: RatingRequestPlayer) =>
   [player.firstName, player.lastName].filter(Boolean).join(' ').trim();
 
+function getPrimaryParentInfo(user: RatingRequestPlayer['userId']) {
+  if (!user) return { name: '—', email: '' };
+
+  const father = user.parents?.father;
+  const mother = user.parents?.mother;
+
+  let primary = null;
+  if (father?.isPrimary) {
+    primary = father;
+  } else if (mother?.isPrimary) {
+    primary = mother;
+  }
+
+  const name = primary?.name || user.name || '—';
+  const email = primary?.email || user.email || '';
+
+  return { name, email };
+}
+
 export default function RatingRequests() {
   const {
     page: currentPage,
@@ -42,12 +56,9 @@ export default function RatingRequests() {
     searchInput: searchQuery,
     setSearchInput: setSearchQuery,
     search: debouncedSearchQuery,
-    getFilter,
-    setFilter,
-  } = useListParams({ defaultFilters: { tab: 'pending' } });
+  } = useListParams();
 
   const itemsPerPage = 10;
-  const tab = getFilter('tab') as 'pending' | 'assigned';
 
   const [playerToAssign, setPlayerToAssign] = useState<RatingRequestPlayer | null>(
     null
@@ -59,7 +70,7 @@ export default function RatingRequests() {
     currentPage,
     itemsPerPage,
     debouncedSearchQuery,
-    tab
+    'pending'
   );
   const { mutateAsync: assign, isPending: isSaving } = useAssignRating();
 
@@ -79,7 +90,6 @@ export default function RatingRequests() {
         childId: playerToLeaveUnrated._id,
         payload: {
           noRating: true,
-          confirmReassign: playerToLeaveUnrated.ratingStatus !== 'pending',
         },
       });
       setPlayerToLeaveUnrated(null);
@@ -92,7 +102,7 @@ export default function RatingRequests() {
     <PageTransition>
       <div className="flex flex-col gap-6 w-full h-full font-sans select-none">
         {/* Top Header Controls */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full sm:max-w-[620px]">
             <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0 shrink-0">
               Rating Requests
@@ -106,32 +116,6 @@ export default function RatingRequests() {
               />
             </div>
           </div>
-
-          {/* Pending / Assigned */}
-          <div
-            className="flex items-center gap-2 rounded-[100px] bg-[#083F92]/10 p-1.5 shrink-0"
-            role="tablist"
-          >
-            {TABS.map((item) => {
-              const isActive = tab === item.key;
-              return (
-                <button
-                  key={item.key}
-                  type="button"
-                  role="tab"
-                  aria-selected={isActive}
-                  onClick={() => setFilter('tab', item.key)}
-                  className={`h-[54px] cursor-pointer rounded-[100px] px-6 font-poppins text-[14px] font-medium tracking-[-0.019em] transition-colors focus:outline-none ${
-                    isActive
-                      ? 'bg-[#083F92] text-white shadow-md'
-                      : 'text-[#000000]/70 hover:text-[#083F92]'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              );
-            })}
-          </div>
         </div>
 
         {/* Main Table Container Card */}
@@ -144,9 +128,7 @@ export default function RatingRequests() {
                   <th className="px-6 py-3 font-semibold w-auto">Player</th>
                   <th className="px-6 py-3 font-semibold w-[90px]">Grade</th>
                   <th className="px-6 py-3 font-semibold w-auto">Parent</th>
-                  <th className="px-6 py-3 font-semibold w-[130px]">
-                    {tab === 'pending' ? 'Waiting' : 'Rating'}
-                  </th>
+                  <th className="px-6 py-3 font-semibold w-[130px]">Waiting</th>
                   <th className="px-6 py-3 font-semibold text-right w-[190px]">
                     Action
                   </th>
@@ -163,7 +145,12 @@ export default function RatingRequests() {
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[90px]" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[140px]" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[30px]" /></td>
-                      <td className="px-6 py-3"><Skeleton className="h-4 w-[160px]" /></td>
+                      <td className="px-6 py-3">
+                        <div className="flex flex-col gap-1.5">
+                          <Skeleton className="h-3.5 w-[120px]" />
+                          <Skeleton className="h-3 w-[150px]" />
+                        </div>
+                      </td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[60px]" /></td>
                       <td className="px-6 py-3">
                         <Skeleton className="ml-auto h-8 w-[150px] rounded-full" />
@@ -173,10 +160,11 @@ export default function RatingRequests() {
                 ) : players.length > 0 ? (
                   players.map((player, index) => {
                     const isEven = index % 2 !== 0;
+                    const parent = getPrimaryParentInfo(player.userId);
                     return (
                       <tr
                         key={player._id}
-                        className={`h-[50px] border-b border-[#DADADA]/30 font-poppins text-[13px] text-[#636363] ${
+                        className={`h-[56px] border-b border-[#DADADA]/30 font-poppins text-[13px] text-[#636363] ${
                           isEven ? 'bg-[#083F92]/10' : 'bg-white'
                         }`}
                       >
@@ -198,41 +186,43 @@ export default function RatingRequests() {
                           {player.grade || '—'}
                         </td>
 
-                        <td className="px-6 py-3 max-w-[240px] truncate" title={player.userId?.email}>
-                          {player.userId?.name || '—'}
+                        <td className="px-6 py-2.5 max-w-[260px]">
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-semibold text-[#181818] truncate leading-[18px]">
+                              <Highlight
+                                text={parent.name}
+                                query={debouncedSearchQuery}
+                              />
+                            </span>
+                            {parent.email ? (
+                              <span
+                                className="text-[12px] text-[#636363] truncate leading-[16px]"
+                                title={parent.email}
+                              >
+                                <Highlight
+                                  text={parent.email}
+                                  query={debouncedSearchQuery}
+                                />
+                              </span>
+                            ) : null}
+                          </div>
                         </td>
 
                         <td className="px-6 py-3 font-semibold">
-                          {tab === 'pending' ? (
-                            waitingFor(player.createdAt)
-                          ) : player.ratingStatus === 'unrated' ? (
-                            <span className="rounded-full bg-[#F4F4F4] px-2.5 py-0.5 text-[11px] font-semibold text-[#8C8C8C]">
-                              Unrated
-                            </span>
-                          ) : (
-                            <span className="text-[#083F92]">{player.rating}</span>
-                          )}
+                          {waitingFor(player.createdAt)}
                         </td>
 
                         <td className="px-6 py-3 text-right">
                           <div className="flex items-center justify-end gap-2">
                             <ActionIconButton
-                              icon={Search}
-                              label={
-                                tab === 'pending'
-                                  ? 'Assign rating'
-                                  : 'Change rating'
-                              }
+                              icon={Award}
+                              label="Assign rating"
                               onClick={() => setPlayerToAssign(player)}
                             />
-                            {/* Reachable without opening the dialog: most new
-                                players have no record to find, and making the
-                                admin search first to learn that is busywork. */}
                             <ActionIconButton
                               icon={Ban}
                               label="Start with no rating"
                               tone="danger"
-                              disabled={player.ratingStatus === 'unrated'}
                               onClick={() => setPlayerToLeaveUnrated(player)}
                             />
                           </div>
@@ -248,9 +238,7 @@ export default function RatingRequests() {
                     >
                       {debouncedSearchQuery
                         ? `No player matches "${debouncedSearchQuery}".`
-                        : tab === 'pending'
-                          ? 'Nothing waiting. Every player has had their rating looked up.'
-                          : 'No ratings assigned yet.'}
+                        : 'Nothing waiting. Every player has had their rating assigned or set as unrated.'}
                     </td>
                   </tr>
                 )}
