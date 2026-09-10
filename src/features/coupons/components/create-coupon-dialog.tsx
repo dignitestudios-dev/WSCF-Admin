@@ -10,6 +10,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCreateCoupon } from '../hooks/use-coupons';
 
+const getTodayDateString = () => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 /**
  * Codes are matched exactly as typed, so SUMMER25 and summer25 are two
  * different codes — the hint under the field says so, because it is not what
@@ -31,11 +39,15 @@ const createCouponSchema = z
     validUntil: z.string().optional().or(z.literal('')),
   })
   .refine(
+    (data) => !data.validUntil || data.validUntil >= getTodayDateString(),
+    { message: 'Valid until date cannot be in the past', path: ['validUntil'] }
+  )
+  .refine(
     (data) =>
       !data.validFrom ||
       !data.validUntil ||
-      new Date(data.validFrom) <= new Date(data.validUntil),
-    { message: 'The end date must be after the start date', path: ['validUntil'] }
+      data.validFrom <= data.validUntil,
+    { message: 'The end date must be on or after the start date', path: ['validUntil'] }
   );
 
 type CreateCouponFormData = z.infer<typeof createCouponSchema>;
@@ -53,11 +65,16 @@ export function CreateCouponDialog({ open, onOpenChange }: CreateCouponDialogPro
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<CreateCouponFormData>({
     resolver: zodResolver(createCouponSchema),
     defaultValues: { code: '', validFrom: '', validUntil: '' },
   });
+
+  const todayStr = getTodayDateString();
+  const validFromVal = watch('validFrom');
+  const minUntilDate = validFromVal && validFromVal > todayStr ? validFromVal : todayStr;
 
   useEffect(() => {
     if (open) reset();
@@ -139,9 +156,13 @@ export function CreateCouponDialog({ open, onOpenChange }: CreateCouponDialogPro
               <Input
                 id="validFrom"
                 type="date"
+                min={todayStr}
                 className="h-11 rounded-full border-[#3D3775] px-4 font-poppins"
                 {...register('validFrom')}
               />
+              {errors.validFrom ? (
+                <p className="text-[12px] text-[#CE2D32]">{errors.validFrom.message}</p>
+              ) : null}
             </div>
 
             <div className="flex flex-col gap-2">
@@ -154,6 +175,7 @@ export function CreateCouponDialog({ open, onOpenChange }: CreateCouponDialogPro
               <Input
                 id="validUntil"
                 type="date"
+                min={minUntilDate}
                 className="h-11 rounded-full border-[#3D3775] px-4 font-poppins"
                 {...register('validUntil')}
               />

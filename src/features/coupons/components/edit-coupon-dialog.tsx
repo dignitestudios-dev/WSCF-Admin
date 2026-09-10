@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +21,36 @@ interface EditCouponDialogProps {
 const toDateInput = (value: string | null) =>
   value ? new Date(value).toISOString().slice(0, 10) : '';
 
+const getTodayDateString = () => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const createEditCouponSchema = (coupon: Coupon | null) =>
+  z
+    .object({
+      validUntil: z.string().optional().or(z.literal('')),
+    })
+    .refine(
+      (data) => !data.validUntil || data.validUntil >= getTodayDateString(),
+      { message: 'Valid until date cannot be in the past', path: ['validUntil'] }
+    )
+    .refine(
+      (data) => {
+        if (!data.validUntil || !coupon?.validFrom) return true;
+        return data.validUntil >= toDateInput(coupon.validFrom);
+      },
+      {
+        message: 'The end date must be on or after the start date',
+        path: ['validUntil'],
+      }
+    );
+
+type EditCouponFormData = z.infer<ReturnType<typeof createEditCouponSchema>>;
+
 /**
  * Editing is deliberately limited to the end date.
  *
@@ -30,9 +62,21 @@ const toDateInput = (value: string | null) =>
 export function EditCouponDialog({ open, onOpenChange, coupon }: EditCouponDialogProps) {
   const { mutateAsync: updateCoupon, isPending } = useUpdateCoupon();
 
-  const { register, handleSubmit, reset } = useForm<{ validUntil: string }>({
+  const schema = useMemo(() => createEditCouponSchema(coupon), [coupon]);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<EditCouponFormData>({
+    resolver: zodResolver(schema),
     defaultValues: { validUntil: '' },
   });
+
+  const todayStr = getTodayDateString();
+  const validFromStr = toDateInput(coupon?.validFrom ?? null);
+  const minUntilDate = validFromStr && validFromStr > todayStr ? validFromStr : todayStr;
 
   useEffect(() => {
     if (open && coupon) {
@@ -40,7 +84,7 @@ export function EditCouponDialog({ open, onOpenChange, coupon }: EditCouponDialo
     }
   }, [open, coupon, reset]);
 
-  const onSubmit = async (data: { validUntil: string }) => {
+  const onSubmit = async (data: EditCouponFormData) => {
     if (!coupon) return;
 
     try {
@@ -96,9 +140,13 @@ export function EditCouponDialog({ open, onOpenChange, coupon }: EditCouponDialo
             <Input
               id="validUntil"
               type="date"
+              min={minUntilDate}
               className="h-11 rounded-full border-[#3D3775] px-4 font-poppins"
               {...register('validUntil')}
             />
+            {errors.validUntil ? (
+              <p className="text-[12px] text-[#CE2D32]">{errors.validUntil.message}</p>
+            ) : null}
             <p className="font-poppins text-[11px] text-[#8C8C8C]">
               Leave empty and the coupon never expires.
             </p>

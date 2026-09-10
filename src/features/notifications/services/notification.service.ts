@@ -36,6 +36,7 @@ export interface NotificationItem {
   type:
     | 'tournament.registered'
     | 'tournament.rescheduled'
+    | 'membership.activated'
     | 'membership.renewed'
     | 'membership.expired'
     | 'membership.payment_failed'

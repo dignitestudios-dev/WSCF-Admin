@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils";
 const ICONS: Record<string, typeof Bell> = {
   "tournament.registered": Trophy,
   "tournament.rescheduled": CalendarClock,
+  "membership.activated": CreditCard,
   "membership.renewed": CreditCard,
   "membership.expired": CreditCard,
   "membership.payment_failed": CreditCard,
