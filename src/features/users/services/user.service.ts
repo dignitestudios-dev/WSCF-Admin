@@ -43,6 +43,8 @@ export interface UserListItem {
   gender?: string;
   dob?: string;
   rating?: number;
+  ratingStatus?: 'pending' | 'assigned' | 'unrated';
+  ratingAssignedAt?: string | null;
   createdAt: string;
 
   /** The parent account. Deactivation and email target this, not the player. */

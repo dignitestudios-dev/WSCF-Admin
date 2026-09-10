@@ -187,7 +187,7 @@ export default function TeamDetail() {
                   setSearchQuery(value);
                   setCurrentPage(1);
                 }}
-                placeholder="Search members"
+                placeholder="Search by first name, last name or member ID"
               />
             </div>
           </div>

@@ -52,7 +52,6 @@ const editUserSchema = z.object({
   city: z.string().max(100, 'City must be at most 100 characters').optional().or(z.literal('')),
   grade: z.string().max(20, 'Grade must be at most 20 characters').optional().or(z.literal('')),
   zipCode: z.string().max(10, 'Zip Code must be at most 10 characters').optional().or(z.literal('')),
-  rating: z.string().max(5, 'Rating must be at most 5 characters').optional().or(z.literal('')),
   fatherName: z.string().max(100, 'Father\'s Name must be at most 100 characters').optional().or(z.literal('')),
   fatherPhone: z.string().max(20, 'Father\'s Phone must be at most 20 characters').optional().or(z.literal('')),
   motherName: z.string().max(100, 'Mother\'s Name must be at most 100 characters').optional().or(z.literal('')),
@@ -124,7 +123,6 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
       city: '',
       grade: '',
       zipCode: '',
-      rating: '',
       fatherName: '',
       fatherPhone: '',
       motherName: '',
@@ -151,7 +149,6 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
           address?.zipCode !== undefined && address?.zipCode !== null
             ? String(address.zipCode)
             : '',
-        rating: profile?.rating !== undefined && profile?.rating !== null ? String(profile.rating) : '',
         fatherName: account?.parents?.father?.name || '',
         fatherPhone: formatPhoneNumber(account?.parents?.father?.phone || ''),
         motherName: account?.parents?.mother?.name || '',
@@ -170,7 +167,6 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
       city: data.city || undefined,
       grade: data.grade || undefined,
       zipCode: data.zipCode ? Number(data.zipCode) : undefined,
-      rating: data.rating ? Number(data.rating) : undefined,
       parents: {
         father: {
           name: data.fatherName || undefined,
@@ -391,29 +387,6 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
                   <p className="text-[12px] text-red-500 mt-[-6px]">{errors.zipCode.message}</p>
                 )}
               </div>
-            </div>
-
-            {/* Rating */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="rating" className="font-poppins font-medium text-[14px] leading-[21px] text-[#181818] capitalize">
-                Rating
-              </Label>
-              <div className="relative h-[44px]">
-                <Input
-                  id="rating"
-                  maxLength={5}
-                  placeholder="Enter rating"
-                  className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
-                  {...register('rating', {
-                    onChange: (e) => {
-                      e.target.value = e.target.value.replace(/[^0-9]/g, '');
-                    }
-                  })}
-                />
-              </div>
-              {errors.rating && (
-                <p className="text-[12px] text-red-500 mt-[-6px]">{errors.rating.message}</p>
-              )}
             </div>
 
             {/* Father's Details */}

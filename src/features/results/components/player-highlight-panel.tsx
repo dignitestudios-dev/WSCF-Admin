@@ -212,7 +212,7 @@ export function PlayerHighlightPanel({
           <input
             value={query}
             disabled={disabled}
-            placeholder={`Search ${players.length} players`}
+            placeholder={`Search ${players.length} players by name`}
             onChange={(event) => setQuery(event.target.value)}
             className="h-10 w-full rounded-full border border-[#3D3775] bg-white pl-11 pr-4 font-poppins text-[13px] text-[#181818] outline-none focus:ring-2 focus:ring-[#083F92]/15 disabled:opacity-60"
           />

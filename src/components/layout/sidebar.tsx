@@ -14,7 +14,7 @@ import {
   LogOut,
   Loader2,
   X,
-  TicketPercent
+  TicketPercent, Star
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -25,6 +25,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import { usePendingRatingCount } from '@/features/ratings/hooks/use-ratings';
 
 interface SidebarProps {
   onClose?: () => void;
@@ -38,6 +39,7 @@ export function Sidebar({ onClose }: SidebarProps) {
   const featuresNav = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
     { name: 'Users', href: '/users', icon: Users },
+    { name: 'Rating Requests', href: '/rating-requests', icon: Star },
     { name: 'Tournaments', href: '/tournaments', icon: Trophy },
     { name: 'Teams', href: '/teams', icon: UserPlus },
     // Current Enrolled Users is hidden from navigation but the route and its
@@ -52,6 +54,8 @@ export function Sidebar({ onClose }: SidebarProps) {
     { name: 'Push Notifications', href: '/notifications', icon: Bell },
     { name: 'Logout', href: '/logout', icon: LogOut },
   ];
+
+  const { data: pendingRatings = 0 } = usePendingRatingCount();
 
   const { mutate: logout, isPending } = useLogout();
 
@@ -116,6 +120,12 @@ export function Sidebar({ onClose }: SidebarProps) {
                   <span className="font-poppins text-[18px] leading-[27px] tracking-[-0.019em]">
                     {item.name}
                   </span>
+                  {/* How many families are waiting on someone here. */}
+                  {item.href === '/rating-requests' && pendingRatings > 0 && (
+                    <span className="ml-auto min-w-[22px] rounded-full bg-white px-[7px] py-[1px] text-center font-poppins text-[12px] font-semibold text-[#083F92]">
+                      {pendingRatings}
+                    </span>
+                  )}
                 </Link>
               );
             })}

@@ -10,19 +10,24 @@ import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ActionIconButton, ActionPillButton } from '@/components/ui/action-button';
-import { useDebounce } from '@/hooks/use-debounce';
 import { useDeleteTeam, useTeams } from '@/features/teams/hooks/use-teams';
 import { Team } from '@/features/teams/services/team.service';
 import { CreateTeamDialog } from '@/features/teams/components/create-team-dialog';
 import { EditTeamDialog } from '@/features/teams/components/edit-team-dialog';
+import { useListParams } from '@/hooks/use-list-params';
+import { Highlight } from '@/components/ui/highlight';
 
 const ITEMS_PER_PAGE = 10;
 
 export default function Teams() {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState('');
-  const debouncedSearch = useDebounce(searchQuery, 500);
-  const [currentPage, setCurrentPage] = useState(1);
+  const {
+    page: currentPage,
+    setPage: setCurrentPage,
+    searchInput: searchQuery,
+    setSearchInput: setSearchQuery,
+    search: debouncedSearch,
+  } = useListParams();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [teamToEdit, setTeamToEdit] = useState<Team | null>(null);
@@ -64,7 +69,7 @@ export default function Teams() {
                   setSearchQuery(value);
                   setCurrentPage(1);
                 }}
-                placeholder="Search teams"
+                placeholder="Search by team name"
               />
             </div>
           </div>
@@ -137,7 +142,7 @@ export default function Teams() {
                             title={team.name}
                             className="block truncate font-semibold text-[#083F92]"
                           >
-                            {team.name}
+                            <Highlight text={team.name} query={debouncedSearch} />
                           </span>
                         </td>
                         {/* The code WinTD knows this team by. It appears in the

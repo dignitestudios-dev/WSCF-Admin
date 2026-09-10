@@ -5,14 +5,12 @@ import {
   Plus, 
   MapPin, 
   Calendar, 
-  Armchair, 
   Tag, 
   ArrowRight,
   CheckCircle2,
   Crown
 } from 'lucide-react';
 import { SearchInput } from '@/components/ui/search-input';
-import { useDebounce } from '@/hooks/use-debounce';
 import { PageTransition } from '@/components/animations/page-transition';
 import Link from 'next/link';
 import { Pagination } from '@/components/ui/pagination';
@@ -20,12 +18,31 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useTournaments, useMarkTournamentCompleted } from '@/features/tournaments/hooks/use-tournaments';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useDeleteTournament } from '@/features/tournaments/hooks/use-delete-tournament';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Trophy } from 'lucide-react';
+import { useListParams } from '@/hooks/use-list-params';
+import { Highlight } from '@/components/ui/highlight';
 
 export default function Tournaments() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const debouncedSearchQuery = useDebounce(searchQuery, 500);
-  const [activeTab, setActiveTab] = useState<'All' | 'upcoming' | 'ongoing' | 'completed'>('All');
-  const [currentPage, setCurrentPage] = useState(1); 
+  // Page, search and the status tab all live in the URL, so returning from a
+  // tournament lands back on the same filtered page.
+  const {
+    page: currentPage,
+    setPage: setCurrentPage,
+    searchInput: searchQuery,
+    setSearchInput: setSearchQuery,
+    search: debouncedSearchQuery,
+    getFilter,
+    setFilter,
+  } = useListParams({ defaultFilters: { status: 'All' } });
+
+  const activeTab = getFilter('status') as
+    | 'All'
+    | 'upcoming'
+    | 'ongoing'
+    | 'completed';
+  const setActiveTab = (tab: string) => setFilter('status', tab);
+
   const itemsPerPage = 10;
 
   const statusParam = activeTab === 'All' ? undefined : activeTab;
@@ -70,7 +87,11 @@ export default function Tournaments() {
             
             {/* Search Pill Input */}
             <div className="w-full sm:w-auto">
-              <SearchInput value={searchQuery} onChangeValue={setSearchQuery} />
+              <SearchInput
+                value={searchQuery}
+                onChangeValue={setSearchQuery}
+                placeholder="Search by tournament name"
+              />
             </div>
           </div>
 
@@ -148,7 +169,7 @@ export default function Tournaments() {
                     {/* Text descriptions */}
                     <div className="flex flex-col gap-2 min-w-0 flex-1">
                       <h2 className="font-poppins font-medium text-[16px] md:text-[18px] leading-[24px] md:leading-[27px] text-[#083F92] truncate w-full">
-                        {t.title}
+                        <Highlight text={t.title} query={debouncedSearchQuery} />
                       </h2>
                       
                       {/* Inner items horizontal details row */}
@@ -164,12 +185,6 @@ export default function Tournaments() {
                         <div className="flex items-center gap-1.5 shrink-0">
                           <Calendar className="w-4 h-4 text-[#083F92]" />
                           <span className="font-poppins font-normal text-[13px] md:text-[14px]">{formatDate(t.date)}</span>
-                        </div>
-
-                        {/* Seats details */}
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <Armchair className="w-4 h-4 text-[#083F92]" />
-                          <span className="font-poppins font-normal text-[13px] md:text-[14px]">N/A</span>
                         </div>
 
                         {/* Price tag details */}
@@ -221,10 +236,20 @@ export default function Tournaments() {
                 </Link>
               ))
             ) : (
-              <div className="w-full py-16 text-center text-[#787878] font-poppins bg-[#083F92]/5 rounded-[12px] border border-dashed border-[#083F92]/20">
-                {activeTab === 'All'
-                  ? 'No tournaments found. Click "Add Tournament" to create one.'
-                  : `No ${activeTab} tournaments found.`}
+              <div className="w-full bg-[#083F92]/5 rounded-[12px] border border-dashed border-[#083F92]/20">
+                <EmptyState
+                  icon={Trophy}
+                  title={
+                    activeTab === 'All'
+                      ? 'No tournaments yet'
+                      : `No ${activeTab.toLowerCase()} tournaments`
+                  }
+                  description={
+                    activeTab === 'All'
+                      ? 'Use "Add Tournament" to create the first one.'
+                      : 'Try another tab to see tournaments in a different state.'
+                  }
+                />
               </div>
             )}
           </div>
