@@ -131,6 +131,7 @@ export function CreateCouponDialog({ open, onOpenChange }: CreateCouponDialogPro
             </Label>
             <Input
               id="code"
+              maxLength={32}
               placeholder="SUMMER25"
               autoComplete="off"
               className="h-11 rounded-full border-[#3D3775] px-4 font-poppins tracking-wide"

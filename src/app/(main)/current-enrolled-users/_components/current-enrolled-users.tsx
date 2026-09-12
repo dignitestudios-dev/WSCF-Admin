@@ -217,13 +217,13 @@ export default function CurrentEnrolledUsers() {
                           query={debouncedSearchQuery}
                         />
                       </td>
-                      <td className="px-6 py-3 font-bold text-[#636363] select-text">{user.user?.name || 'N/A'}</td>
+                      <td className="px-6 py-3 font-bold text-[#636363] select-text max-w-[150px] truncate" title={user.user?.name || 'N/A'}>{user.user?.name || 'N/A'}</td>
                       <td className="px-6 py-3 font-bold text-[#636363] select-text">{user.playerProfile?.grade || 'N/A'}</td>
-                      <td className="px-6 py-3 font-medium tracking-[-0.02em] select-text">
+                      <td className="px-6 py-3 font-medium tracking-[-0.02em] select-text max-w-[230px] truncate" title={user.team?.name || 'N/A'}>
                         <Highlight text={user.team?.name || 'N/A'} query={debouncedSearchQuery} />
                       </td>
                       <td className="px-6 py-3 font-semibold select-text">{user.playerProfile?.rating ?? 0}</td>
-                      <td className="px-6 py-3 font-semibold select-text">{user.division?.label || 'N/A'}</td>
+                      <td className="px-6 py-3 font-semibold select-text max-w-[150px] truncate" title={user.division?.label || 'N/A'}>{user.division?.label || 'N/A'}</td>
                       <td className="px-6 py-3 font-semibold tracking-[-0.02em] select-text pr-2 max-w-[170px] truncate">
                         {selectedTournamentTitle || 'N/A'}
                       </td>

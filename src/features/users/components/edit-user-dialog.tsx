@@ -43,19 +43,51 @@ function formatPhoneNumber(value: string) {
   }
 }
 
+const nameRegex = /^[a-zA-Z'.-]+(?: [a-zA-Z'.-]+)*$/;
+const cityRegex = /^[a-zA-Z.-]+(?: [a-zA-Z.-]+)*$/;
+const streetAddressRegex = /^[a-zA-Z0-9,.'#-]+(?: [a-zA-Z0-9,.'#-]+)*$/;
+
 const editUserSchema = z.object({
-  firstName: z.string().min(1, 'First name is required').max(50, 'First name must be at most 50 characters'),
-  lastName: z.string().min(1, 'Last name is required').max(50, 'Last name must be at most 50 characters'),
+  firstName: z
+    .string()
+    .min(1, 'First name is required')
+    .max(50, 'First name must be at most 50 characters')
+    .regex(nameRegex, 'First name can only contain letters, hyphens, periods, and apostrophes'),
+  lastName: z
+    .string()
+    .min(1, 'Last name is required')
+    .max(50, 'Last name must be at most 50 characters')
+    .regex(nameRegex, 'Last name can only contain letters, hyphens, periods, and apostrophes'),
   gender: z.string().optional(),
   sigma: z.string().optional(),
-  streetAddress: z.string().max(150, 'Street Address must be at most 150 characters').optional().or(z.literal('')),
-  city: z.string().max(100, 'City must be at most 100 characters').optional().or(z.literal('')),
+  streetAddress: z
+    .string()
+    .max(50, 'Street Address must be at most 50 characters')
+    .regex(streetAddressRegex, 'Street address contains invalid characters')
+    .optional()
+    .or(z.literal('')),
+  city: z
+    .string()
+    .max(30, 'City must be at most 30 characters')
+    .regex(cityRegex, 'City can only contain letters, periods, and hyphens')
+    .optional()
+    .or(z.literal('')),
   grade: z.string().max(20, 'Grade must be at most 20 characters').optional().or(z.literal('')),
   zipCode: z.string().max(10, 'Zip Code must be at most 10 characters').optional().or(z.literal('')),
-  fatherName: z.string().max(100, 'Father\'s Name must be at most 100 characters').optional().or(z.literal('')),
-  fatherPhone: z.string().max(20, 'Father\'s Phone must be at most 20 characters').optional().or(z.literal('')),
-  motherName: z.string().max(100, 'Mother\'s Name must be at most 100 characters').optional().or(z.literal('')),
-  motherPhone: z.string().max(20, 'Mother\'s Phone must be at most 20 characters').optional().or(z.literal('')),
+  fatherName: z
+    .string()
+    .max(50, 'Father\'s Name must be at most 50 characters')
+    .regex(nameRegex, 'Name can only contain letters, hyphens, periods, and apostrophes')
+    .optional()
+    .or(z.literal('')),
+  fatherPhone: z.string().max(14, 'Father\'s Phone must be at most 14 characters').optional().or(z.literal('')),
+  motherName: z
+    .string()
+    .max(50, 'Mother\'s Name must be at most 50 characters')
+    .regex(nameRegex, 'Name can only contain letters, hyphens, periods, and apostrophes')
+    .optional()
+    .or(z.literal('')),
+  motherPhone: z.string().max(14, 'Mother\'s Phone must be at most 14 characters').optional().or(z.literal('')),
 });
 
 type EditUserFormData = z.infer<typeof editUserSchema>;
@@ -316,7 +348,7 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
               <div className="relative h-[44px]">
                 <Input
                   id="streetAddress"
-                  maxLength={150}
+                  maxLength={50}
                   placeholder="Enter street address"
                   className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
                   {...register('streetAddress')}
@@ -335,7 +367,7 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
               <div className="relative h-[44px]">
                 <Input
                   id="city"
-                  maxLength={100}
+                  maxLength={30}
                   placeholder="Enter city"
                   className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
                   {...register('city')}
@@ -400,7 +432,7 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
                   <div className="relative h-[44px]">
                     <Input
                       id="fatherName"
-                      maxLength={100}
+                      maxLength={50}
                       placeholder="Name"
                       className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
                       {...register('fatherName', {
@@ -422,7 +454,7 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
                   <div className="relative h-[44px]">
                     <Input
                       id="fatherPhone"
-                      maxLength={20}
+                      maxLength={14}
                       placeholder="Phone"
                       className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
                       {...register('fatherPhone', {
@@ -450,7 +482,7 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
                   <div className="relative h-[44px]">
                     <Input
                       id="motherName"
-                      maxLength={100}
+                      maxLength={50}
                       placeholder="Name"
                       className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
                       {...register('motherName', {
@@ -472,7 +504,7 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
                   <div className="relative h-[44px]">
                     <Input
                       id="motherPhone"
-                      maxLength={20}
+                      maxLength={14}
                       placeholder="Phone"
                       className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
                       {...register('motherPhone', {

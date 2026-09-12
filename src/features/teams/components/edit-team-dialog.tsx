@@ -72,7 +72,7 @@ export function EditTeamDialog({ open, onOpenChange, team }: EditTeamDialogProps
             </Label>
             <Input
               id="edit-team-name"
-              maxLength={100}
+              maxLength={50}
               autoComplete="off"
               disabled={isPending}
               className="h-[44px] rounded-[24px] border border-[#3D3775] bg-white px-4 text-[14px] font-normal text-[#181818] placeholder:text-[#181818]/40 focus-visible:ring-0 focus-visible:ring-offset-0"

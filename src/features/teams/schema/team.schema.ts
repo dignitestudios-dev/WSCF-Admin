@@ -7,7 +7,11 @@ export const teamSchema = z.object({
     .string({ message: 'Team name is required' })
     .trim()
     .min(1, 'Team name is required')
-    .max(100, 'Team name cannot exceed 100 characters'),
+    .max(50, 'Team name cannot exceed 50 characters')
+    .regex(
+      /^[a-zA-Z0-9'.-]+(?: [a-zA-Z0-9'.-]+)*$/,
+      'Team name can only contain letters, numbers, hyphens, periods, and apostrophes',
+    ),
 });
 
 export type TeamFormData = z.infer<typeof teamSchema>;

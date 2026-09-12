@@ -76,34 +76,36 @@ export function LoginForm() {
             <label htmlFor="password" className="font-medium text-[14px] leading-[19px] capitalize text-[#181818]">
               Password
             </label>
-            <div className="relative w-full h-[44px]">
-              <Input
-                id="password"
-                placeholder="••••••••"
-                type={showPassword ? "text" : "password"}
-                maxLength={50}
-                className="w-full h-full bg-white border border-[#3D3775] rounded-[24px] px-[16px] font-normal text-[14px] text-[#181818] pr-[40px] placeholder:tracking-widest"
-                {...register('password')}
-              />
-              {/* Eye icon / hide icon toggle */}
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-[16px] top-1/2 -translate-y-1/2 flex items-center cursor-pointer p-0 bg-transparent border-0 focus:outline-none focus:ring-0 text-[#130F26]/60 hover:text-[#130F26] transition-colors"
-              >
-                {showPassword ? (
-                  <Eye className="h-5 w-5" />
-                ) : (
-                  <EyeOff className="h-5 w-5" />
-                )}
-              </button>
+            <div className="relative w-full">
+              <div className="relative w-full h-[44px]">
+                <Input
+                  id="password"
+                  placeholder="••••••••"
+                  type={showPassword ? "text" : "password"}
+                  maxLength={50}
+                  className="w-full h-full bg-white border border-[#3D3775] rounded-[24px] px-[16px] font-normal text-[14px] text-[#181818] pr-[40px] placeholder:tracking-widest"
+                  {...register('password')}
+                />
+                {/* Eye icon / hide icon toggle */}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-[16px] top-1/2 -translate-y-1/2 flex items-center cursor-pointer p-0 bg-transparent border-0 focus:outline-none focus:ring-0 text-[#130F26]/60 hover:text-[#130F26] transition-colors"
+                >
+                  {showPassword ? (
+                    <Eye className="h-5 w-5" />
+                  ) : (
+                    <EyeOff className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
               {errors.password && (
                 <p className="text-[0.8rem] font-medium text-destructive mt-1">
                   {errors.password.message}
                 </p>
               )}
 
-              <div className="w-full flex justify-end mt-[4px]">
+              <div className="w-full flex justify-end mt-[6px]">
                 <Link href="/forgot-password" className="font-semibold text-[12px] leading-[16px] text-right capitalize text-[#083F92] hover:underline">
                   forgot password?
                 </Link>

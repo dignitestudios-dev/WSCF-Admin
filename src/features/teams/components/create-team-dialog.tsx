@@ -83,7 +83,7 @@ export function CreateTeamDialog({ open, onOpenChange }: CreateTeamDialogProps) 
             </Label>
             <Input
               id="name"
-              maxLength={100}
+              maxLength={50}
               autoComplete="off"
               placeholder="e.g. Milwaukee Knights"
               disabled={isPending}
