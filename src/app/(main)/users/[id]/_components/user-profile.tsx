@@ -232,7 +232,7 @@ export default function UserProfile() {
             {/* Profile text details & stats grid */}
             <div className="flex flex-col gap-6 flex-1 w-full text-white">
               {/* Title & Email */}
-              <div className="flex flex-col items-center md:items-start gap-1 text-center md:text-left">
+              <div className="flex flex-col items-center md:items-start gap-1 text-center md:text-left min-w-0 max-w-full">
                 {isLoading ? (
                   <>
                     <Skeleton className="h-9 w-[200px] bg-white/20" />
@@ -240,11 +240,11 @@ export default function UserProfile() {
                   </>
                 ) : (
                   <>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                      <h1 className="font-poppins font-semibold text-[32px] leading-[38px] text-white m-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 min-w-0 max-w-full">
+                      <h1 className="font-poppins font-semibold text-[32px] leading-[38px] text-white m-0 break-words break-all [overflow-wrap:anywhere] min-w-0">
                         {userData.name}
                       </h1>
-                      <span className={`px-2.5 py-0.5 rounded-[100px] text-[12px] font-semibold uppercase tracking-wider ${
+                      <span className={`px-2.5 py-0.5 rounded-[100px] text-[12px] font-semibold uppercase tracking-wider shrink-0 ${
                         playerStatus === 'active'
                           ? 'bg-emerald-600 text-white shadow-sm'
                           : 'bg-rose-600 text-white shadow-sm'
@@ -252,7 +252,7 @@ export default function UserProfile() {
                         {playerStatus}
                       </span>
                     </div>
-                    <span className="font-poppins font-normal text-[14px] leading-[21px] text-[#DBDBDB]">
+                    <span className="font-poppins font-normal text-[14px] leading-[21px] text-[#DBDBDB] break-words break-all [overflow-wrap:anywhere] min-w-0 max-w-full">
                       {userData.email}
                     </span>
                   </>
@@ -263,26 +263,26 @@ export default function UserProfile() {
               <div className="grid grid-cols-2 md:flex md:flex-wrap md:items-center justify-between gap-6 w-full mt-2 select-text ml-0 md:ml-2">
 
                 {/* Stats block - User ID */}
-                <div className="flex flex-col items-center md:items-start text-center md:text-left">
+                <div className="flex flex-col items-center md:items-start text-center md:text-left min-w-0">
                   <span className="font-poppins font-normal text-[12px] leading-[18px] text-white/70">UserID</span>
-                  <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em]">{profile?.membershipId}</span>
+                  <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em] break-words break-all [overflow-wrap:anywhere]">{profile?.membershipId}</span>
                 </div>
 
                 {/* Divider Line & Stats block - Grade */}
-                <div className="flex items-center md:items-start gap-0 md:gap-3 justify-center md:justify-start">
+                <div className="flex items-center md:items-start gap-0 md:gap-3 justify-center md:justify-start min-w-0">
                   <div className="hidden md:block w-[4px] h-[18px] bg-white rounded-full shrink-0" />
-                  <div className="flex flex-col items-center md:items-start text-center md:text-left">
+                  <div className="flex flex-col items-center md:items-start text-center md:text-left min-w-0">
                     <span className="font-poppins font-normal text-[12px] leading-[18px] text-white/70">Grade</span>
-                    <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em]">{userData.grade}</span>
+                    <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em] break-words break-all [overflow-wrap:anywhere]">{userData.grade}</span>
                   </div>
                 </div>
 
                 {/* Divider Line & Stats block - Team */}
-                <div className="flex items-center md:items-start gap-0 md:gap-3 justify-center md:justify-start">
+                <div className="flex items-center md:items-start gap-0 md:gap-3 justify-center md:justify-start min-w-0 max-w-[200px] md:max-w-[300px]">
                   <div className="hidden md:block w-[4px] h-[18px] bg-white rounded-full shrink-0" />
-                  <div className="flex flex-col items-center md:items-start text-center md:text-left">
+                  <div className="flex flex-col items-center md:items-start text-center md:text-left min-w-0 max-w-full">
                     <span className="font-poppins font-normal text-[12px] leading-[18px] text-white/70">Team</span>
-                    <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em]">{userData.team}</span>
+                    <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em] break-words break-all [overflow-wrap:anywhere] max-w-full">{userData.team}</span>
                   </div>
                 </div>
 
@@ -444,13 +444,13 @@ export default function UserProfile() {
                   <div className="flex flex-wrap items-center gap-6 w-full mt-2">
 
                     {/* Parent detail item - Name */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0 max-w-[280px]">
                       <div className="w-[32px] h-[32px] bg-[#083F92] text-white rounded-full flex items-center justify-center shrink-0">
                         <UsersIcon className="w-4 h-4" />
                       </div>
-                      <div className="flex flex-col">
+                      <div className="flex flex-col min-w-0">
                         <span className="font-poppins font-normal text-[14px] leading-[21px] text-[#797979]">Name</span>
-                        <span className="font-poppins font-medium text-[20px] leading-[30px] text-[#083F92]">{userData.parentDetail.name}</span>
+                        <span className="font-poppins font-medium text-[20px] leading-[30px] text-[#083F92] break-words break-all [overflow-wrap:anywhere]">{userData.parentDetail.name}</span>
                       </div>
                     </div>
 
@@ -458,13 +458,13 @@ export default function UserProfile() {
                     <div className="hidden md:block w-[4px] h-[18px] bg-[#CDCDCD] rounded-full shrink-0" />
 
                     {/* Parent detail item - Contact */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0 max-w-[280px]">
                       <div className="w-[32px] h-[32px] bg-[#083F92] text-white rounded-full flex items-center justify-center shrink-0">
                         <Phone className="w-4 h-4" />
                       </div>
-                      <div className="flex flex-col">
+                      <div className="flex flex-col min-w-0">
                         <span className="font-poppins font-normal text-[14px] leading-[21px] text-[#797979]">Contact No.</span>
-                        <span className="font-poppins font-medium text-[20px] leading-[30px] text-[#083F92]">{userData.parentDetail.contact}</span>
+                        <span className="font-poppins font-medium text-[20px] leading-[30px] text-[#083F92] break-words break-all [overflow-wrap:anywhere]">{userData.parentDetail.contact}</span>
                       </div>
                     </div>
 
@@ -472,13 +472,13 @@ export default function UserProfile() {
                     <div className="hidden md:block w-[4px] h-[18px] bg-[#CDCDCD] rounded-full shrink-0" />
 
                     {/* Parent detail item - Email */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0 max-w-[280px]">
                       <div className="w-[32px] h-[32px] bg-[#083F92] text-white rounded-full flex items-center justify-center shrink-0">
                         <Mail className="w-4 h-4" />
                       </div>
-                      <div className="flex flex-col">
+                      <div className="flex flex-col min-w-0">
                         <span className="font-poppins font-normal text-[14px] leading-[21px] text-[#797979]">Email</span>
-                        <span className="font-poppins font-medium text-[20px] leading-[30px] text-[#083F92]">{userData.parentDetail.email}</span>
+                        <span className="font-poppins font-medium text-[20px] leading-[30px] text-[#083F92] break-words break-all [overflow-wrap:anywhere]">{userData.parentDetail.email}</span>
                       </div>
                     </div>
 

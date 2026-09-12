@@ -186,10 +186,10 @@ export function PlayerHighlightPanel({
           {value.map((entry) => (
             <span
               key={entry.name}
-              className="flex items-center gap-2 rounded-full border border-[#083F92]/30 bg-white py-1 pl-3 pr-1 font-poppins text-[12px] text-[#181818]"
+              className="flex items-center gap-2 rounded-full border border-[#083F92]/30 bg-white py-1 pl-3 pr-1 font-poppins text-[12px] text-[#181818] max-w-full"
             >
-              <span className="font-medium">{entry.name}</span>
-              <span className="text-[#8C8C8C]">{entry.label}</span>
+              <span className="font-medium truncate max-w-[140px]" title={entry.name}>{entry.name}</span>
+              <span className="text-[#8C8C8C] truncate max-w-[120px]" title={entry.label}>{entry.label}</span>
               <button
                 type="button"
                 disabled={disabled}
@@ -197,7 +197,7 @@ export function PlayerHighlightPanel({
                   onChange(value.filter((item) => item.name !== entry.name))
                 }
                 aria-label={`Remove note from ${entry.name}`}
-                className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full text-[#B42318] transition-colors hover:bg-[#FDECEA]"
+                className="flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#B42318] transition-colors hover:bg-[#FDECEA]"
               >
                 <X className="h-3 w-3" />
               </button>

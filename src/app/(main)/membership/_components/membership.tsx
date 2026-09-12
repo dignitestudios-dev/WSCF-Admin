@@ -246,7 +246,7 @@ export default function Membership() {
                         <td className="px-6 py-3 font-semibold select-text">
                           <Highlight text={member.membershipId} query={debouncedSearchQuery} />
                         </td>
-                        <td className="px-6 py-3 font-bold text-[#636363] select-text">
+                        <td className="px-6 py-3 font-bold text-[#636363] select-text max-w-[200px] truncate" title={member.name}>
                           <Highlight text={member.name} query={debouncedSearchQuery} />
                         </td>
                         <td className="px-6 py-3 font-semibold text-[#636363] select-text">{displayDate}</td>

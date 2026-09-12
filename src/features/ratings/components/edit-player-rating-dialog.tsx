@@ -97,11 +97,11 @@ export function EditPlayerRatingDialog({
             <div className="w-[42px] h-[42px] bg-[#083F92]/10 rounded-full flex items-center justify-center text-[#083F92] shrink-0">
               <Award className="w-5 h-5 text-[#083F92]" />
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <DialogTitle className="font-poppins text-[20px] font-semibold text-[#083F92]">
                 Edit Player Rating
               </DialogTitle>
-              <p className="font-poppins text-[13px] text-[#8C8C8C]">
+              <p className="font-poppins text-[13px] text-[#8C8C8C] break-words break-all [overflow-wrap:anywhere] max-w-full">
                 {playerName}
               </p>
             </div>

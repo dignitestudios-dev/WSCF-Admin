@@ -174,8 +174,8 @@ export default function Users() {
                           {user.grade}
                         </td>
                         <td className="max-w-[230px] truncate px-6 py-3 font-semibold tracking-[-0.02em]" title={user.team}>{user.team}</td>
-                        <td className="px-6 py-3 font-semibold tracking-[-0.02em]">
-                          <div className="line-clamp-2" title={user.city}>
+                        <td className="px-6 py-3 font-semibold tracking-[-0.02em] max-w-[150px]">
+                          <div className="line-clamp-2 break-words break-all [overflow-wrap:anywhere]" title={user.city}>
                             {user.city}
                           </div>
                         </td>

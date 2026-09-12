@@ -70,23 +70,23 @@ export function ConfirmDialog({
     >
       <DialogContent
         showCloseButton={false}
-        className="w-[90vw]! sm:w-[440px]! max-w-[440px]! rounded-[12px] border-none bg-white p-0 shadow-2xl"
+        className="w-[90vw]! sm:w-[440px]! max-w-[440px]! rounded-[12px] border-none bg-white p-0 shadow-2xl overflow-hidden"
       >
-        <div className="flex flex-col items-center gap-5 px-8 pt-8 text-center">
+        <div className="flex flex-col items-center gap-5 px-8 pt-8 text-center w-full max-w-full min-w-0">
           <span
             className={cn(
-              'flex h-[72px] w-[72px] items-center justify-center rounded-full text-white shadow-md',
+              'flex h-[72px] w-[72px] items-center justify-center rounded-full text-white shadow-md shrink-0',
               tones.badge
             )}
           >
             <Icon className="h-8 w-8" />
           </span>
 
-          <div className="flex flex-col gap-2">
-            <DialogTitle className="font-poppins text-[22px] font-semibold leading-[30px] text-[#181818]">
+          <div className="flex flex-col gap-2 w-full max-w-full min-w-0">
+            <DialogTitle className="font-poppins text-[22px] font-semibold leading-[30px] text-[#181818] break-words break-all [overflow-wrap:anywhere] max-w-full">
               {title}
             </DialogTitle>
-            <div className="font-poppins text-[14px] leading-[21px] text-[#565656]">
+            <div className="font-poppins text-[14px] leading-[21px] text-[#565656] break-words break-all [overflow-wrap:anywhere] max-w-full">
               {description}
             </div>
           </div>

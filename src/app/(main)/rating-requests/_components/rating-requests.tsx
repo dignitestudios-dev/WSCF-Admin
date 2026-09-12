@@ -175,7 +175,7 @@ export default function RatingRequests() {
                           />
                         </td>
 
-                        <td className="px-6 py-3 font-semibold text-[#181818]">
+                        <td className="px-6 py-3 font-semibold text-[#181818] max-w-[200px] truncate" title={fullName(player)}>
                           <Highlight
                             text={fullName(player)}
                             query={debouncedSearchQuery}

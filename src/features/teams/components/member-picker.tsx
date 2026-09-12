@@ -75,15 +75,15 @@ export function MemberPicker({
           {selected.map((member) => (
             <span
               key={member.id}
-              className="flex items-center gap-1.5 rounded-full bg-[#083F92] py-1 pl-3 pr-1.5 font-poppins text-[12px] font-medium text-white"
+              className="flex items-center gap-1.5 rounded-full bg-[#083F92] py-1 pl-3 pr-1.5 font-poppins text-[12px] font-medium text-white max-w-full"
             >
-              {member.name}
+              <span className="truncate max-w-[200px]" title={member.name}>{member.name}</span>
               <button
                 type="button"
                 disabled={disabled}
                 aria-label={`Remove ${member.name}`}
                 onClick={() => onChange(selected.filter((m) => m.id !== member.id))}
-                className="flex h-4 w-4 items-center justify-center rounded-full bg-white/20 transition-colors hover:bg-white/35 disabled:opacity-50 cursor-pointer"
+                className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white/20 transition-colors hover:bg-white/35 disabled:opacity-50 cursor-pointer"
               >
                 <X className="h-3 w-3" />
               </button>
