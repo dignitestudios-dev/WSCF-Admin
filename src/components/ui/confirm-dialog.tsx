@@ -83,10 +83,10 @@ export function ConfirmDialog({
           </span>
 
           <div className="flex flex-col gap-2 w-full max-w-full min-w-0">
-            <DialogTitle className="font-poppins text-[22px] font-semibold leading-[30px] text-[#181818] break-words break-all [overflow-wrap:anywhere] max-w-full">
+            <DialogTitle className="font-poppins text-[22px] font-semibold leading-[30px] text-[#181818] break-words [overflow-wrap:anywhere] max-w-full">
               {title}
             </DialogTitle>
-            <div className="font-poppins text-[14px] leading-[21px] text-[#565656] break-words break-all [overflow-wrap:anywhere] max-w-full">
+            <div className="font-poppins text-[14px] leading-[21px] text-[#565656] break-words [overflow-wrap:anywhere] max-w-full">
               {description}
             </div>
           </div>

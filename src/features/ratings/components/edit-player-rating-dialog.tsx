@@ -101,7 +101,7 @@ export function EditPlayerRatingDialog({
               <DialogTitle className="font-poppins text-[20px] font-semibold text-[#083F92]">
                 Edit Player Rating
               </DialogTitle>
-              <p className="font-poppins text-[13px] text-[#8C8C8C] break-words break-all [overflow-wrap:anywhere] max-w-full">
+              <p className="font-poppins text-[13px] text-[#8C8C8C] break-words [overflow-wrap:anywhere] max-w-full">
                 {playerName}
               </p>
             </div>

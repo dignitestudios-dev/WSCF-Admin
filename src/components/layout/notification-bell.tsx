@@ -94,7 +94,7 @@ function NotificationRow({
         notification.isRead ? "bg-white" : "bg-[rgba(8,63,146,0.05)]",
         isRemoving
           ? "max-h-0 -translate-x-4 border-b-0 py-0 opacity-0"
-          : "max-h-[200px] translate-x-0 opacity-100",
+          : "max-h-[1000px] translate-x-0 opacity-100",
       )}
     >
       <div
@@ -107,10 +107,10 @@ function NotificationRow({
       </div>
 
       <div className="min-w-0 flex-1 pr-5">
-        <div className="flex items-start gap-2">
+        <div className="flex w-full min-w-0 items-start gap-2">
           <p
             className={cn(
-              "font-poppins text-sm leading-5 text-[#121111] break-words break-all [overflow-wrap:anywhere]",
+              "min-w-0 flex-1 font-poppins text-sm leading-5 text-[#121111] break-words [overflow-wrap:anywhere]",
               notification.isRead ? "font-medium" : "font-semibold",
             )}
           >
@@ -121,7 +121,7 @@ function NotificationRow({
           )}
         </div>
 
-        <p className="mt-1 font-poppins text-xs font-medium leading-[18px] text-[#636363] break-words break-all [overflow-wrap:anywhere]">
+        <p className="mt-1 font-poppins text-xs font-medium leading-[18px] text-[#636363] break-words [overflow-wrap:anywhere]">
           {notification.body}
         </p>
 

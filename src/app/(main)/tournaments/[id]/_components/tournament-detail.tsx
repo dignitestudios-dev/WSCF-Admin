@@ -91,7 +91,7 @@ export default function TournamentDetail() {
               <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
               <span className="font-poppins font-medium text-[18px] leading-[27px]">Back</span>
             </button>
-            <h1 className="font-poppins font-bold text-[24px] leading-[36px] text-[#083F92] m-0 break-words break-all [overflow-wrap:anywhere] max-w-[calc(100vw-150px)] md:max-w-[500px]">
+            <h1 className="font-poppins font-bold text-[24px] leading-[36px] text-[#083F92] m-0 break-words [overflow-wrap:anywhere] max-w-[calc(100vw-150px)] md:max-w-[500px]">
               {tournamentTitle}
             </h1>
           </div>
@@ -165,7 +165,7 @@ export default function TournamentDetail() {
                   </span>
 
                   {/* Value column */}
-                  <span className="font-poppins font-bold text-[16px] sm:text-[20px] leading-[30px] text-[#083F92] break-words break-all [overflow-wrap:anywhere] min-w-0 flex-1 pl-11 sm:pl-0">
+                  <span className="font-poppins font-bold text-[16px] sm:text-[20px] leading-[30px] text-[#083F92] break-words [overflow-wrap:anywhere] min-w-0 flex-1 pl-11 sm:pl-0">
                     {item.value}
                   </span>
 

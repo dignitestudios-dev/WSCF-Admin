@@ -241,7 +241,7 @@ export default function UserProfile() {
                 ) : (
                   <>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-3 min-w-0 max-w-full">
-                      <h1 className="font-poppins font-semibold text-[32px] leading-[38px] text-white m-0 break-words break-all [overflow-wrap:anywhere] min-w-0">
+                      <h1 className="font-poppins font-semibold text-[32px] leading-[38px] text-white m-0 break-words [overflow-wrap:anywhere] min-w-0">
                         {userData.name}
                       </h1>
                       <span className={`px-2.5 py-0.5 rounded-[100px] text-[12px] font-semibold uppercase tracking-wider shrink-0 ${
@@ -252,7 +252,7 @@ export default function UserProfile() {
                         {playerStatus}
                       </span>
                     </div>
-                    <span className="font-poppins font-normal text-[14px] leading-[21px] text-[#DBDBDB] break-words break-all [overflow-wrap:anywhere] min-w-0 max-w-full">
+                    <span className="font-poppins font-normal text-[14px] leading-[21px] text-[#DBDBDB] break-words [overflow-wrap:anywhere] min-w-0 max-w-full">
                       {userData.email}
                     </span>
                   </>
@@ -265,7 +265,7 @@ export default function UserProfile() {
                 {/* Stats block - User ID */}
                 <div className="flex flex-col items-center md:items-start text-center md:text-left min-w-0">
                   <span className="font-poppins font-normal text-[12px] leading-[18px] text-white/70">UserID</span>
-                  <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em] break-words break-all [overflow-wrap:anywhere]">{profile?.membershipId}</span>
+                  <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em] break-words [overflow-wrap:anywhere]">{profile?.membershipId}</span>
                 </div>
 
                 {/* Divider Line & Stats block - Grade */}
@@ -273,7 +273,7 @@ export default function UserProfile() {
                   <div className="hidden md:block w-[4px] h-[18px] bg-white rounded-full shrink-0" />
                   <div className="flex flex-col items-center md:items-start text-center md:text-left min-w-0">
                     <span className="font-poppins font-normal text-[12px] leading-[18px] text-white/70">Grade</span>
-                    <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em] break-words break-all [overflow-wrap:anywhere]">{userData.grade}</span>
+                    <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em] break-words [overflow-wrap:anywhere]">{userData.grade}</span>
                   </div>
                 </div>
 
@@ -282,7 +282,7 @@ export default function UserProfile() {
                   <div className="hidden md:block w-[4px] h-[18px] bg-white rounded-full shrink-0" />
                   <div className="flex flex-col items-center md:items-start text-center md:text-left min-w-0 max-w-full">
                     <span className="font-poppins font-normal text-[12px] leading-[18px] text-white/70">Team</span>
-                    <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em] break-words break-all [overflow-wrap:anywhere] max-w-full">{userData.team}</span>
+                    <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em] break-words [overflow-wrap:anywhere] max-w-full">{userData.team}</span>
                   </div>
                 </div>
 
@@ -450,7 +450,7 @@ export default function UserProfile() {
                       </div>
                       <div className="flex flex-col min-w-0">
                         <span className="font-poppins font-normal text-[14px] leading-[21px] text-[#797979]">Name</span>
-                        <span className="font-poppins font-medium text-[20px] leading-[30px] text-[#083F92] break-words break-all [overflow-wrap:anywhere]">{userData.parentDetail.name}</span>
+                        <span className="font-poppins font-medium text-[20px] leading-[30px] text-[#083F92] break-words [overflow-wrap:anywhere]">{userData.parentDetail.name}</span>
                       </div>
                     </div>
 
@@ -464,7 +464,7 @@ export default function UserProfile() {
                       </div>
                       <div className="flex flex-col min-w-0">
                         <span className="font-poppins font-normal text-[14px] leading-[21px] text-[#797979]">Contact No.</span>
-                        <span className="font-poppins font-medium text-[20px] leading-[30px] text-[#083F92] break-words break-all [overflow-wrap:anywhere]">{userData.parentDetail.contact}</span>
+                        <span className="font-poppins font-medium text-[20px] leading-[30px] text-[#083F92] break-words [overflow-wrap:anywhere]">{userData.parentDetail.contact}</span>
                       </div>
                     </div>
 
@@ -478,7 +478,7 @@ export default function UserProfile() {
                       </div>
                       <div className="flex flex-col min-w-0">
                         <span className="font-poppins font-normal text-[14px] leading-[21px] text-[#797979]">Email</span>
-                        <span className="font-poppins font-medium text-[20px] leading-[30px] text-[#083F92] break-words break-all [overflow-wrap:anywhere]">{userData.parentDetail.email}</span>
+                        <span className="font-poppins font-medium text-[20px] leading-[30px] text-[#083F92] break-words [overflow-wrap:anywhere]">{userData.parentDetail.email}</span>
                       </div>
                     </div>
 

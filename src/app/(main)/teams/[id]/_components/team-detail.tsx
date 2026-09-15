@@ -127,7 +127,7 @@ export default function TeamDetail() {
             {isTeamLoading ? (
               <Skeleton className="h-9 w-[260px]" />
             ) : (
-              <h1 className="m-0 max-w-[calc(100vw-150px)] break-words break-all [overflow-wrap:anywhere] font-poppins text-[24px] font-bold leading-[36px] text-[#083F92] md:max-w-[500px]">
+              <h1 className="m-0 max-w-[calc(100vw-150px)] break-words [overflow-wrap:anywhere] font-poppins text-[24px] font-bold leading-[36px] text-[#083F92] md:max-w-[500px]">
                 {team?.name ?? 'Team not found'}
               </h1>
             )}

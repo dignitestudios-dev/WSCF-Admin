@@ -108,8 +108,8 @@ export function AssignRatingDialog({
             Assign Rating
           </DialogTitle>
 
-          <p className="font-poppins text-[13px] text-[#8C8C8C] mt-1 break-words break-all [overflow-wrap:anywhere] max-w-full">
-            <span className="font-semibold text-[#181818] break-words break-all [overflow-wrap:anywhere]">{fullName(player)}</span>
+          <p className="font-poppins text-[13px] text-[#8C8C8C] mt-1 break-words [overflow-wrap:anywhere] max-w-full">
+            <span className="font-semibold text-[#181818] break-words [overflow-wrap:anywhere]">{fullName(player)}</span>
             {player?.membershipId ? ` — ${player.membershipId}` : ''}
             {player?.grade ? ` · Grade ${player.grade}` : ''}
           </p>

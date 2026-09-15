@@ -67,8 +67,8 @@ export function AddMembersDialog({
         </div>
 
         <div className="mt-2 px-8 min-w-0 max-w-full">
-          <p className="font-poppins text-[14px] text-[#565656] break-words break-all [overflow-wrap:anywhere] max-w-full">
-            Adding to <span className="font-semibold text-[#181818] break-words break-all [overflow-wrap:anywhere]">{teamName}</span>
+          <p className="font-poppins text-[14px] text-[#565656] break-words [overflow-wrap:anywhere] max-w-full">
+            Adding to <span className="font-semibold text-[#181818] break-words [overflow-wrap:anywhere]">{teamName}</span>
           </p>
         </div>
 

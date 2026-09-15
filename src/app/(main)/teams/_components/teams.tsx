@@ -65,10 +65,7 @@ export default function Teams() {
             <div className="w-full sm:w-auto">
               <SearchInput
                 value={searchQuery}
-                onChangeValue={(value) => {
-                  setSearchQuery(value);
-                  setCurrentPage(1);
-                }}
+                onChangeValue={setSearchQuery}
                 placeholder="Search by team name"
               />
             </div>

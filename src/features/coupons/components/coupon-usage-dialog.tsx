@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -72,14 +73,25 @@ export function CouponUsageDialog({ open, onOpenChange, coupon }: CouponUsageDia
                     className="flex items-center justify-between gap-4 rounded-[12px] border border-[#DADADA] px-4 py-3"
                   >
                     <div className="flex min-w-0 flex-col">
-                      <span className="truncate font-poppins text-[14px] font-semibold text-[#181818]">
-                        {name}
-                        {player?.membershipId ? (
-                          <span className="ml-2 text-[11px] font-normal text-[#8C8C8C]">
-                            {player.membershipId}
-                          </span>
-                        ) : null}
-                      </span>
+                      {player?._id ? (
+                        <Link
+                          href={`/users/${player._id}`}
+                          onClick={() => onOpenChange(false)}
+                          className="truncate font-poppins text-[14px] font-semibold text-[#083F92] hover:underline cursor-pointer flex items-center gap-1.5"
+                          title={`View ${name}'s profile`}
+                        >
+                          <span className="truncate">{name}</span>
+                          {player.membershipId ? (
+                            <span className="text-[11px] font-normal text-[#8C8C8C] shrink-0">
+                              ({player.membershipId})
+                            </span>
+                          ) : null}
+                        </Link>
+                      ) : (
+                        <span className="truncate font-poppins text-[14px] font-semibold text-[#181818]">
+                          {name}
+                        </span>
+                      )}
                       <span className="truncate font-poppins text-[12px] text-[#8C8C8C]">
                         {redemption.tournamentId?.title || 'Tournament removed'}
                         {' · '}

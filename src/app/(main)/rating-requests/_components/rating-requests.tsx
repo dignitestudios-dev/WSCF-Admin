@@ -77,11 +77,6 @@ export default function RatingRequests() {
   const players = data?.data?.players || [];
   const totalPages = data?.pagination?.totalPages || 1;
 
-  const handleSearch = (value: string) => {
-    setSearchQuery(value);
-    setCurrentPage(1);
-  };
-
   const confirmNoRating = async () => {
     if (!playerToLeaveUnrated) return;
 
@@ -111,7 +106,7 @@ export default function RatingRequests() {
             <div className="w-full sm:w-auto">
               <SearchInput
                 value={searchQuery}
-                onChangeValue={handleSearch}
+                onChangeValue={setSearchQuery}
                 placeholder="Search by first name, last name or member ID"
               />
             </div>

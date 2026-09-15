@@ -117,7 +117,7 @@ export default function Tournaments() {
             return (
               <button
                 key={tab}
-                onClick={() => { setActiveTab(tab); setCurrentPage(1); }}
+                onClick={() => setActiveTab(tab)}
                 className={`min-w-[103px] px-4 h-[50px] rounded-[100px] border-4 border-[#F4F4F4] font-poppins font-semibold text-[14px] leading-[19px] flex items-center justify-center transition-all duration-150 capitalize cursor-pointer ${
                   isActive 
                     ? 'bg-[#083F92] text-white border-transparent' 
@@ -137,19 +137,19 @@ export default function Tournaments() {
           <div className="flex flex-col gap-3 w-full">
             {isLoading || isFetching ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <div key={`skeleton-${i}`} className="w-full min-h-[107px] py-4 md:py-0 bg-white border border-[#083F92]/30 rounded-[12px] flex flex-col md:flex-row md:items-center justify-between px-6 gap-4">
-                  <div className="flex items-center gap-4 w-full md:max-w-[85%]">
+                <div key={`skeleton-${i}`} className="w-full min-h-[107px] py-4 md:py-0 bg-white border border-[#083F92]/30 rounded-[12px] flex flex-col md:flex-row md:items-center justify-between px-6 gap-4 min-w-0 overflow-hidden">
+                  <div className="flex items-center gap-4 min-w-0 flex-1">
                     <Skeleton className="w-[40px] h-[40px] rounded-full shrink-0" />
-                    <div className="flex flex-col gap-2 w-full">
+                    <div className="flex flex-col gap-2 min-w-0 flex-1">
                       <Skeleton className="h-5 w-1/3" />
                       <div className="flex gap-4">
-                        <Skeleton className="h-4 w-20" />
-                        <Skeleton className="h-4 w-24" />
-                        <Skeleton className="h-4 w-12" />
+                        <Skeleton className="h-4 w-20 shrink-0" />
+                        <Skeleton className="h-4 w-24 shrink-0" />
+                        <Skeleton className="h-4 w-12 shrink-0" />
                       </div>
                     </div>
                   </div>
-                  <Skeleton className="w-[89px] h-[38px] rounded-[8px]" />
+                  <Skeleton className="w-[89px] h-[38px] rounded-[8px] shrink-0" />
                 </div>
               ))
             ) : tournaments.length > 0 ? (
@@ -157,10 +157,10 @@ export default function Tournaments() {
                 <Link 
                   key={t._id}
                   href={`/tournaments/${t._id}`}
-                  className="w-full min-h-[107px] py-4 md:py-0 bg-white border border-[#083F92]/30 rounded-[12px] shadow-[0px_4px_4px_rgba(0,0,0,0.05)] hover:shadow-[0px_4px_4px_rgba(0,0,0,0.1)] transition-all duration-150 flex flex-col md:flex-row md:items-center justify-between px-6 cursor-pointer gap-4"
+                  className="w-full min-h-[107px] py-4 md:py-0 bg-white border border-[#083F92]/30 rounded-[12px] shadow-[0px_4px_4px_rgba(0,0,0,0.05)] hover:shadow-[0px_4px_4px_rgba(0,0,0,0.1)] transition-all duration-150 flex flex-col md:flex-row md:items-center justify-between px-6 cursor-pointer gap-4 min-w-0 overflow-hidden"
                 >
                   {/* Left Card Details */}
-                  <div className="flex items-start md:items-center gap-4 w-full md:max-w-[85%]">
+                  <div className="flex items-start md:items-center gap-4 min-w-0 flex-1">
                     {/* Chess icon circle container */}
                     <div className="w-[40px] h-[40px] bg-[#083F92] text-white rounded-full flex items-center justify-center shrink-0">
                       <Crown className="w-5 h-5" />
@@ -168,28 +168,28 @@ export default function Tournaments() {
 
                     {/* Text descriptions */}
                     <div className="flex flex-col gap-2 min-w-0 flex-1">
-                      <h2 className="font-poppins font-medium text-[16px] md:text-[18px] leading-[24px] md:leading-[27px] text-[#083F92] truncate w-full">
+                      <h2 className="font-poppins font-medium text-[16px] md:text-[18px] leading-[24px] md:leading-[27px] text-[#083F92] truncate block min-w-0" title={t.title}>
                         <Highlight text={t.title} query={debouncedSearchQuery} />
                       </h2>
                       
                       {/* Inner items horizontal details row */}
-                      <div className="flex items-center gap-x-4 gap-y-2 flex-wrap text-[#151515]/90">
+                      <div className="flex items-center gap-x-4 gap-y-2 flex-wrap text-[#151515]/90 min-w-0">
                         
                         {/* Location details */}
-                        <div className="flex items-center gap-1.5 shrink-0 max-w-full">
+                        <div className="flex items-center gap-1.5 min-w-0 max-w-[200px] sm:max-w-[260px] md:max-w-[320px]">
                           <MapPin className="w-4 h-4 text-[#083F92] shrink-0" />
-                          <span className="font-poppins font-normal text-[13px] md:text-[14px] truncate max-w-[150px] sm:max-w-[250px] md:max-w-[400px]">{t.location}</span>
+                          <span className="font-poppins font-normal text-[13px] md:text-[14px] truncate" title={t.location}>{t.location}</span>
                         </div>
 
                         {/* Date details */}
                         <div className="flex items-center gap-1.5 shrink-0">
-                          <Calendar className="w-4 h-4 text-[#083F92]" />
+                          <Calendar className="w-4 h-4 text-[#083F92] shrink-0" />
                           <span className="font-poppins font-normal text-[13px] md:text-[14px]">{formatDate(t.date)}</span>
                         </div>
 
                         {/* Price tag details */}
                         <div className="flex items-center gap-1.5 shrink-0">
-                          <Tag className="w-4 h-4 text-[#083F92]" />
+                          <Tag className="w-4 h-4 text-[#083F92] shrink-0" />
                           <span className="font-poppins font-normal text-[13px] md:text-[14px]">${t.entryFee}</span>
                         </div>
 
@@ -198,9 +198,9 @@ export default function Tournaments() {
                   </div>
 
                   {/* Right Card Actions (Status Pill + Navigation Chevron) */}
-                  <div className="flex items-center justify-between md:justify-end gap-6 shrink-0 w-full md:w-auto border-t md:border-t-0 pt-3 md:pt-0 border-neutral-100">
+                  <div className="flex items-center justify-between md:justify-end gap-3 md:gap-4 shrink-0 w-full md:w-auto border-t md:border-t-0 pt-3 md:pt-0 border-neutral-100">
                     {/* Status badge */}
-                    <div className={`w-[89px] h-[38px] rounded-[8px] flex items-center justify-center font-poppins font-medium text-[13px] leading-[18px] capitalize ${
+                    <div className={`w-[89px] h-[38px] rounded-[8px] flex items-center justify-center font-poppins font-medium text-[13px] leading-[18px] capitalize shrink-0 ${
                       t.status === 'completed'
                         ? 'bg-[#083F92] text-white shadow-sm'
                         : 'bg-[#083F92]/10 text-[#083F92]'
@@ -222,15 +222,15 @@ export default function Tournaments() {
                         }}
                         className="flex h-[38px] shrink-0 cursor-pointer items-center gap-2 rounded-[100px] bg-[#083F92] px-4 text-white shadow-sm transition-opacity hover:opacity-90"
                       >
-                        <CheckCircle2 className="h-4 w-4" />
-                        <span className="font-poppins text-[13px] font-semibold">
+                        <CheckCircle2 className="h-4 w-4 shrink-0" />
+                        <span className="font-poppins text-[13px] font-semibold whitespace-nowrap">
                           Mark Completed
                         </span>
                       </button>
                     )}
 
                     {/* Action arrow icon */}
-                    <ArrowRight className="w-6 h-6 text-black/80 hover:translate-x-0.5 transition-transform hidden md:block" />
+                    <ArrowRight className="w-6 h-6 text-black/80 hover:translate-x-0.5 transition-transform hidden md:block shrink-0" />
                   </div>
 
                 </Link>

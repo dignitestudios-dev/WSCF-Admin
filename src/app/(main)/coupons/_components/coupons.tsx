@@ -56,13 +56,6 @@ export default function Coupons() {
   const coupons = data?.data?.coupons || [];
   const totalPages = data?.pagination?.totalPages || 1;
 
-  const handleSearch = (value: string) => {
-    setSearchQuery(value);
-    // A new search starts at the first page; page 3 of the old results says
-    // nothing about the new ones.
-    setCurrentPage(1);
-  };
-
   const confirmToggle = async () => {
     if (!couponToToggle) return;
 
@@ -90,7 +83,7 @@ export default function Coupons() {
             <div className="w-full sm:w-auto">
               <SearchInput
                 value={searchQuery}
-                onChangeValue={handleSearch}
+                onChangeValue={setSearchQuery}
                 placeholder="Search by coupon code"
               />
             </div>

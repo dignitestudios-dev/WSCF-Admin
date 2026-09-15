@@ -3,10 +3,7 @@
 import { useState, useMemo } from 'react';
 import { 
   FileSpreadsheet, 
-  ChevronUp, 
-  ChevronDown, 
-  Check,
-  ChevronsUpDown
+  Check
 } from 'lucide-react';
 import { SearchInput } from '@/components/ui/search-input';
 import Link from 'next/link';
@@ -156,10 +153,7 @@ export default function Membership() {
             <div className="w-full sm:w-auto">
               <SearchInput 
                 value={searchQuery} 
-                onChangeValue={(val) => {
-                  setSearchQuery(val);
-                  setCurrentPage(1);
-                }} 
+                onChangeValue={setSearchQuery} 
                 placeholder="Search by name, member ID or parent name"
                 disabled={isLoading}
                 containerClassName={isLoading ? 'opacity-50 pointer-events-none' : ''}
@@ -198,20 +192,7 @@ export default function Membership() {
                   <th className="px-6 py-3 font-semibold w-[200px]">Member Name</th>
                   <th className="px-6 py-3 font-semibold w-[180px]">Purchase Date</th>
                   
-                  {/* Membership Status Heading with Sorting */}
-                  <th className="px-6 py-3 font-semibold w-[200px]">
-                    <div 
-                      onClick={() => handleSort('status')}
-                      className="flex items-center gap-1.5 cursor-pointer hover:opacity-85"
-                    >
-                      <span>Membership Status</span>
-                      {sortField === 'status' ? (
-                        sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-                      ) : (
-                        <ChevronsUpDown className="w-4 h-4 text-white/50" />
-                      )}
-                    </div>
-                  </th>
+                  <th className="px-6 py-3 font-semibold w-[200px]">Membership Status</th>
 
                   <th className="px-6 py-3 font-semibold text-right w-[150px]">Action</th>
                 </tr>

@@ -44,10 +44,6 @@ export default function CurrentEnrolledUsers() {
   const participants = participantsData?.data?.participants || [];
   const totalPages = participantsData?.pagination?.totalPages || 1;
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [debouncedSearchQuery]);
-
   // In case selectedTournament is not in the current paginated list, we could store it separately.
   // But for now, we'll try to find it, or we could just save its title in state.
   const [selectedTournamentTitle, setSelectedTournamentTitle] = useState<string>('');

@@ -51,12 +51,12 @@ const editUserSchema = z.object({
   firstName: z
     .string()
     .min(1, 'First name is required')
-    .max(50, 'First name must be at most 50 characters')
+    .max(30, 'First name must be at most 30 characters')
     .regex(nameRegex, 'First name can only contain letters, hyphens, periods, and apostrophes'),
   lastName: z
     .string()
     .min(1, 'Last name is required')
-    .max(50, 'Last name must be at most 50 characters')
+    .max(30, 'Last name must be at most 30 characters')
     .regex(nameRegex, 'Last name can only contain letters, hyphens, periods, and apostrophes'),
   gender: z.string().optional(),
   sigma: z.string().optional(),
@@ -76,14 +76,14 @@ const editUserSchema = z.object({
   zipCode: z.string().max(10, 'Zip Code must be at most 10 characters').optional().or(z.literal('')),
   fatherName: z
     .string()
-    .max(50, 'Father\'s Name must be at most 50 characters')
+    .max(30, 'Father\'s Name must be at most 30 characters')
     .regex(nameRegex, 'Name can only contain letters, hyphens, periods, and apostrophes')
     .optional()
     .or(z.literal('')),
   fatherPhone: z.string().max(14, 'Father\'s Phone must be at most 14 characters').optional().or(z.literal('')),
   motherName: z
     .string()
-    .max(50, 'Mother\'s Name must be at most 50 characters')
+    .max(30, 'Mother\'s Name must be at most 30 characters')
     .regex(nameRegex, 'Name can only contain letters, hyphens, periods, and apostrophes')
     .optional()
     .or(z.literal('')),
@@ -261,7 +261,7 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
                 <div className="relative h-[44px]">
                   <Input
                     id="firstName"
-                    maxLength={50}
+                    maxLength={30}
                     placeholder="Enter first name"
                     className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
                     {...register('firstName', {
@@ -283,7 +283,7 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
                 <div className="relative h-[44px]">
                   <Input
                     id="lastName"
-                    maxLength={50}
+                    maxLength={30}
                     placeholder="Enter last name"
                     className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
                     {...register('lastName', {
@@ -432,7 +432,7 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
                   <div className="relative h-[44px]">
                     <Input
                       id="fatherName"
-                      maxLength={50}
+                      maxLength={30}
                       placeholder="Name"
                       className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
                       {...register('fatherName', {
@@ -482,7 +482,7 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
                   <div className="relative h-[44px]">
                     <Input
                       id="motherName"
-                      maxLength={50}
+                      maxLength={30}
                       placeholder="Name"
                       className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
                       {...register('motherName', {
