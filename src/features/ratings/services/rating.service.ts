@@ -10,6 +10,8 @@ export interface RatingRequestPlayer {
   membershipId: string | null;
   ratingStatus: 'pending' | 'assigned' | 'unrated';
   ratingAssignedAt: string | null;
+  /** Optional, admin-set. Independent of whether a rating was assigned. */
+  sigma: string | null;
   createdAt: string;
   /** The parent account, populated by the API. */
   userId: {
@@ -90,13 +92,18 @@ export const ratingService = {
    * Send `rating` to manually set a whole number rating, `masterPlayerId` to
    * link a record, or `noRating` to record that there is nothing to link.
    * `confirmReassign` is required when the player already has a rating.
+   *
+   * `sigma` rides along with any of them: it belongs to the player rather than
+   * to the rating, so it is just as valid on a player starting unrated. Send an
+   * empty string to clear it; omit it to leave it untouched.
    */
   assignRating: async (
     childId: string,
-    payload:
+    payload: { sigma?: string } & (
       | { rating: number; confirmReassign?: boolean }
       | { masterPlayerId: string; confirmReassign?: boolean }
       | { noRating: true; confirmReassign?: boolean }
+    )
   ): Promise<{ message: string }> => {
     const response = await axiosInstance.patch(
       `/player/children/${childId}/rating`,

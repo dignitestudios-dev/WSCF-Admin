@@ -114,6 +114,8 @@ export interface PlayerProfile extends UserListItem {
   totalWins?: number;
   updatedAt?: string;
   masterFileChecked?: boolean;
+  /** Optional, admin-set. Returned by the API as null when never set. */
+  sigma?: string | null;
 }
 
 export interface UserDetailsResponse {

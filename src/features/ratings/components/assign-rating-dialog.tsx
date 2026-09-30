@@ -24,6 +24,9 @@ export function AssignRatingDialog({
   player,
 }: AssignRatingDialogProps) {
   const [rating, setRating] = useState('');
+  // Optional, and kept apart from the rating: an admin can set it whether they
+  // assign a number or start the player unrated.
+  const [sigma, setSigma] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState<{
     type: 'rating' | 'noRating';
@@ -35,10 +38,11 @@ export function AssignRatingDialog({
   useEffect(() => {
     if (open) {
       setRating('');
+      setSigma(player?.sigma ?? '');
       setError(null);
       setConfirming(null);
     }
-  }, [open, player?._id]);
+  }, [open, player?._id, player?.sigma]);
 
   const handleRatingChange = (val: string) => {
     // Only allow digits
@@ -82,10 +86,14 @@ export function AssignRatingDialog({
     if (!confirming || !player) return;
 
     try {
-      const payload =
-        confirming.type === 'noRating'
+      // Always sent, so clearing the box clears the stored value rather than
+      // leaving the old one behind with no way to remove it.
+      const payload = {
+        sigma: sigma.trim(),
+        ...(confirming.type === 'noRating'
           ? { noRating: true as const }
-          : { rating: confirming.value as number };
+          : { rating: confirming.value as number }),
+      };
 
       await assign({
         childId: player._id,
@@ -133,6 +141,24 @@ export function AssignRatingDialog({
               {error && (
                 <p className="font-poppins text-[12px] font-medium text-red-500">{error}</p>
               )}
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="sigma" className="font-poppins font-medium text-[14px] text-[#181818]">
+                Sigma <span className="text-[#8C8C8C] font-normal">(optional)</span>
+              </Label>
+              <Input
+                id="sigma"
+                type="text"
+                placeholder="Enter sigma"
+                value={sigma}
+                onChange={(e) => setSigma(e.target.value)}
+                maxLength={30}
+                className="h-[48px] rounded-[12px] border border-[#DADADA] px-4 font-poppins text-[15px] focus-visible:ring-1 focus-visible:ring-[#083F92]"
+              />
+              <p className="font-poppins text-[12px] text-[#8C8C8C]">
+                Saved with either action. Leave empty to clear it.
+              </p>
             </div>
 
             <div className="mt-4 flex flex-col sm:flex-row items-center gap-3">

@@ -118,7 +118,8 @@ interface EditUserDialogProps {
       firstName?: string;
       lastName?: string;
       gender?: string;
-      sigma?: string;
+      // Null when the API has never had a value for it.
+      sigma?: string | null;
       grade?: string;
       rating?: number;
       account?: {
