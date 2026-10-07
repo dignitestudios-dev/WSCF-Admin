@@ -15,6 +15,8 @@ interface EditCouponDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   coupon: Coupon | null;
+  /** Opens the replace-code dialog; the code cannot be edited in place. */
+  onReplaceCode?: () => void;
 }
 
 /** A date input needs yyyy-MM-dd; the API sends an ISO timestamp. */
@@ -32,6 +34,11 @@ const getTodayDateString = () => {
 const createEditCouponSchema = (coupon: Coupon | null) =>
   z
     .object({
+      organizationName: z
+        .string()
+        .trim()
+        .min(2, 'Enter the organization name')
+        .max(100, 'Name must be at most 100 characters'),
       validUntil: z.string().optional().or(z.literal('')),
     })
     .refine(
@@ -52,14 +59,19 @@ const createEditCouponSchema = (coupon: Coupon | null) =>
 type EditCouponFormData = z.infer<ReturnType<typeof createEditCouponSchema>>;
 
 /**
- * Editing is deliberately limited to the end date.
+ * Editing is deliberately narrow: the name, the limit and the end date.
  *
  * The code itself is fixed once created: it may already be printed, shared or
  * used, and changing it would silently invalidate every copy already out
  * there. It is shown here read-only so the admin can see what they are
  * editing.
  */
-export function EditCouponDialog({ open, onOpenChange, coupon }: EditCouponDialogProps) {
+export function EditCouponDialog({
+  open,
+  onOpenChange,
+  coupon,
+  onReplaceCode,
+}: EditCouponDialogProps) {
   const { mutateAsync: updateCoupon, isPending } = useUpdateCoupon();
 
   const schema = useMemo(() => createEditCouponSchema(coupon), [coupon]);
@@ -71,7 +83,7 @@ export function EditCouponDialog({ open, onOpenChange, coupon }: EditCouponDialo
     formState: { errors },
   } = useForm<EditCouponFormData>({
     resolver: zodResolver(schema),
-    defaultValues: { validUntil: '' },
+    defaultValues: { organizationName: '', validUntil: '' },
   });
 
   const todayStr = getTodayDateString();
@@ -80,7 +92,10 @@ export function EditCouponDialog({ open, onOpenChange, coupon }: EditCouponDialo
 
   useEffect(() => {
     if (open && coupon) {
-      reset({ validUntil: toDateInput(coupon.validUntil) });
+      reset({
+        organizationName: coupon.organizationName,
+        validUntil: toDateInput(coupon.validUntil),
+      });
     }
   }, [open, coupon, reset]);
 
@@ -90,8 +105,11 @@ export function EditCouponDialog({ open, onOpenChange, coupon }: EditCouponDialo
     try {
       await updateCoupon({
         couponId: coupon._id,
-        // Cleared means no end date at all, so the coupon stops expiring.
-        data: { validUntil: data.validUntil || null },
+        data: {
+          organizationName: data.organizationName,
+          // Cleared means no end date at all.
+          validUntil: data.validUntil || null,
+        },
       });
       onOpenChange(false);
     } catch {
@@ -103,10 +121,10 @@ export function EditCouponDialog({ open, onOpenChange, coupon }: EditCouponDialo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[480px] rounded-[24px] p-6">
         <DialogTitle className="font-poppins text-[22px] font-semibold text-[#083F92]">
-          Edit Coupon
+          Edit Organization
         </DialogTitle>
         <p className="font-poppins text-[13px] text-[#8C8C8C]">
-          Only the end date can be changed.
+          The code itself cannot be changed.
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-4 flex flex-col gap-4">
@@ -116,17 +134,52 @@ export function EditCouponDialog({ open, onOpenChange, coupon }: EditCouponDialo
             of the layout. */}
         <fieldset disabled={isPending} className="contents">
           <div className="flex flex-col gap-2">
+            <Label
+              htmlFor="organizationName"
+              className="font-poppins text-[14px] font-medium text-[#181818]"
+            >
+              School, Club or District
+            </Label>
+            <Input
+              id="organizationName"
+              maxLength={100}
+              autoComplete="off"
+              className="h-11 rounded-full border-[#3D3775] px-4 font-poppins"
+              {...register('organizationName')}
+            />
+            {errors.organizationName ? (
+              <p className="text-[12px] text-[#CE2D32]">{errors.organizationName.message}</p>
+            ) : null}
+          </div>
+
+          <div className="flex flex-col gap-2">
             <Label className="font-poppins text-[14px] font-medium text-[#181818]">
               Coupon Code
             </Label>
-            <Input
-              value={coupon?.code ?? ''}
-              readOnly
-              disabled
-              className="h-11 cursor-not-allowed rounded-full border-[#DADADA] bg-[#F4F4F4] px-4 font-poppins text-[#8C8C8C]"
-            />
+            <div className="flex gap-2">
+              <Input
+                value={coupon?.code ?? ''}
+                readOnly
+                disabled
+                className="h-11 cursor-not-allowed rounded-full border-[#DADADA] bg-[#F4F4F4] px-4 font-mono tracking-wide text-[#8C8C8C]"
+              />
+              {onReplaceCode ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-11 shrink-0 rounded-full border-[#CE2D32] px-5 text-[#CE2D32] hover:bg-[#CE2D32]/5"
+                  onClick={() => {
+                    onOpenChange(false);
+                    onReplaceCode();
+                  }}
+                >
+                  Replace
+                </Button>
+              ) : null}
+            </div>
             <p className="font-poppins text-[11px] text-[#8C8C8C]">
-              The code cannot be changed — it may already have been shared or used.
+              A code is not edited in place. Replace it to revoke this one and issue a
+              new code.
             </p>
           </div>
 

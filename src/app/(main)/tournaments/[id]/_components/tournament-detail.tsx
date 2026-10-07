@@ -197,7 +197,7 @@ export default function TournamentDetail() {
 
               {/* Scrollable Table Area */}
               <div className="overflow-x-auto w-full">
-                <table className="w-full border-collapse min-w-[800px]">
+                <table className="w-full border-collapse min-w-[960px]">
 
                   {/* Table Header */}
                   <thead>
@@ -208,6 +208,7 @@ export default function TournamentDetail() {
                       <th className="px-6 py-3 font-semibold w-[150px]">Selected Division</th>
                       <th className="px-6 py-3 font-semibold w-[140px]">Team</th>
                       <th className="px-6 py-3 font-semibold w-[70px]">Rating</th>
+                      <th className="px-6 py-3 font-semibold w-[190px]">Payment</th>
                       <th className="px-6 py-3 font-semibold text-right w-[126px]">Action</th>
                     </tr>
                   </thead>
@@ -216,13 +217,13 @@ export default function TournamentDetail() {
                   <tbody>
                     {isParticipantsLoading ? (
                       <tr>
-                        <td colSpan={7} className="px-6 py-8 text-center text-[#636363]">
+                        <td colSpan={8} className="px-6 py-8 text-center text-[#636363]">
                           Loading participants...
                         </td>
                       </tr>
                     ) : registeredPlayers.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="px-6 py-8 text-center text-[#636363]">
+                        <td colSpan={8} className="px-6 py-8 text-center text-[#636363]">
                           No participants found.
                         </td>
                       </tr>
@@ -242,6 +243,23 @@ export default function TournamentDetail() {
                             <td className="px-6 py-3 font-semibold text-[#083F92]">{player.division?.label || 'N/A'}</td>
                             <td className="px-6 py-3 font-semibold text-black max-w-[150px] truncate" title={player.team?.name}>{player.team?.name || '—'}</td>
                             <td className="px-6 py-3 font-semibold text-black">{player.playerProfile?.rating || '0'}</td>
+                            <td className="px-6 py-3">
+                              {/* Covered by an organization's code (links to it),
+                                  or paid by the parent themselves. */}
+                              {player.coupon ? (
+                                <Link
+                                  href={`/coupons/${player.coupon._id}`}
+                                  title={`Registered with code ${player.coupon.code}`}
+                                  className="inline-flex max-w-[170px] items-center rounded-full bg-[#FFF4E5] px-2.5 py-0.5 text-[11px] font-semibold text-[#B54708] transition-opacity hover:opacity-80"
+                                >
+                                  <span className="truncate">{player.coupon.organizationName}</span>
+                                </Link>
+                              ) : (
+                                <span className="inline-flex items-center rounded-full bg-[#E7F6EC] px-2.5 py-0.5 text-[11px] font-semibold text-[#036B26]">
+                                  Paid by parent
+                                </span>
+                              )}
+                            </td>
                             <td className="px-6 py-3 text-right">
                               {userId ? (
                                 <Link
