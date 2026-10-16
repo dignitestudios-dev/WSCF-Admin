@@ -262,7 +262,14 @@ export default function CouponDetail() {
                 emphasis
                 label="To be invoiced"
                 value={formatMoney(billing.toInvoice.amount)}
-                hint={`${billing.toInvoice.count} registration${billing.toInvoice.count === 1 ? '' : 's'}`}
+                hint={
+                  billing.toInvoiceByKind.membership.count > 0 &&
+                  billing.toInvoiceByKind.tournament.count > 0
+                    ? `Memberships ${formatMoney(billing.toInvoiceByKind.membership.amount)} · Tournaments ${formatMoney(billing.toInvoiceByKind.tournament.amount)}`
+                    : billing.toInvoiceByKind.membership.count > 0
+                      ? `${billing.toInvoice.count} membership${billing.toInvoice.count === 1 ? '' : 's'}`
+                      : `${billing.toInvoice.count} registration${billing.toInvoice.count === 1 ? '' : 's'}`
+                }
               />
               <StatCard
                 label="Invoiced, awaiting payment"
@@ -350,12 +357,19 @@ export default function CouponDetail() {
                         {group.tournament.title}
                       </span>
                     )}
-                    <span className="font-poppins text-[12px] text-[#636363]">
-                      {dateLabel(group.tournament.date)}
-                    </span>
+                    {group.kind === 'membership' ? (
+                      <span className="font-poppins text-[12px] text-[#636363]">
+                        Membership fees
+                      </span>
+                    ) : (
+                      <span className="font-poppins text-[12px] text-[#636363]">
+                        {dateLabel(group.tournament.date)}
+                      </span>
+                    )}
                   </div>
                   <span className="font-poppins text-[14px] font-semibold text-[#083F92]">
-                    {group.count} student{group.count === 1 ? '' : 's'} ·{' '}
+                    {group.count} {group.kind === 'membership' ? 'membership' : 'student'}
+                    {group.count === 1 ? '' : 's'} ·{' '}
                     {formatMoney(group.total)}
                   </span>
                 </header>

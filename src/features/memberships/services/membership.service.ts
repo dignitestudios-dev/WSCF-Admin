@@ -6,6 +6,9 @@ export interface MembershipUser {
   name: string;
   membershipId: string;
   purchaseDate: string;
+  /** Admin-only: how this period was paid. */
+  paymentSource?: 'paypal' | 'coupon';
+  organization?: { _id: string; name: string } | null;
   status: string;
 }
 

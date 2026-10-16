@@ -29,6 +29,9 @@ interface Member {
   userId: string;
   name: string;
   purchaseDate: string;
+  /** How this period was paid. Admin-only: parents are never told. */
+  paymentSource?: 'paypal' | 'coupon';
+  organization?: { _id: string; name: string } | null;
   status: {
     type: 'active' | 'warning' | 'expired';
     text: string;
@@ -193,6 +196,7 @@ export default function Membership() {
                   <th className="px-6 py-3 font-semibold w-[180px]">Purchase Date</th>
                   
                   <th className="px-6 py-3 font-semibold w-[200px]">Membership Status</th>
+                  <th className="px-6 py-3 font-semibold w-[200px]">Payment</th>
 
                   <th className="px-6 py-3 font-semibold text-right w-[150px]">Action</th>
                 </tr>
@@ -207,6 +211,7 @@ export default function Membership() {
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[150px]" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[120px]" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[100px]" /></td>
+                      <td className="px-6 py-3"><Skeleton className="h-5 w-[110px] rounded-full" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[100px] float-right" /></td>
                     </tr>
                   ))
@@ -232,6 +237,24 @@ export default function Membership() {
                         </td>
                         <td className="px-6 py-3 font-semibold text-[#636363] select-text">{displayDate}</td>
                         <td className="px-6 py-3 font-semibold select-text">{displayStatus}</td>
+                        <td className="px-6 py-3">
+                          {/* Two badges, so the two ways a membership gets paid
+                              are told apart at a glance. A coupon one names the
+                              organization and opens its billing page. */}
+                          {member.paymentSource === 'coupon' && member.organization ? (
+                            <Link
+                              href={`/coupons/${member.organization._id}`}
+                              title={`Paid by coupon: ${member.organization.name}`}
+                              className="inline-flex max-w-[180px] items-center rounded-full bg-[#FFF4E5] px-2.5 py-0.5 text-[11px] font-semibold text-[#B54708] transition-opacity hover:opacity-80"
+                            >
+                              <span className="truncate">Coupon · {member.organization.name}</span>
+                            </Link>
+                          ) : (
+                            <span className="inline-flex items-center rounded-full bg-[#E7F6EC] px-2.5 py-0.5 text-[11px] font-semibold text-[#036B26]">
+                              Paid
+                            </span>
+                          )}
+                        </td>
                         
                         <td className="px-6 py-3 text-right">
                           <div className="flex items-center justify-end gap-1.5">
@@ -266,7 +289,7 @@ export default function Membership() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={5} className="py-12 text-center text-[#787878] font-poppins">
+                    <td colSpan={6} className="py-12 text-center text-[#787878] font-poppins">
                       No membership records found matching your search.
                     </td>
                   </tr>

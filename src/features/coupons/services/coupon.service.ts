@@ -19,7 +19,12 @@ export interface BillingSummary {
   toInvoice: BillingBucket;
   invoiced: BillingBucket;
   paid: BillingBucket;
+  /** What is still to invoice, by what it was for. */
+  toInvoiceByKind: { membership: BillingBucket; tournament: BillingBucket };
 }
+
+/** What a code waived: a tournament entry fee, or a membership. */
+export type RedemptionKind = 'tournament' | 'membership';
 
 /** An organization and the code assigned to it. */
 export interface Coupon {
@@ -51,6 +56,7 @@ export interface Coupon {
 
 export interface CouponRegistration {
   _id: string;
+  kind: RedemptionKind;
   /** The entry fee at the moment the player registered. */
   amount: number;
   billingStatus: BillingStatus;
@@ -69,6 +75,8 @@ export interface CouponRegistration {
 
 /** One tournament's registrations, the way an invoice lists them. */
 export interface TournamentGroup {
+  kind: RedemptionKind;
+  /** For a membership group: "Memberships · valid until August 31, 2027". */
   tournament: {
     _id: string;
     title: string;
