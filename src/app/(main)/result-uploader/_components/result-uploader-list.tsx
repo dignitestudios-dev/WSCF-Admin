@@ -75,7 +75,7 @@ export default function ResultUploaderList() {
                       <div className="flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-full bg-[#083F92] text-white shadow-sm">
                         <Crown className="h-5 w-5" />
                       </div>
-                      <h2 className="flex-1 truncate font-poppins text-[15px] font-medium leading-[22px] text-[#151515] sm:text-[18px] sm:leading-[27px]">
+                      <h2 className="min-w-0 flex-1 font-poppins text-[15px] font-medium leading-[22px] text-[#151515] break-words [overflow-wrap:anywhere] sm:text-[18px] sm:leading-[27px]">
                         {tournament.title}
                       </h2>
                     </div>
@@ -94,10 +94,10 @@ export default function ResultUploaderList() {
                   </div>
 
                   <div className="mt-1 flex flex-wrap items-center justify-between gap-4 border-t border-[#EEEEEE] pt-3 sm:flex-nowrap">
-                    <div className="flex flex-wrap items-center gap-4 text-[#151515] sm:flex-nowrap sm:gap-6">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-[#083F92]" />
-                        <span className="font-poppins text-[14px] font-normal leading-[21px]">
+                    <div className="flex min-w-0 flex-wrap items-center gap-4 text-[#151515] sm:flex-nowrap sm:gap-6">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <MapPin className="h-4 w-4 shrink-0 text-[#083F92]" />
+                        <span className="min-w-0 font-poppins text-[14px] font-normal leading-[21px] break-words [overflow-wrap:anywhere]">
                           {tournament.location || '—'}
                         </span>
                       </div>

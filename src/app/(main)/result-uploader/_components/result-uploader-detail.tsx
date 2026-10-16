@@ -434,7 +434,7 @@ export default function ResultUploaderDetail({
           </button>
         </div>
 
-        <h1 className="m-0 font-poppins text-[24px] font-bold leading-[36px] text-[#083F92] md:text-[28px]">
+        <h1 className="m-0 font-poppins text-[24px] font-bold leading-[36px] text-[#083F92] break-words [overflow-wrap:anywhere] md:text-[28px]">
           {selected.title}
         </h1>
 
@@ -449,20 +449,20 @@ export default function ResultUploaderDetail({
               {detailRows.map((row) => (
                 <div
                   key={row.label}
-                  className="grid grid-cols-1 items-start gap-1 border-b border-[#083F92]/5 pb-2 md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-4 md:border-b-0 md:pb-0"
+                  className="grid grid-cols-1 items-start gap-1 border-b border-[#083F92]/5 pb-2 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-center md:gap-4 md:border-b-0 md:pb-0"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#083F92] text-white">
                       <row.icon className="h-[16px] w-[16px]" />
                     </div>
-                    <span className="truncate font-poppins text-[16px] font-medium leading-[30px] text-[#636363] md:text-[20px]">
+                    <span className="min-w-0 font-poppins text-[16px] font-medium leading-[30px] text-[#636363] break-words [overflow-wrap:anywhere] md:text-[20px]">
                       {row.label}
                     </span>
                   </div>
                   <span className="hidden font-general-sans text-[20px] font-medium leading-[27px] text-black md:inline">
                     :
                   </span>
-                  <span className="pl-11 font-poppins text-[16px] font-bold leading-[30px] text-[#083F92] md:pl-0 md:text-[20px]">
+                  <span className="min-w-0 pl-11 font-poppins text-[16px] font-bold leading-[30px] text-[#083F92] break-words [overflow-wrap:anywhere] md:pl-0 md:text-[20px]">
                     {row.value}
                   </span>
                 </div>
@@ -481,7 +481,7 @@ export default function ResultUploaderDetail({
               <div className="flex w-full flex-col gap-5 rounded-[12px] bg-[#083F92]/10 p-6">
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#0F8B4C]" />
-                  <div className="flex flex-col gap-1">
+                  <div className="flex min-w-0 flex-col gap-1">
                     <p className="font-poppins text-[15px] font-semibold text-[#0F5132]">
                       Results published
                       {published?.publishedAt
@@ -498,7 +498,7 @@ export default function ResultUploaderDetail({
                       replaced.
                     </p>
                     {published?.attachments?.length ? (
-                      <p className="font-poppins text-[12px] text-[#565656]">
+                      <p className="font-poppins text-[12px] text-[#565656] break-words [overflow-wrap:anywhere]">
                         Includes {published.attachments.length} attached file(s)
                         at the back:{' '}
                         {published.attachments
@@ -514,9 +514,9 @@ export default function ResultUploaderDetail({
                   {published?.divisions.map((division) => (
                     <div
                       key={division.divisionLabel}
-                      className="flex flex-col gap-1 rounded-[12px] border border-[#DADADA] bg-white px-4 py-3"
+                      className="flex min-w-0 flex-col gap-1 rounded-[12px] border border-[#DADADA] bg-white px-4 py-3"
                     >
-                      <span className="font-poppins text-[13px] font-bold text-[#083F92]">
+                      <span className="font-poppins text-[13px] font-bold text-[#083F92] break-words [overflow-wrap:anywhere]">
                         {division.divisionLabel}
                       </span>
                       <span className="font-poppins text-[11px] text-[#636363]">
@@ -593,7 +593,7 @@ export default function ResultUploaderDetail({
                 {published?.status === 'failed' ? (
                   <div className="flex items-start gap-3 rounded-[12px] border border-[#CE2D32]/30 bg-[#FDECEA] px-5 py-4">
                     <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#B42318]" />
-                    <p className="font-poppins text-[12px] leading-5 text-[#7A1710]">
+                    <p className="min-w-0 flex-1 font-poppins text-[12px] leading-5 text-[#7A1710] break-words [overflow-wrap:anywhere]">
                       The last attempt failed: {published.failureReason}
                     </p>
                   </div>

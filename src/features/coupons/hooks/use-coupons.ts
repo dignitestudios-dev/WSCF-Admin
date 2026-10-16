@@ -133,7 +133,7 @@ export function useUpdateBilling(couponId: string) {
   return useMutation({
     mutationFn: (data: {
       redemptionIds: string[];
-      status: BillingStatus;
+      status: Exclude<BillingStatus, 'unbilled'>;
       invoiceNumber?: string | null;
     }) => couponService.updateBilling(couponId, data),
     onSuccess: (response: any) => {
@@ -141,6 +141,9 @@ export function useUpdateBilling(couponId: string) {
       toast.success(response?.message || 'Billing updated');
     },
     onError: (error: any) => {
+      // A refusal usually means the page is showing a status someone else has
+      // already moved on, so show the current one rather than the stale one.
+      invalidate();
       toast.error(errorMessage(error, 'Failed to update billing'));
     },
   });

@@ -114,8 +114,8 @@ export function ResultPreviewPanel({ preview }: { preview: ResultPreview }) {
           className="overflow-hidden rounded-[24px] border border-[#DADADA] bg-white"
         >
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#EFEFEF] px-5 py-4">
-            <div className="flex items-center gap-3">
-              <span className="rounded-full bg-[#083F92] px-3 py-1 font-poppins text-[13px] font-bold text-white">
+            <div className="flex min-w-0 max-w-full flex-wrap items-center gap-x-3 gap-y-1">
+              <span className="max-w-full rounded-[16px] bg-[#083F92] px-3 py-1 font-poppins text-[13px] font-bold text-white break-words [overflow-wrap:anywhere]">
                 {division.divisionLabel}
               </span>
               <span className="font-poppins text-[12px] text-[#8C8C8C]">

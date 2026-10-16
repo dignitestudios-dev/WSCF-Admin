@@ -17,7 +17,10 @@ interface EditTeamDialogProps {
   team: Team | null;
 }
 
-/** The name is the only editable field — members are managed on the team page. */
+/**
+ * The name is the only editable field — members are managed on the team page.
+ * The team code is generated from it, so it changes with the name.
+ */
 export function EditTeamDialog({ open, onOpenChange, team }: EditTeamDialogProps) {
   const { mutateAsync: updateTeam, isPending } = useUpdateTeam();
 
@@ -81,6 +84,16 @@ export function EditTeamDialog({ open, onOpenChange, team }: EditTeamDialogProps
             {errors.name && (
               <p className="font-poppins text-[12px] text-red-500">{errors.name.message}</p>
             )}
+            {team?.code ? (
+              <p className="font-poppins text-[12px] leading-[18px] text-[#565656]">
+                The team code is generated from the name, so renaming the team gives it a new
+                code. It is{' '}
+                <span className="font-mono font-semibold tracking-wide text-[#181818]">
+                  {team.code}
+                </span>{' '}
+                now.
+              </p>
+            ) : null}
           </div>
 
           <Button

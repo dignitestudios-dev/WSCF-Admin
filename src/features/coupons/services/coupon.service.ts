@@ -189,7 +189,8 @@ export const couponService = {
     couponId: string,
     data: {
       redemptionIds: string[];
-      status: BillingStatus;
+      /** Forward only: To invoice -> invoiced -> paid. There is no way back. */
+      status: Exclude<BillingStatus, 'unbilled'>;
       invoiceNumber?: string | null;
     }
   ) => {

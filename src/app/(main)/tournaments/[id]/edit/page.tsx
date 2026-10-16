@@ -25,6 +25,11 @@ export default function EditTournamentPage() {
     });
   };
 
+  // The API refuses edits once a tournament has started. Say so here instead of
+  // showing a form that can only fail when it is saved.
+  const status: string | undefined = tournament?.data?.tournament?.status;
+  const isLocked = Boolean(status) && status !== 'upcoming';
+
   const handleSuccessClose = () => {
     setShowSuccess(false);
     router.push('/tournaments');
@@ -56,6 +61,21 @@ export default function EditTournamentPage() {
           {isFetching ? (
             <div className="flex justify-center py-20">
               <Loader2 className="w-8 h-8 animate-spin text-[#083F92]" />
+            </div>
+          ) : isLocked ? (
+            <div className="flex flex-col items-center gap-3 py-20 text-center font-poppins">
+              <p className="text-[18px] font-medium text-[#181818]">
+                This tournament is {status} and can no longer be edited.
+              </p>
+              <p className="text-[14px] text-[#565656]">
+                Only upcoming tournaments can be changed.
+              </p>
+              <button
+                onClick={() => router.back()}
+                className="mt-2 h-[44px] rounded-[24px] bg-[#083F92] px-8 text-[14px] font-semibold text-white transition-colors hover:bg-[#083F92]/90"
+              >
+                Go back
+              </button>
             </div>
           ) : tournament?.data?.tournament ? (
             <TournamentForm

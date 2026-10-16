@@ -189,6 +189,7 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
     handleSubmit,
     reset,
     setValue,
+    trigger,
     watch,
     control,
     formState: { errors, isDirty, isValid },
@@ -506,8 +507,15 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
                       max={watch(`divisions.${index}.gradeMax`)}
                       disabled={isPending}
                       onChange={(nextMin, nextMax) => {
-                        setValue(`divisions.${index}.gradeMin`, nextMin, { shouldDirty: true, shouldValidate: true });
-                        setValue(`divisions.${index}.gradeMax`, nextMax, { shouldDirty: true, shouldValidate: true });
+                        const minField = `divisions.${index}.gradeMin` as const;
+                        const maxField = `divisions.${index}.gradeMax` as const;
+                        // Both ends are written first and validated once, together.
+                        // Validating after each write checks the form while only
+                        // one end is set, records "Grade is required" against it,
+                        // and nothing clears that once the other end arrives.
+                        setValue(minField, nextMin, { shouldDirty: true });
+                        setValue(maxField, nextMax, { shouldDirty: true });
+                        void trigger([minField, maxField]);
                       }}
                     />
                     {errors.divisions?.[index]?.gradeMin && (
@@ -548,7 +556,7 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
                     <Input
                       {...register(`divisions.${index}.rating` as const, { setValueAs: (v) => (v === '' || v === null ? undefined : Number(v)) })}
                       type="number"
-                      min={0}
+                      min={1}
                       onKeyDown={(e) => {
                         if (e.key === '-' || e.key === 'e') {
                           e.preventDefault();

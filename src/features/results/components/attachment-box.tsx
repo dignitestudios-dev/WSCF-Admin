@@ -64,7 +64,10 @@ export function AttachmentBox({
             </div>
 
             <div className="flex min-w-0 flex-1 flex-col">
-              <span className="truncate font-poppins text-[13px] font-semibold text-[#151515]">
+              <span
+                title={attachment.file.name}
+                className="truncate font-poppins text-[13px] font-semibold text-[#151515]"
+              >
                 {attachment.file.name}
               </span>
               <span className="font-poppins text-[11px] text-[#8C8C8C]">

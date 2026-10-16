@@ -92,7 +92,10 @@ export function ResultFileBox({
               </div>
 
               <div className="flex min-w-0 flex-col">
-                <span className="truncate font-poppins text-[13px] font-semibold text-[#151515]">
+                <span
+                  title={staged.file.name}
+                  className="truncate font-poppins text-[13px] font-semibold text-[#151515]"
+                >
                   {staged.file.name}
                 </span>
                 <span className="font-poppins text-[11px] text-[#8C8C8C]">
@@ -121,17 +124,22 @@ export function ResultFileBox({
                     }
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="w-auto min-w-(--anchor-width) max-w-[min(360px,90vw)]">
                   {divisions.map((division) => (
                     <SelectItem
                       key={division._id}
                       value={division._id}
+                      // The shared item keeps its label from shrinking, which stops a long
+                      // name wrapping; here it has to be allowed to.
+                      className="[&>*:first-child]:min-w-0 [&>*:first-child]:shrink"
                       disabled={
                         division._id !== staged.divisionId &&
                         takenDivisionIds.includes(division._id)
                       }
                     >
-                      {division.label}
+                      <span className="min-w-0 whitespace-normal break-words [overflow-wrap:anywhere]">
+                        {division.label}
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>

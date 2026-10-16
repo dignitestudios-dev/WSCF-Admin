@@ -34,6 +34,10 @@ export default function TournamentDetail() {
   const tournament = response?.data?.tournament;
 
   const tournamentTitle = tournament?.title || "Tournament";
+  // Only a tournament that has not started can be changed; the API enforces it
+  // too. Offering Edit on an ongoing or completed one would lead to a form that
+  // can only fail.
+  const canEdit = tournament?.status === 'upcoming';
 
 
   // The name the admin gave it. Nothing is derived from the grade or rating
@@ -94,11 +98,17 @@ export default function TournamentDetail() {
             <h1 className="font-poppins font-bold text-[24px] leading-[36px] text-[#083F92] m-0 break-words [overflow-wrap:anywhere] max-w-[calc(100vw-150px)] md:max-w-[500px]">
               {tournamentTitle}
             </h1>
+            {tournament && !canEdit && (
+              <p className="font-poppins text-[13px] text-[#8C8C8C] m-0">
+                This tournament is {tournament.status}, so it can no longer be edited.
+              </p>
+            )}
           </div>
 
           {/* Right Action buttons: Edit & Delete */}
           <div className="flex items-center gap-3 shrink-0">
             {/* Edit Button */}
+            {canEdit && (
             <button
               onClick={() => router.push(`/tournaments/${id}/edit`)}
               className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-[105px] justify-center"
@@ -110,6 +120,7 @@ export default function TournamentDetail() {
                 Edit
               </span>
             </button>
+            )}
 
             {/* A tournament with anyone registered cannot be deleted — the API
                 refuses it — so the button is not offered at all. */}

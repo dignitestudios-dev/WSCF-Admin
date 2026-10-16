@@ -41,11 +41,14 @@ export const divisionSchema = z.object({
   // silently admits everyone instead of the group that was meant.
   const hasRating = data.rating !== undefined && !Number.isNaN(data.rating);
   if (hasRating) {
-    if ((data.rating as number) < 0) {
+    // A limit is at least 1: "under 0" only matches players with no rating and
+    // "over 0" matches everyone, so neither restricts what was meant. To have no
+    // limit, leave the rating empty.
+    if ((data.rating as number) < 1) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['rating'],
-        message: 'Rating cannot be negative',
+        message: 'Rating must be at least 1. Leave it empty for no rating limit.',
       });
     } else if ((data.rating as number) > 10000) {
       ctx.addIssue({

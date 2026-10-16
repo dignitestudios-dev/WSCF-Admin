@@ -19,10 +19,15 @@ export interface SendBulkNotificationResponse {
   };
 }
 
+/**
+ * Message one member. `playerProfileId` keeps it to that child; `userId`
+ * addresses the whole account and reaches every child on it. Send one of them.
+ */
 export interface SendIndividualNotificationRequest {
-  userId: string;
-  email: string;
   message: string;
+  playerProfileId?: string;
+  userId?: string;
+  email?: string;
 }
 
 export interface SendIndividualNotificationResponse {

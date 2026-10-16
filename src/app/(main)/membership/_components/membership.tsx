@@ -27,6 +27,8 @@ type NotificationFormData = z.infer<typeof notificationSchema>;
 
 interface Member {
   userId: string;
+  /** The player this membership belongs to: who a notification is about. */
+  playerProfileId: string;
   name: string;
   purchaseDate: string;
   /** How this period was paid. Admin-only: parents are never told. */
@@ -97,8 +99,11 @@ export default function Membership() {
   const onNotifySubmit = async (data: NotificationFormData) => {
     try {
       await sendIndividualNotification({
-        userId: notifyingMember.userId,
-        email: "", // Not provided in membership API, backend should handle via userId
+        // The player's id, not the parent's: a membership belongs to one child, so
+        // the message must reach only that child. Sending the account id would
+        // put it in every sibling's inbox too. The backend finds the parent's
+        // email from the player.
+        playerProfileId: notifyingMember.playerProfileId,
         message: data.message.trim()
       });
       setNotifyingMember(null);

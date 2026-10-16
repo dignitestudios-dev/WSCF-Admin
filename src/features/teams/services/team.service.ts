@@ -4,8 +4,9 @@ export interface Team {
   _id: string;
   name: string;
   /**
-   * The short code WinTD knows this team by, assigned on creation and never
-   * changed — it is what ties a returning results row back to this team.
+   * The six-character code WinTD knows this team by. It is generated from the
+   * name and follows it: renaming the team gives it a new code (the old one
+   * keeps resolving, so results already on their way back still find the team).
    */
   code?: string | null;
   /** Only present on the list endpoint, which counts members per team. */

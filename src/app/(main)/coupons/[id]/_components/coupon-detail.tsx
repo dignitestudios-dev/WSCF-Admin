@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { format } from 'date-fns';
-import { ChevronLeft, Download, Edit, FileText, CircleDollarSign, RotateCcw, Users, ArchiveRestore } from 'lucide-react';
+import { ChevronLeft, Download, Edit, FileText, CircleDollarSign, Users, ArchiveRestore } from 'lucide-react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageTransition } from '@/components/animations/page-transition';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -42,6 +42,18 @@ const STATUS_BADGE: Record<BillingStatus, { label: string; tone: string }> = {
   unbilled: { label: 'To invoice', tone: 'bg-[#FFF4E5] text-[#B54708]' },
   invoiced: { label: 'Invoiced', tone: 'bg-[#E8F0FE] text-[#083F92]' },
   paid: { label: 'Paid', tone: 'bg-[#E7F6EC] text-[#036B26]' },
+};
+
+/**
+ * Billing only moves forward, one step at a time: To invoice, then Invoiced,
+ * then Paid, and Paid is final. The API enforces it; this is what the page
+ * offers so nobody is led to a button that can only fail.
+ */
+type BillingStep = 'invoiced' | 'paid';
+const NEXT_STEP: Record<BillingStatus, BillingStep | null> = {
+  unbilled: 'invoiced',
+  invoiced: 'paid',
+  paid: null,
 };
 
 const dateLabel = (value: string | null) =>
@@ -93,7 +105,7 @@ export default function CouponDetail() {
   const [isReplaceOpen, setIsReplaceOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   // What the selection is about to be marked as, awaiting confirmation.
-  const [pendingStatus, setPendingStatus] = useState<BillingStatus | null>(null);
+  const [pendingStatus, setPendingStatus] = useState<BillingStep | null>(null);
   const [invoiceNumber, setInvoiceNumber] = useState('');
 
   const { data: coupon, isLoading: isCouponLoading } = useCoupon(id);
@@ -106,9 +118,13 @@ export default function CouponDetail() {
   const [isRestoreOpen, setIsRestoreOpen] = useState(false);
 
   const allRegistrations: CouponRegistration[] = groups.flatMap((g) => g.registrations);
-  const selectedTotal = allRegistrations
-    .filter((r) => selected.has(r._id))
-    .reduce((sum, r) => sum + r.amount, 0);
+  const selectedItems = allRegistrations.filter((r) => selected.has(r._id));
+  const selectedTotal = selectedItems.reduce((sum, r) => sum + r.amount, 0);
+  // A selection moves on together, so it only has a next step when everyone in
+  // it is at the same one. A mix of statuses has none.
+  const selectedStatuses = new Set(selectedItems.map((r) => r.billingStatus));
+  const nextStep =
+    selectedStatuses.size === 1 ? NEXT_STEP[[...selectedStatuses][0]] : null;
 
   const changeFilter = (value: BillingStatus | 'all') => {
     setStatusFilter(value);
@@ -141,7 +157,9 @@ export default function CouponDetail() {
       await updateBilling({
         redemptionIds: [...selected],
         status: pendingStatus,
-        invoiceNumber: invoiceNumber.trim() || null,
+        // The number belongs to the invoice, so only that step takes one.
+        invoiceNumber:
+          pendingStatus === 'invoiced' ? invoiceNumber.trim() || null : null,
       });
       setSelected(new Set());
       setPendingStatus(null);
@@ -335,8 +353,12 @@ export default function CouponDetail() {
           </div>
         ) : (
           groups.map((group) => {
-            const ids = group.registrations.map((r) => r._id);
-            const allSelected = ids.every((registrationId) => selected.has(registrationId));
+            // Paid is final: nothing more can be done to those rows.
+            const ids = group.registrations
+              .filter((r) => r.billingStatus !== 'paid')
+              .map((r) => r._id);
+            const allSelected =
+              ids.length > 0 && ids.every((registrationId) => selected.has(registrationId));
 
             return (
               <section
@@ -383,8 +405,9 @@ export default function CouponDetail() {
                             type="checkbox"
                             aria-label={`Select all for ${group.tournament.title}`}
                             checked={allSelected}
+                            disabled={ids.length === 0}
                             onChange={() => toggleGroup(ids)}
-                            className="h-4 w-4 cursor-pointer accent-white"
+                            className="h-4 w-4 cursor-pointer accent-white disabled:cursor-not-allowed disabled:opacity-40"
                           />
                         </th>
                         <th className="px-4 py-2">Player</th>
@@ -415,8 +438,10 @@ export default function CouponDetail() {
                                 type="checkbox"
                                 aria-label={`Select ${item.player?.name ?? 'registration'}`}
                                 checked={selected.has(item._id)}
+                                disabled={item.billingStatus === 'paid'}
+                                title={item.billingStatus === 'paid' ? 'Paid — nothing more to do' : undefined}
                                 onChange={() => toggleOne(item._id)}
-                                className="h-4 w-4 cursor-pointer accent-[#083F92]"
+                                className="h-4 w-4 cursor-pointer accent-[#083F92] disabled:cursor-not-allowed disabled:opacity-30"
                               />
                             </td>
                             <td className="px-4 py-2 font-semibold text-black">
@@ -477,31 +502,23 @@ export default function CouponDetail() {
           <span className="font-poppins text-[14px] font-semibold text-[#083F92]">
             {selected.size} selected · {formatMoney(selectedTotal)}
           </span>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              className="h-10 rounded-full px-4"
-              onClick={() => setPendingStatus('unbilled')}
-            >
-              <RotateCcw className="mr-1.5 h-4 w-4" />
-              To invoice
-            </Button>
-            <Button
-              variant="outline"
-              className="h-10 rounded-full px-4"
-              onClick={() => setPendingStatus('invoiced')}
-            >
-              <FileText className="mr-1.5 h-4 w-4" />
-              Mark invoiced
-            </Button>
+          {nextStep ? (
             <Button
               className="h-10 rounded-full bg-[#083F92] px-4 hover:bg-[#062f6e]"
-              onClick={() => setPendingStatus('paid')}
+              onClick={() => setPendingStatus(nextStep)}
             >
-              <CircleDollarSign className="mr-1.5 h-4 w-4" />
-              Mark paid
+              {nextStep === 'invoiced' ? (
+                <FileText className="mr-1.5 h-4 w-4" />
+              ) : (
+                <CircleDollarSign className="mr-1.5 h-4 w-4" />
+              )}
+              {nextStep === 'invoiced' ? 'Mark invoiced' : 'Mark paid'}
             </Button>
-          </div>
+          ) : (
+            <span className="font-poppins text-[12px] text-[#8C8C8C]">
+              Select registrations with the same status to move them on.
+            </span>
+          )}
         </div>
       ) : null}
 
@@ -518,9 +535,9 @@ export default function CouponDetail() {
         coupon={coupon ?? null}
       />
 
-      {/* Invoiced / paid: an invoice reference can be attached. */}
+      {/* Each step is confirmed. Only invoicing takes an invoice number. */}
       <Dialog
-        open={pendingStatus === 'invoiced' || pendingStatus === 'paid'}
+        open={pendingStatus !== null}
         onOpenChange={(open) => {
           if (!open && !isUpdating) {
             setPendingStatus(null);
@@ -534,26 +551,31 @@ export default function CouponDetail() {
             {pendingStatus === 'paid' ? 'paid' : 'invoiced'}
           </DialogTitle>
           <p className="font-poppins text-[13px] text-[#8C8C8C]">
-            {formatMoney(selectedTotal)} in total.
+            {formatMoney(selectedTotal)} in total.{' '}
+            {pendingStatus === 'paid'
+              ? 'This cannot be undone: paid registrations stay paid.'
+              : 'Once invoiced they can only be marked as paid.'}
           </p>
 
-          <div className="mt-2 flex flex-col gap-2">
-            <Label
-              htmlFor="invoiceNumber"
-              className="font-poppins text-[14px] font-medium text-[#181818]"
-            >
-              Invoice number <span className="text-[#8C8C8C]">(optional)</span>
-            </Label>
-            <Input
-              id="invoiceNumber"
-              maxLength={60}
-              autoComplete="off"
-              value={invoiceNumber}
-              onChange={(event) => setInvoiceNumber(event.target.value)}
-              disabled={isUpdating}
-              className="h-11 rounded-full border-[#3D3775] px-4 font-poppins"
-            />
-          </div>
+          {pendingStatus === 'invoiced' ? (
+            <div className="mt-2 flex flex-col gap-2">
+              <Label
+                htmlFor="invoiceNumber"
+                className="font-poppins text-[14px] font-medium text-[#181818]"
+              >
+                Invoice number <span className="text-[#8C8C8C]">(optional)</span>
+              </Label>
+              <Input
+                id="invoiceNumber"
+                maxLength={60}
+                autoComplete="off"
+                value={invoiceNumber}
+                onChange={(event) => setInvoiceNumber(event.target.value)}
+                disabled={isUpdating}
+                className="h-11 rounded-full border-[#3D3775] px-4 font-poppins"
+              />
+            </div>
+          ) : null}
 
           <div className="mt-4 flex justify-end gap-3">
             <Button
@@ -598,18 +620,6 @@ export default function CouponDetail() {
         }}
       />
 
-      <ConfirmDialog
-        open={pendingStatus === 'unbilled'}
-        onOpenChange={(open) => !open && setPendingStatus(null)}
-        title="Move back to “To invoice”"
-        description={`${selected.size} registration${selected.size === 1 ? '' : 's'} (${formatMoney(selectedTotal)}) will count as not yet invoiced, and their invoice number and dates are cleared.`}
-        confirmText="Move back"
-        loadingText="Saving..."
-        tone="primary"
-        icon={RotateCcw}
-        isLoading={isUpdating}
-        onConfirm={applyStatus}
-      />
     </PageTransition>
   );
 }
