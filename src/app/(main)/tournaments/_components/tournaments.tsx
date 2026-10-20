@@ -190,7 +190,14 @@ export default function Tournaments() {
                         {/* Price tag details */}
                         <div className="flex items-center gap-1.5 shrink-0">
                           <Tag className="w-4 h-4 text-[#083F92] shrink-0" />
-                          <span className="font-poppins font-normal text-[13px] md:text-[14px]">${t.entryFee}</span>
+                          <span className="font-poppins font-normal text-[13px] md:text-[14px]">
+                            ${t.entryFee}
+                            {t.payOnSite ? (
+                              <span className="ml-1.5 inline-flex items-center rounded-full bg-[#EFF8FF] border border-[#B2DDFF] px-2 py-0.5 text-[11px] font-medium text-[#175CD3]">
+                                Pay On-Site
+                              </span>
+                            ) : null}
+                          </span>
                         </div>
 
                       </div>

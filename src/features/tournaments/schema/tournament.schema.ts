@@ -73,6 +73,7 @@ export const tournamentSchema = z.object({
   date: z.string().min(1, 'Date is required'),
   location: z.string().min(2, 'Location is required').max(100, 'Location must be at most 100 characters'),
   entryFee: z.string().min(1, 'Entry fee is required').refine(val => !isNaN(parseFloat(val)) && parseFloat(val) > 0, 'Entry fee must be greater than 0'),
+  payOnSite: z.boolean().optional(),
   divisions: z.array(divisionSchema)
     .min(1, 'At least one division is required')
     .superRefine((divisions, ctx) => {

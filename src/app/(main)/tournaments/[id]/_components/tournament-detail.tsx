@@ -14,7 +14,8 @@ import {
   MapPin,
   DollarSign,
   Calendar,
-  GitMerge
+  GitMerge,
+  CreditCard
 } from 'lucide-react';
 import Link from 'next/link';
 import { PageTransition } from '@/components/animations/page-transition';
@@ -58,12 +59,12 @@ export default function TournamentDetail() {
     });
   };
 
-  const tournamentDetails = {
+    const tournamentDetails = {
     location: tournament?.location || "N/A",
-    entryFee: `$${tournament?.entryFee}`,
+    entryFee: `${tournament?.entryFee || 0}${tournament?.payOnSite ? ' (Pay On-Site)' : ''}`,
+    paymentMethod: tournament?.payOnSite ? 'Pay On-Site (Cash/Card at venue)' : 'Online Payment (PayPal)',
     date: formatDate(tournament?.date),
     division: divisions,
-
   };
 
   if (isLoading) {
@@ -154,6 +155,7 @@ export default function TournamentDetail() {
               {[
                 { label: 'Location', value: tournamentDetails.location, icon: MapPin },
                 { label: 'Entry fee', value: tournamentDetails.entryFee, icon: DollarSign },
+                { label: 'Payment type', value: tournamentDetails.paymentMethod, icon: CreditCard },
                 { label: 'Date of Tournament', value: tournamentDetails.date, icon: Calendar },
                 { label: 'Division', value: tournamentDetails.division, icon: GitMerge },
 
@@ -260,14 +262,18 @@ export default function TournamentDetail() {
                               {player.coupon ? (
                                 <Link
                                   href={`/coupons/${player.coupon._id}`}
-                                  title={`Registered with code ${player.coupon.code}`}
-                                  className="inline-flex max-w-[170px] items-center rounded-full bg-[#FFF4E5] px-2.5 py-0.5 text-[11px] font-semibold text-[#B54708] transition-opacity hover:opacity-80"
+                                  title={`Registered with code ${player.coupon.code} (${player.coupon.organizationName})`}
+                                  className="inline-flex max-w-[170px] items-center gap-1 rounded-full bg-[#FFF4E5] border border-[#FEDF89] px-2.5 py-0.5 text-[11px] font-semibold text-[#B54708] transition-opacity hover:opacity-80"
                                 >
-                                  <span className="truncate">{player.coupon.organizationName}</span>
+                                  <span className="truncate">Coupon: {player.coupon.code}</span>
                                 </Link>
+                              ) : tournament?.payOnSite ? (
+                                <span className="inline-flex items-center rounded-full bg-[#EFF8FF] border border-[#B2DDFF] px-2.5 py-0.5 text-[11px] font-semibold text-[#175CD3]">
+                                  Pay on-site
+                                </span>
                               ) : (
-                                <span className="inline-flex items-center rounded-full bg-[#E7F6EC] px-2.5 py-0.5 text-[11px] font-semibold text-[#036B26]">
-                                  Paid by parent
+                                <span className="inline-flex items-center rounded-full bg-[#E7F6EC] border border-[#A6F4C5] px-2.5 py-0.5 text-[11px] font-semibold text-[#036B26]">
+                                  Paid online
                                 </span>
                               )}
                             </td>

@@ -201,6 +201,7 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
       date: '',
       location: '',
       entryFee: '',
+      payOnSite: false,
       divisions: [emptyDivision()],
     },
   });
@@ -219,6 +220,7 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
         date: formattedDate,
         location: initialData.location || '',
         entryFee: initialData.entryFee?.toString() || '',
+        payOnSite: Boolean(initialData.payOnSite),
         divisions: (initialData.divisions || []).map((d: any) => ({
           // Sent back on save so the API updates the existing division
           // instead of replacing it and orphaning its participants.
@@ -240,6 +242,7 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
       date: new Date(data.date).toISOString(),
       location: data.location,
       entryFee: parseFloat(data.entryFee || '0') || 0,
+      payOnSite: Boolean(data.payOnSite),
       divisions: (data.divisions || []).map((d: any) => {
         // Only send _id for divisions that already exist server-side.
         const identity = d._id ? { _id: d._id } : {};
@@ -443,6 +446,27 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
           {errors.entryFee && (
             <p className="text-[12px] text-red-500 mt-[-6px]">{errors.entryFee.message}</p>
           )}
+        </div>
+
+        {/* Pay On-Site */}
+        <div className="sm:col-span-2 flex items-start gap-3 p-3.5 rounded-[16px] bg-[#F4F7FC] border border-[#D5E1F5]">
+          <input
+            id="payOnSite"
+            type="checkbox"
+            className="h-4 w-4 mt-0.5 rounded border-gray-300 text-[#083F92] accent-[#083F92] focus:ring-[#083F92] cursor-pointer"
+            {...register('payOnSite')}
+          />
+          <div className="flex flex-col gap-0.5">
+            <Label
+              htmlFor="payOnSite"
+              className="font-poppins font-medium text-[14px] text-[#181818] cursor-pointer"
+            >
+              Pay On-Site
+            </Label>
+            <p className="font-poppins text-[12px] text-[#555] leading-normal">
+              When checked, participants will not be charged upfront online via PayPal. Instead, the entry fee will be collected on-site at the venue. Promo codes can still be applied to waive the fee.
+            </p>
+          </div>
         </div>
 
       </div>
