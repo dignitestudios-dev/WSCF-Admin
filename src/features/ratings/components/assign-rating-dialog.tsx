@@ -135,6 +135,7 @@ export function AssignRatingDialog({
                 placeholder="Enter rating (e.g. 1200)"
                 value={rating}
                 onChange={(e) => handleRatingChange(e.target.value)}
+                maxLength={4}
                 className="h-[48px] rounded-[12px] border border-[#DADADA] px-4 font-poppins text-[15px] focus-visible:ring-1 focus-visible:ring-[#083F92]"
                 autoFocus
               />

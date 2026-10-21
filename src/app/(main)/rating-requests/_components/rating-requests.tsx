@@ -107,7 +107,7 @@ export default function RatingRequests() {
               <SearchInput
                 value={searchQuery}
                 onChangeValue={setSearchQuery}
-                placeholder="Search by first name, last name or member ID"
+                placeholder="Search by first name, last name or user ID"
               />
             </div>
           </div>

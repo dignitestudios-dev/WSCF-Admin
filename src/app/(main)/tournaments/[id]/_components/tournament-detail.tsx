@@ -253,7 +253,12 @@ export default function TournamentDetail() {
                             <td className="px-6 py-3 font-semibold">{player.playerProfile?.membershipId || 'N/A'}</td>
                             <td className="px-6 py-3 font-semibold text-black max-w-[150px] truncate" title={player.user?.name}>{player.user?.name || 'N/A'}</td>
                             <td className="px-6 py-3 font-semibold text-black">{player.playerProfile?.grade || 'N/A'}</td>
-                            <td className="px-6 py-3 font-semibold text-[#083F92]">{player.division?.label || 'N/A'}</td>
+                            <td
+                              className="px-6 py-3 font-semibold text-[#083F92] max-w-[150px] truncate"
+                              title={player.division?.name || player.division?.label || 'N/A'}
+                            >
+                              {player.division?.name || player.division?.label || 'N/A'}
+                            </td>
                             <td className="px-6 py-3 font-semibold text-black max-w-[150px] truncate" title={player.team?.name}>{player.team?.name || '—'}</td>
                             <td className="px-6 py-3 font-semibold text-black">{player.playerProfile?.rating || '0'}</td>
                             <td className="px-6 py-3">
