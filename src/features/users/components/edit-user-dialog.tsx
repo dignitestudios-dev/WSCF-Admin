@@ -9,8 +9,21 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useUpdateUser } from '../hooks/use-users';
 import { toast } from '@/lib/toast';
+
+const GENDER_OPTIONS = [
+  { value: 'male', label: 'Male' },
+  { value: 'female', label: 'Female' },
+  { value: 'other', label: 'Other' },
+];
 
 function formatPhoneNumber(value: string) {
   if (!value) return value;
@@ -144,6 +157,8 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<EditUserFormData>({
     resolver: zodResolver(editUserSchema),
@@ -307,16 +322,37 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
                   Gender
                 </Label>
                 <div className="relative h-[44px]">
-                  <select
-                    id="gender"
-                    {...register('gender')}
-                    className="h-full w-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40 outline-none"
+                  <Select
+                    value={watch('gender')?.toLowerCase() || null}
+                    onValueChange={(val) => {
+                      setValue('gender', val ?? '', { shouldDirty: true, shouldValidate: true });
+                    }}
                   >
-                    <option value="">Select Gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                  </select>
+                    <SelectTrigger
+                      id="gender"
+                      className="h-full! w-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 outline-none data-placeholder:text-[#181818]/40 shadow-none cursor-pointer"
+                    >
+                      <SelectValue placeholder="Select Gender">
+                        {(val: unknown) => {
+                          const opt = GENDER_OPTIONS.find(
+                            (g) => g.value === (typeof val === 'string' ? val.toLowerCase() : val)
+                          );
+                          return opt ? opt.label : undefined;
+                        }}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="bg-white rounded-[16px] border border-[#DADADA] shadow-lg p-1 font-poppins text-[14px]">
+                      {GENDER_OPTIONS.map((item) => (
+                        <SelectItem
+                          key={item.value}
+                          value={item.value}
+                          className="cursor-pointer font-poppins text-[14px] rounded-[10px] py-2 px-3 text-[#181818] hover:bg-[#083F92]/10 focus:bg-[#083F92]/10 transition-colors"
+                        >
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 {errors.gender && (
                   <p className="text-[12px] text-red-500 mt-[-6px]">{errors.gender.message}</p>
