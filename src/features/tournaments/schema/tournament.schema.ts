@@ -104,6 +104,19 @@ export const tournamentSchema = z.object({
         }
       });
     }),
+}).superRefine((data, ctx) => {
+  if (data.registrationCutoff && data.registrationCutoff.trim() !== '' && data.date) {
+    const cutoffDateStr = data.registrationCutoff.split('T')[0];
+    const tournamentDateStr = data.date.includes('T') ? data.date.split('T')[0] : data.date;
+
+    if (cutoffDateStr >= tournamentDateStr) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['registrationCutoff'],
+        message: 'Registration cut-off date must be before the tournament date',
+      });
+    }
+  }
 });
 
 export type TournamentFormData = z.infer<typeof tournamentSchema>;

@@ -326,6 +326,22 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
 
   const duplicateIndices = getDuplicateIndices();
 
+  const tournamentDateValue = watch('date');
+  let maxCutoff: string | undefined = undefined;
+  if (tournamentDateValue) {
+    const localDate = getLocalDateFromUtcString(tournamentDateValue);
+    if (localDate) {
+      const prevDay = new Date(localDate);
+      prevDay.setDate(prevDay.getDate() - 1);
+      const pad = (n: number) => String(n).padStart(2, '0');
+      maxCutoff = `${prevDay.getFullYear()}-${pad(prevDay.getMonth() + 1)}-${pad(prevDay.getDate())}T23:59`;
+    }
+  }
+
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const minCutoff = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-[22px] w-full">
         {/* Locked while the request is in flight: disabling only the
@@ -387,6 +403,7 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
                   selected={watch('date') ? getLocalDateFromUtcString(watch('date')) : undefined}
                   onSelect={(date) => {
                     setValue('date', date ? getUtcStringFromLocalDate(date) : '', { shouldValidate: true, shouldDirty: true });
+                    trigger('registrationCutoff');
                     setIsCalendarOpen(false);
                   }}
                   disabled={(date) => {
@@ -415,13 +432,15 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
             <Input
               id="registrationCutoff"
               type="datetime-local"
+              min={minCutoff}
+              max={maxCutoff}
               placeholder="Select date and time"
               className="w-full h-full bg-white border border-[#3D3775] rounded-full px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0"
               {...register('registrationCutoff')}
             />
           </div>
           <p className="text-[12px] text-[#636363]">
-            Timer after which new player registration closes (e.g. 9:00 PM Friday). Must be a future date/time.
+            Timer after which new player registration closes (e.g. 9:00 PM Friday). Must be a future date/time before the tournament date.
           </p>
           {errors.registrationCutoff && (
             <p className="text-[12px] text-red-500 mt-[-6px]">{errors.registrationCutoff.message}</p>
