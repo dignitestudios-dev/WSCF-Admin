@@ -214,10 +214,17 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
   useEffect(() => {
     if (initialData) {
       const formattedDate = initialData.date ? new Date(initialData.date).toISOString().split('T')[0] : '';
+      let formattedCutoff = '';
+      if (initialData.registrationCutoff) {
+        const d = new Date(initialData.registrationCutoff);
+        const pad = (n: number) => String(n).padStart(2, '0');
+        formattedCutoff = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      }
 
       reset({
         title: initialData.title || '',
         date: formattedDate,
+        registrationCutoff: formattedCutoff,
         location: initialData.location || '',
         entryFee: initialData.entryFee?.toString() || '',
         payOnSite: Boolean(initialData.payOnSite),
@@ -240,6 +247,7 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
     const payload = {
       title: data.title,
       date: new Date(data.date).toISOString(),
+      registrationCutoff: data.registrationCutoff ? new Date(data.registrationCutoff).toISOString() : null,
       location: data.location,
       entryFee: parseFloat(data.entryFee || '0') || 0,
       payOnSite: Boolean(data.payOnSite),
@@ -392,6 +400,31 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
           </div>
           {errors.date && (
             <p className="text-[12px] text-red-500 mt-[-6px]">{errors.date.message}</p>
+          )}
+        </div>
+
+        {/* Registration Cut-off Timer */}
+        <div className="flex flex-col gap-2">
+          <Label
+            htmlFor="registrationCutoff"
+            className="font-poppins font-medium text-[14px] leading-[21px] text-[#181818] capitalize"
+          >
+            Registration Cut-off (Optional)
+          </Label>
+          <div className="relative h-[42px]! w-full">
+            <Input
+              id="registrationCutoff"
+              type="datetime-local"
+              placeholder="Select date and time"
+              className="w-full h-full bg-white border border-[#3D3775] rounded-full px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0"
+              {...register('registrationCutoff')}
+            />
+          </div>
+          <p className="text-[12px] text-[#636363]">
+            Timer after which new player registration closes (e.g. 9:00 PM Friday). Must be a future date/time.
+          </p>
+          {errors.registrationCutoff && (
+            <p className="text-[12px] text-red-500 mt-[-6px]">{errors.registrationCutoff.message}</p>
           )}
         </div>
 

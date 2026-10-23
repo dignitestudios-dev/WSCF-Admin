@@ -8,6 +8,7 @@ export interface Tournament {
   location: string;
   entryFee: number;
   payOnSite?: boolean;
+  registrationCutoff?: string | null;
   status: string; // 'upcoming' | 'completed' etc
   createdBy: string;
   createdAt: string;

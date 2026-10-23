@@ -15,7 +15,8 @@ import {
   DollarSign,
   Calendar,
   GitMerge,
-  CreditCard
+  CreditCard,
+  Clock
 } from 'lucide-react';
 import Link from 'next/link';
 import { PageTransition } from '@/components/animations/page-transition';
@@ -62,8 +63,16 @@ export default function TournamentDetail() {
     const tournamentDetails = {
     location: tournament?.location || "N/A",
     entryFee: `${tournament?.entryFee || 0}${tournament?.payOnSite ? ' (Pay On-Site)' : ''}`,
-    paymentMethod: tournament?.payOnSite ? 'Pay On-Site (Cash/Card at venue)' : 'Online Payment (PayPal)',
+    paymentMethod: tournament?.payOnSite ? 'Pay On-Site (Cash at venue)' : 'Online Payment (PayPal)',
     date: formatDate(tournament?.date),
+    registrationCutoff: tournament?.registrationCutoff ? new Date(tournament.registrationCutoff).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    }) : 'None',
     division: divisions,
   };
 
@@ -157,6 +166,7 @@ export default function TournamentDetail() {
                 { label: 'Entry fee', value: tournamentDetails.entryFee, icon: DollarSign },
                 { label: 'Payment type', value: tournamentDetails.paymentMethod, icon: CreditCard },
                 { label: 'Date of Tournament', value: tournamentDetails.date, icon: Calendar },
+                ...(tournamentDetails.registrationCutoff !== 'None' ? [{ label: 'Registration cut-off', value: tournamentDetails.registrationCutoff, icon: Clock }] : []),
                 { label: 'Division', value: tournamentDetails.division, icon: GitMerge },
 
               ].map((item, idx) => (
