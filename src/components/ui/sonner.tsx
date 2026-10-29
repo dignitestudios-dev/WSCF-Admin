@@ -46,6 +46,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       position="bottom-right"
       duration={4000}
+      visibleToasts={1}
       icons={{
         success: <SuccessIcon />,
         error: <ErrorIcon />,

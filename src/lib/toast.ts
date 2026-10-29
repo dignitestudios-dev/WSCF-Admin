@@ -22,10 +22,16 @@ const shape = (
   heading: string,
   message: string,
   options?: ExternalToast,
-): [string, ExternalToast | undefined] =>
-  options?.description !== undefined
-    ? [message, options]
-    : [heading, { ...options, description: message }];
+): [string, ExternalToast | undefined] => {
+  const defaultId = `${heading.toLowerCase()}-${message}`;
+  const mergedOptions: ExternalToast = {
+    id: options?.id ?? defaultId,
+    ...options,
+  };
+  return options?.description !== undefined
+    ? [message, mergedOptions]
+    : [heading, { ...mergedOptions, description: message }];
+};
 
 export const toast = {
   success: (message: string, options?: ExternalToast) =>

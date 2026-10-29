@@ -17,6 +17,7 @@ export const divisionSchema = z.object({
   rating: z.number().or(z.nan()).optional(),
   // The UI says "Over", the API says "above"; tournament-form.tsx translates.
   condition: z.enum(['under', 'over']).optional(),
+  participantCount: z.number().optional(),
 }).superRefine((data, ctx) => {
   const hasMin = data.gradeMin !== undefined && !Number.isNaN(data.gradeMin);
   const hasMax = data.gradeMax !== undefined && !Number.isNaN(data.gradeMax);

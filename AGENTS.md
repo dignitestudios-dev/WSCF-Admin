@@ -27,7 +27,7 @@ There is no test setup.
 One variable, and **no `.env` file is committed** — create `.env.local`:
 
 ```
-NEXT_PUBLIC_API_URL=http://localhost:3050/
+NEXT_PUBLIC_API_URL=http://localhost:4000/
 ```
 
 Without it, `src/lib/axios.ts` falls back to the **production** API

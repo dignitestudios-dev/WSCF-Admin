@@ -8,9 +8,22 @@ export function useRatingRequests(
   search = '',
   status: 'pending' | 'assigned' | 'unrated' = 'pending'
 ) {
+  const queryClient = useQueryClient();
+
   return useQuery({
     queryKey: ['rating-requests', page, limit, search, status],
-    queryFn: () => ratingService.getRatingRequests(page, limit, search, status),
+    queryFn: async () => {
+      const response = await ratingService.getRatingRequests(page, limit, search, status);
+      // Immediately sync the sidebar pending-count badge when viewing the default pending list
+      if (status === 'pending' && !search && response?.pagination?.totalItems !== undefined) {
+        queryClient.setQueryData(['rating-requests', 'pending-count'], {
+          pagination: { totalItems: response.pagination.totalItems },
+        });
+      }
+      return response;
+    },
+    refetchInterval: 10000, // Poll every 10 seconds in the background
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -19,7 +32,9 @@ export function usePendingRatingCount() {
   return useQuery({
     queryKey: ['rating-requests', 'pending-count'],
     queryFn: () => ratingService.getRatingRequests(1, 1, '', 'pending'),
-    select: (response) => response.pagination?.totalItems ?? 0,
+    select: (response) => response?.pagination?.totalItems ?? 0,
+    refetchInterval: 10000, // Poll every 10 seconds in the background
+    refetchOnWindowFocus: true,
   });
 }
 

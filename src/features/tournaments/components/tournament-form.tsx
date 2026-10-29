@@ -12,6 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { toast } from '@/lib/toast';
 
 const getLocalDateFromUtcString = (utcString: string) => {
   if (!utcString) return undefined;
@@ -237,6 +238,7 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
           gradeMax: typeof d.gradeMax === 'number' ? d.gradeMax : undefined,
           rating: typeof d.rating === 'number' ? d.rating : undefined,
           condition: d.condition === 'above' ? 'over' : (d.condition || undefined),
+          participantCount: typeof d.participantCount === 'number' ? d.participantCount : 0,
         })),
       });
     }
@@ -542,15 +544,34 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
             // participants, and that error surfaces as a toast. Renaming is
             // always allowed - the name is display text that eligibility
             // never reads.
+            const participantCount = (field as any).participantCount ?? (watch(`divisions.${index}.participantCount` as any) || 0);
+
             return (
               <div key={field.id} className="flex flex-col gap-4 p-5 bg-white border border-[#DADADA]/60 shadow-[0_2px_10px_rgba(0,0,0,0.03)] rounded-[24px] relative overflow-hidden group transition-all hover:border-[#083F92]/30">
                 <div className="absolute top-0 left-0 w-1 h-full bg-[#083F92] opacity-80" />
                 {divisionFields.length > 1 && (
                   <button
                     type="button"
-                    onClick={() => removeDivision(index)}
-                    className="absolute top-4 right-4 text-red-500 hover:bg-red-50 p-1.5 rounded-full transition-colors z-10"
-                    title="Remove Division"
+                    onClick={() => {
+                      if (participantCount > 0) {
+                        toast.error(
+                          `Cannot remove "${watch(`divisions.${index}.name`) || 'this division'}" because it has ${participantCount} registered participant${participantCount === 1 ? '' : 's'}.`
+                        );
+                        return;
+                      }
+                      removeDivision(index);
+                    }}
+                    className={cn(
+                      "absolute top-4 right-4 p-1.5 rounded-full transition-colors z-10",
+                      participantCount > 0
+                        ? "text-gray-400 hover:bg-gray-100 cursor-not-allowed"
+                        : "text-red-500 hover:bg-red-50"
+                    )}
+                    title={
+                      participantCount > 0
+                        ? `Cannot remove division with ${participantCount} registered participant${participantCount === 1 ? '' : 's'}`
+                        : "Remove Division"
+                    }
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -560,7 +581,14 @@ export function TournamentForm({ initialData, onSubmitAction, isPending, submitB
                   {/* Name. Free text, and the only thing a player is shown
                       by name - so it comes first. */}
                   <div className="flex flex-col gap-2">
-                    <Label className="font-poppins font-medium text-[14px] text-[#181818]">Division Name</Label>
+                    <div className="flex items-center justify-between">
+                      <Label className="font-poppins font-medium text-[14px] text-[#181818]">Division Name</Label>
+                      {participantCount > 0 && (
+                        <span className="text-[12px] font-medium font-poppins text-[#083F92] bg-[#083F92]/10 px-2.5 py-0.5 rounded-full">
+                          {participantCount} registered {participantCount === 1 ? 'participant' : 'participants'}
+                        </span>
+                      )}
+                    </div>
                     <Input
                       {...register(`divisions.${index}.name` as const)}
                       type="text"
