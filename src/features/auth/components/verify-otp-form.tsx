@@ -148,10 +148,13 @@ export function VerifyOtpForm() {
       {
         onSuccess: () => setIsVerified(true),
         onError: () => {
-          // Only a rejected code unlocks the form, so the user can correct it.
-
+          // Auto-clear OTP input fields on error
           setHasError(true);
           setIsShaking(true);
+          setOtp(['', '', '', '', '', '']);
+          if (inputRefs.current[0]) {
+            inputRefs.current[0].focus();
+          }
           setTimeout(() => setIsShaking(false), 400);
         },
       }
