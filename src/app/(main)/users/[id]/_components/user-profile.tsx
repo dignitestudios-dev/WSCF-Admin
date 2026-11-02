@@ -24,6 +24,7 @@ import Link from 'next/link';
 import { useUserDetails, useDeactivateUser, useActivateUser } from '@/features/users/hooks/use-users';
 import { EditUserDialog } from '@/features/users/components/edit-user-dialog';
 import { EditPlayerRatingDialog } from '@/features/ratings/components/edit-player-rating-dialog';
+import { EditPlayerSigmaDialog } from '@/features/users/components/edit-player-sigma-dialog';
 import { toast } from '@/lib/toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUserTournamentHistory } from '@/features/tournaments/hooks/use-user-tournament-history';
@@ -50,6 +51,7 @@ export default function UserProfile() {
   const itemsPerPage = 10;
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showEditRatingDialog, setShowEditRatingDialog] = useState(false);
+  const [showEditSigmaDialog, setShowEditSigmaDialog] = useState(false);
 
   const { data: historyData, isLoading: isLoadingHistory } = useUserTournamentHistory(
     id,
@@ -295,7 +297,19 @@ export default function UserProfile() {
                   <div className="hidden md:block w-[4px] h-[18px] bg-white rounded-full shrink-0" />
                   <div className="flex flex-col items-center md:items-start text-center md:text-left min-w-0">
                     <span className="font-poppins font-normal text-[12px] leading-[18px] text-white/70">Sigma</span>
-                    <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em] break-words [overflow-wrap:anywhere]">{userData.sigma}</span>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em] break-words [overflow-wrap:anywhere]">{userData.sigma}</span>
+                      {!isLoading && (
+                        <button
+                          type="button"
+                          onClick={() => setShowEditSigmaDialog(true)}
+                          className="text-white/70 hover:text-white transition-colors cursor-pointer shrink-0"
+                          title="Edit Sigma"
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -611,6 +625,14 @@ export default function UserProfile() {
         playerId={profile?._id || id}
         playerName={userData.name}
         currentRating={Number(profile?.rating) || 0}
+      />
+
+      <EditPlayerSigmaDialog
+        open={showEditSigmaDialog}
+        onOpenChange={setShowEditSigmaDialog}
+        playerId={id}
+        playerName={userData.name}
+        currentSigma={profile?.sigma}
       />
 
       <ConfirmDialog
