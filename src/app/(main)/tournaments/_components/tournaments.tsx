@@ -15,6 +15,7 @@ import { PageTransition } from '@/components/animations/page-transition';
 import Link from 'next/link';
 import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CountBadge } from '@/components/ui/count-badge';
 import { useTournaments, useMarkTournamentCompleted } from '@/features/tournaments/hooks/use-tournaments';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useDeleteTournament } from '@/features/tournaments/hooks/use-delete-tournament';
@@ -62,6 +63,7 @@ export default function Tournaments() {
 
   const tournaments = tournamentsData?.data?.tournaments || [];
   const totalPages = tournamentsData?.pagination?.totalPages || 1;
+  const totalItems = tournamentsData?.pagination?.totalItems;
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('en-US', {
@@ -81,9 +83,17 @@ export default function Tournaments() {
           
           {/* Left Title + Search pill bar */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full sm:max-w-[500px]">
-            <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0 shrink-0">
-              Tournaments
-            </h1>
+            <div className="flex flex-col items-start gap-1 shrink-0">
+              <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0">
+                Tournaments
+              </h1>
+              <CountBadge
+                count={totalItems}
+                label={statusParam ? `${statusParam} tournament` : 'tournament'}
+                isLoading={isLoading}
+                filtered={Boolean(debouncedSearchQuery)}
+              />
+            </div>
             
             {/* Search Pill Input */}
             <div className="w-full sm:w-auto">

@@ -6,6 +6,7 @@ import { SearchInput } from '@/components/ui/search-input';
 import { PageTransition } from '@/components/animations/page-transition';
 import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CountBadge } from '@/components/ui/count-badge';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ActionIconButton } from '@/components/ui/action-button';
 import { Highlight } from '@/components/ui/highlight';
@@ -76,6 +77,7 @@ export default function RatingRequests() {
 
   const players = data?.data?.players || [];
   const totalPages = data?.pagination?.totalPages || 1;
+  const totalItems = data?.pagination?.totalItems;
 
   const confirmNoRating = async () => {
     if (!playerToLeaveUnrated) return;
@@ -99,9 +101,17 @@ export default function RatingRequests() {
         {/* Top Header Controls */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full sm:max-w-[620px]">
-            <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0 shrink-0">
-              Rating Requests
-            </h1>
+            <div className="flex flex-col items-start gap-1 shrink-0">
+              <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0">
+                Rating Requests
+              </h1>
+              <CountBadge
+                count={totalItems}
+                label="pending request"
+                isLoading={isLoading}
+                filtered={Boolean(debouncedSearchQuery)}
+              />
+            </div>
 
             <div className="w-full sm:w-auto">
               <SearchInput

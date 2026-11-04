@@ -8,6 +8,7 @@ import { SearchInput } from '@/components/ui/search-input';
 import { PageTransition } from '@/components/animations/page-transition';
 import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CountBadge } from '@/components/ui/count-badge';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ActionIconButton } from '@/components/ui/action-button';
 import {
@@ -84,6 +85,7 @@ export default function Coupons() {
 
   const coupons = data?.data?.coupons || [];
   const totalPages = data?.pagination?.totalPages || 1;
+  const totalItems = data?.pagination?.totalItems;
 
   const confirmToggle = async () => {
     if (!couponToToggle) return;
@@ -127,9 +129,17 @@ export default function Coupons() {
         {/* Top Header Controls */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full sm:max-w-none">
-            <h1 className="font-poppins font-bold sm:text-[34px] text-[26px] sm:leading-[52px] leading-[34px] text-[#083F92] m-0 shrink-0">
-              Coupons &amp; Organizations
-            </h1>
+            <div className="flex flex-col items-start gap-1 shrink-0">
+              <h1 className="font-poppins font-bold sm:text-[34px] text-[26px] sm:leading-[52px] leading-[34px] text-[#083F92] m-0">
+                Coupons &amp; Organizations
+              </h1>
+              <CountBadge
+                count={totalItems}
+                label={`${status} coupon`}
+                isLoading={isLoading}
+                filtered={Boolean(debouncedSearchQuery)}
+              />
+            </div>
 
             <div className="w-full sm:w-auto">
               <SearchInput

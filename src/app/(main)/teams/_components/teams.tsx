@@ -8,6 +8,7 @@ import { PageTransition } from '@/components/animations/page-transition';
 import { SearchInput } from '@/components/ui/search-input';
 import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CountBadge } from '@/components/ui/count-badge';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ActionIconButton, ActionPillButton } from '@/components/ui/action-button';
 import { useDeleteTeam, useTeams } from '@/features/teams/hooks/use-teams';
@@ -38,7 +39,7 @@ export default function Teams() {
 
   const teams = data?.data?.teams || [];
   const totalPages = data?.pagination?.totalPages || 1;
-  const totalItems = data?.pagination?.totalItems ?? teams.length;
+  const totalItems = data?.pagination?.totalItems;
 
   const handleDelete = async () => {
     if (!teamToDelete) return;
@@ -59,9 +60,12 @@ export default function Teams() {
         {/* Header: title, search, create */}
         <div className="flex w-full flex-col items-start justify-between gap-4 md:flex-row md:items-center">
           <div className="flex w-full flex-col gap-4 sm:max-w-[500px] sm:flex-row sm:items-center sm:gap-6">
-            <h1 className="m-0 shrink-0 font-poppins text-[28px] font-bold leading-[36px] text-[#083F92] sm:text-[42px] sm:leading-[63px]">
-              Teams
-            </h1>
+            <div className="flex shrink-0 flex-col items-start gap-1">
+              <h1 className="m-0 font-poppins text-[28px] font-bold leading-[36px] text-[#083F92] sm:text-[42px] sm:leading-[63px]">
+                Teams
+              </h1>
+              <CountBadge count={totalItems} label="team" isLoading={isLoading} filtered={Boolean(debouncedSearch)} />
+            </div>
             <div className="w-full sm:w-auto">
               <SearchInput
                 value={searchQuery}
@@ -204,10 +208,7 @@ export default function Teams() {
           </div>
 
           {!isLoading && teams.length > 0 && (
-            <div className="absolute bottom-0 left-0 flex w-full items-center justify-between gap-4 border-t border-[#DADADA]/40 bg-white px-6 py-4">
-              <span className="font-poppins text-[13px] text-[#8C8C8C]">
-                {totalItems} team{totalItems === 1 ? '' : 's'}
-              </span>
+            <div className="absolute bottom-0 left-0 flex w-full items-center justify-end gap-4 border-t border-[#DADADA]/40 bg-white px-6 py-4">
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}

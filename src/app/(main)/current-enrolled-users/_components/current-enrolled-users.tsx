@@ -12,6 +12,7 @@ import { useTournaments } from '@/features/tournaments/hooks/use-tournaments';
 import { useGetTournamentParticipants } from '@/features/tournaments/hooks/use-get-tournament-participants';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CountBadge } from '@/components/ui/count-badge';
 import { ChevronDown } from 'lucide-react';
 import { tournamentService } from '@/features/tournaments/services/tournament.service';
 import { toast } from '@/lib/toast';
@@ -43,6 +44,8 @@ export default function CurrentEnrolledUsers() {
   const { data: participantsData, isLoading: isParticipantsLoading } = useGetTournamentParticipants(selectedTournamentId, currentPage, 10, debouncedSearchQuery);
   const participants = participantsData?.data?.participants || [];
   const totalPages = participantsData?.pagination?.totalPages || 1;
+  // Nothing to count until a tournament has been picked.
+  const totalParticipants = selectedTournamentId ? participantsData?.pagination?.totalItems : undefined;
 
   // In case selectedTournament is not in the current paginated list, we could store it separately.
   // But for now, we'll try to find it, or we could just save its title in state.
@@ -90,9 +93,17 @@ export default function CurrentEnrolledUsers() {
       
       {/* Top Title & Action Button Row */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
-        <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0">
-          Current Enrolled Users
-        </h1>
+        <div className="flex flex-col items-start gap-1">
+          <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0">
+            Current Enrolled Users
+          </h1>
+          <CountBadge
+            count={totalParticipants}
+            label="participant"
+            isLoading={Boolean(selectedTournamentId) && isParticipantsLoading}
+            filtered={Boolean(debouncedSearchQuery)}
+          />
+        </div>
 
         {/* Export Button */}
         <button 

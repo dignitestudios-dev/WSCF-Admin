@@ -13,6 +13,7 @@ import {
 import { SearchInput } from '@/components/ui/search-input';
 import { PageTransition } from '@/components/animations/page-transition';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CountBadge } from '@/components/ui/count-badge';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useTournaments } from '@/features/tournaments/hooks/use-tournaments';
 
@@ -37,14 +38,23 @@ export default function ResultUploaderList() {
   );
 
   const tournaments = tournamentsData?.data?.tournaments || [];
+  const totalItems = tournamentsData?.pagination?.totalItems;
 
   return (
     <PageTransition>
       <div className="flex h-full w-full flex-col gap-6 font-sans select-none pb-12">
         <div className="flex w-full flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-          <h1 className="m-0 font-poppins text-[28px] font-bold leading-[36px] text-[#083F92] sm:text-[42px] sm:leading-[63px]">
-            Upload Result
-          </h1>
+          <div className="flex flex-col items-start gap-1">
+            <h1 className="m-0 font-poppins text-[28px] font-bold leading-[36px] text-[#083F92] sm:text-[42px] sm:leading-[63px]">
+              Upload Result
+            </h1>
+            <CountBadge
+              count={totalItems}
+              label="completed tournament"
+              isLoading={isLoading}
+              filtered={Boolean(debouncedSearchQuery)}
+            />
+          </div>
 
           <div className="w-full sm:w-auto">
             <SearchInput

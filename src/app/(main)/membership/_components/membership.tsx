@@ -14,6 +14,7 @@ import { toast } from '@/lib/toast';
 import { useMemberships, useExportMemberships } from '@/features/memberships/hooks/use-memberships';
 import { useSendIndividualNotification } from '@/features/notifications/hooks/use-send-notification';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CountBadge } from '@/components/ui/count-badge';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -58,6 +59,7 @@ export default function Membership() {
   const { data: membershipsData, isLoading } = useMemberships(currentPage, itemsPerPage, debouncedSearchQuery);
   const members = membershipsData?.data || [];
   const totalPages = membershipsData?.pagination?.totalPages || 1;
+  const totalItems = membershipsData?.pagination?.totalItems;
 
   const { mutateAsync: exportMemberships, isPending: isExporting } = useExportMemberships();
 
@@ -155,6 +157,13 @@ export default function Membership() {
               <p className="font-poppins font-medium text-[12px] leading-[18px] text-[#787878] m-0">
                 Every Membership will Expire on 31st August
               </p>
+              <CountBadge
+                count={totalItems}
+                label="membership"
+                isLoading={isLoading}
+                filtered={Boolean(debouncedSearchQuery)}
+                className="mt-1.5 self-start"
+              />
             </div>
             
             {/* Search Pill Input */}

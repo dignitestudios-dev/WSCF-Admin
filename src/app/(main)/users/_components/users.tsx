@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { PageTransition } from '@/components/animations/page-transition';
 import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CountBadge } from '@/components/ui/count-badge';
 import { useUsers } from '@/features/users/hooks/use-users';
 import { userService } from '@/features/users/services/user.service';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -41,6 +42,7 @@ export default function Users() {
   const { data: usersData, isLoading } = useUsers(currentPage, itemsPerPage, debouncedSearchQuery);
   const users = usersData?.data?.users || [];
   const totalPages = usersData?.data?.pagination?.totalPages || 1;
+  const totalItems = usersData?.data?.pagination?.totalItems;
 
   const handleExport = async () => {
     try {
@@ -82,9 +84,12 @@ export default function Users() {
 
           {/* Left Title + Search pill bar */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full sm:max-w-[500px]">
-            <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0 shrink-0">
-              Users
-            </h1>
+            <div className="flex flex-col items-start gap-1 shrink-0">
+              <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0">
+                Users
+              </h1>
+              <CountBadge count={totalItems} label="user" isLoading={isLoading} filtered={Boolean(debouncedSearchQuery)} />
+            </div>
 
             {/* Search Pill Input */}
             <div className="w-full sm:w-auto">
