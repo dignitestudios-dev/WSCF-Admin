@@ -1,14 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X } from 'lucide-react';
+import { differenceInYears, format } from 'date-fns';
+import { CalendarIcon, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { parseCalendarDate, toCalendarDateString } from '@/lib/calendar-date';
 import {
   Select,
   SelectContent,
@@ -60,6 +65,27 @@ const nameRegex = /^[a-zA-Z'.-]+(?: [a-zA-Z'.-]+)*$/;
 const cityRegex = /^[a-zA-Z.-]+(?: [a-zA-Z.-]+)*$/;
 const streetAddressRegex = /^[a-zA-Z0-9,.'#-]+(?: [a-zA-Z0-9,.'#-]+)*$/;
 
+// A player is 4 to 20 whole years old: the same rule the signup form enforces,
+// and the API checks it again.
+const MIN_PLAYER_AGE = 4;
+const MAX_PLAYER_AGE = 20;
+
+/** Dates the picker may offer: someone aged 4 up to someone not yet 21. */
+function getBirthDateRange() {
+  const latest = new Date();
+  latest.setFullYear(latest.getFullYear() - MIN_PLAYER_AGE);
+
+  const earliest = new Date();
+  earliest.setFullYear(earliest.getFullYear() - (MAX_PLAYER_AGE + 1));
+
+  return { earliest, latest };
+}
+
+const ageOf = (value: string) => {
+  const date = parseCalendarDate(value);
+  return date ? differenceInYears(new Date(), date) : null;
+};
+
 const editUserSchema = z.object({
   firstName: z
     .string()
@@ -72,6 +98,19 @@ const editUserSchema = z.object({
     .max(30, 'Last name must be at most 30 characters')
     .regex(nameRegex, 'Last name can only contain letters, hyphens, periods, and apostrophes'),
   gender: z.string().optional(),
+  // Empty means "leave as is" — there is no way to clear a birth date.
+  dob: z
+    .string()
+    .optional()
+    .refine((value) => !value || ageOf(value) !== null, 'Enter a valid birth date')
+    .refine((value) => {
+      const age = value ? ageOf(value) : null;
+      return age === null || age >= MIN_PLAYER_AGE;
+    }, `Player must be at least ${MIN_PLAYER_AGE} years old`)
+    .refine((value) => {
+      const age = value ? ageOf(value) : null;
+      return age === null || age <= MAX_PLAYER_AGE;
+    }, `Player must be ${MAX_PLAYER_AGE} years old or younger`),
   sigma: z.string().optional(),
   streetAddress: z
     .string()
@@ -133,6 +172,8 @@ interface EditUserDialogProps {
       gender?: string;
       // Null when the API has never had a value for it.
       sigma?: string | null;
+      // ISO string from the API; null for a player created without one.
+      dob?: string | null;
       grade?: string;
       rating?: number;
       account?: {
@@ -153,12 +194,16 @@ interface EditUserDialogProps {
 export function EditUserDialog({ open, onOpenChange, userId, initialData }: EditUserDialogProps) {
   const { mutateAsync: updateUser, isPending } = useUpdateUser(userId);
 
+  const [isDobOpen, setIsDobOpen] = useState(false);
+  const birthDateRange = getBirthDateRange();
+
   const {
     register,
     handleSubmit,
     reset,
     setValue,
     watch,
+    control,
     formState: { errors },
   } = useForm<EditUserFormData>({
     resolver: zodResolver(editUserSchema),
@@ -166,6 +211,7 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
       firstName: '',
       lastName: '',
       gender: '',
+      dob: '',
       sigma: '',
       streetAddress: '',
       city: '',
@@ -189,6 +235,7 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
         firstName: profile?.firstName || '',
         lastName: profile?.lastName || '',
         gender: profile?.gender || '',
+        dob: toCalendarDateString(parseCalendarDate(profile?.dob)),
         sigma: profile?.sigma || '',
         streetAddress: address?.streetAddress || '',
         city: address?.city || '',
@@ -210,6 +257,7 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
       firstName: data.firstName,
       lastName: data.lastName,
       gender: data.gender || undefined,
+      dob: data.dob || undefined,
       sigma: data.sigma || undefined,
       streetAddress: data.streetAddress || undefined,
       city: data.city || undefined,
@@ -375,6 +423,50 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
                   <p className="text-[12px] text-red-500 mt-[-6px]">{errors.sigma.message}</p>
                 )}
               </div>
+            </div>
+
+            {/* Birth Date */}
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="dob" className="font-poppins font-medium text-[14px] leading-[21px] text-[#181818] capitalize">
+                Birth Date
+              </Label>
+              <Controller
+                name="dob"
+                control={control}
+                render={({ field }) => (
+                  <Popover open={isDobOpen} onOpenChange={setIsDobOpen}>
+                    <PopoverTrigger
+                      id="dob"
+                      className={cn(
+                        'flex h-[44px] w-full items-center justify-between bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] outline-none cursor-pointer',
+                        !field.value && 'text-[#181818]/40'
+                      )}
+                    >
+                      {field.value ? format(parseCalendarDate(field.value)!, 'PPP') : 'Select birth date'}
+                      <CalendarIcon className="h-4 w-4 text-[#083F92] opacity-80" />
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 z-[100]" align="start">
+                      {/* Offers only the years a player can be: 4 up to under 21. */}
+                      <Calendar
+                        mode="single"
+                        captionLayout="dropdown"
+                        startMonth={birthDateRange.earliest}
+                        endMonth={birthDateRange.latest}
+                        defaultMonth={parseCalendarDate(field.value) ?? birthDateRange.latest}
+                        selected={parseCalendarDate(field.value) ?? undefined}
+                        onSelect={(date) => {
+                          field.onChange(toCalendarDateString(date));
+                          setIsDobOpen(false);
+                        }}
+                        disabled={(date) => date > birthDateRange.latest || date < birthDateRange.earliest}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+              {errors.dob && (
+                <p className="text-[12px] text-red-500 mt-[-6px]">{errors.dob.message}</p>
+              )}
             </div>
 
             {/* Address */}
