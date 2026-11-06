@@ -65,8 +65,11 @@ export default function Users() {
 
   // A row is a player — a child. The membership id, grade and name are theirs;
   // the address comes from the parent account and is shared with any siblings.
+  // The id is issued with a player's first membership, so someone who has only
+  // signed up has none yet. Shown as a dash: a fragment of the database id here
+  // would read as a real member id.
   const mappedUsers = users.map((user: any) => ({
-    userId: user.membershipId || user._id.substring(0, 8).toUpperCase(),
+    userId: user.membershipId || '—',
     originalId: user._id, // the player, which is what /users/[id] expects
     firstName: user.firstName || 'N/A',
     lastName: user.lastName || 'N/A',

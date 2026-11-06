@@ -111,7 +111,8 @@ const editUserSchema = z.object({
       const age = value ? ageOf(value) : null;
       return age === null || age <= MAX_PLAYER_AGE;
     }, `Player must be ${MAX_PLAYER_AGE} years old or younger`),
-  sigma: z.string().optional(),
+  // The API refuses anything longer than 30.
+  sigma: z.string().max(30, 'Sigma must be at most 30 characters').optional(),
   streetAddress: z
     .string()
     .max(50, 'Street Address must be at most 50 characters')
@@ -413,7 +414,7 @@ export function EditUserDialog({ open, onOpenChange, userId, initialData }: Edit
                 <div className="relative h-[44px]">
                   <Input
                     id="sigma"
-                    maxLength={50}
+                    maxLength={30}
                     placeholder="Enter sigma"
                     className="h-full bg-white border border-[#3D3775] rounded-[24px] px-4 font-normal text-[14px] text-[#181818] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#181818]/40"
                     {...register('sigma')}

@@ -115,7 +115,9 @@ export default function UserProfile() {
   const userData = {
     name: profile?.name || "Loading...",
     email: account?.email || "...",
-    userId: profile?.membershipId || profile?._id?.substring(0, 8).toUpperCase() || "...",
+    // Issued with the player's first membership; none until then. Never a
+    // fragment of the database id, which would read as a real member id.
+    userId: profile?.membershipId || (profile ? "Not assigned" : "..."),
     grade: profile?.grade || "N/A",
     team: profile?.team?.name || "N/A",
     rating: profile?.ratingStatus === 'unrated' ? "Unrated" : (profile?.rating?.toString() || "0"),
@@ -269,7 +271,7 @@ export default function UserProfile() {
                 {/* Stats block - User ID */}
                 <div className="flex flex-col items-center md:items-start text-center md:text-left min-w-0">
                   <span className="font-poppins font-normal text-[12px] leading-[18px] text-white/70">UserID</span>
-                  <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em] break-words [overflow-wrap:anywhere]">{profile?.membershipId}</span>
+                  <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em] break-words [overflow-wrap:anywhere]">{userData.userId}</span>
                 </div>
 
                 {/* Divider Line & Stats block - Grade */}
