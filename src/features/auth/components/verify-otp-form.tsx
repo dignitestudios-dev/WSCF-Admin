@@ -202,6 +202,9 @@ export function VerifyOtpForm() {
         <p className="w-full h-[22px] font-normal text-[16px] leading-[22px] text-center tracking-[-0.014em] text-[#565656] m-0">
           Code has been sent to <span className="font-medium text-[#181818]">{email}</span>
         </p>
+        <p className="w-full font-normal text-[14px] leading-[20px] text-center text-[#727272] m-0">
+          Valid for 10 minutes
+        </p>
       </div>
 
       {/* Form */}
