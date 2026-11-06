@@ -203,7 +203,7 @@ export function VerifyOtpForm() {
           Code has been sent to <span className="font-medium text-[#181818]">{email}</span>
         </p>
         <p className="w-full font-normal text-[14px] leading-[20px] text-center text-[#727272] m-0">
-          Valid for 10 minutes
+          Valid for 8 hours
         </p>
       </div>
 
@@ -269,6 +269,10 @@ export function VerifyOtpForm() {
                   {isResending ? 'Resending...' : 'Resend'}
                 </span>
               )}
+            </p>
+
+            <p className="w-full text-xs text-center text-[#727272] m-0">
+              Not receiving the email? Please check your Spam or Junk folder.
             </p>
           </div>
         </div>
