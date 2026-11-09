@@ -11,7 +11,8 @@ import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CountBadge } from '@/components/ui/count-badge';
 import { useUsers } from '@/features/users/hooks/use-users';
-import { userService } from '@/features/users/services/user.service';
+import { userService, type EmailVerifiedFilter } from '@/features/users/services/user.service';
+import { EmailVerifiedBadge } from '@/components/ui/email-verified-badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { UserRound } from 'lucide-react';
 import { useListParams } from '@/hooks/use-list-params';
@@ -35,11 +36,24 @@ export default function Users() {
     searchInput: searchQuery,
     setSearchInput: setSearchQuery,
     search: debouncedSearchQuery,
+    getFilter,
+    setFilter,
   } = useListParams();
   const itemsPerPage = 10;
   const [isExporting, setIsExporting] = useState(false);
 
-  const { data: usersData, isLoading } = useUsers(currentPage, itemsPerPage, debouncedSearchQuery);
+  // Email verification is optional for parents, so the admin can tell who has
+  // done it and who has not. Kept in the URL like the page and search.
+  const rawVerified = getFilter('emailVerified');
+  const emailVerified: EmailVerifiedFilter =
+    rawVerified === 'verified' || rawVerified === 'unverified' ? rawVerified : 'all';
+
+  const { data: usersData, isLoading } = useUsers(
+    currentPage,
+    itemsPerPage,
+    debouncedSearchQuery,
+    emailVerified
+  );
   const users = usersData?.data?.users || [];
   const totalPages = usersData?.data?.pagination?.totalPages || 1;
   const totalItems = usersData?.data?.pagination?.totalItems;
@@ -76,6 +90,7 @@ export default function Users() {
     grade: user.grade || 'N/A',
     team: user.team?.name || 'N/A',
     city: user.account?.address?.city || 'N/A',
+    emailVerified: user.account?.isEmailVerified as boolean | undefined,
   }));
 
   return (
@@ -91,7 +106,7 @@ export default function Users() {
               <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0">
                 Users
               </h1>
-              <CountBadge count={totalItems} label="user" isLoading={isLoading} filtered={Boolean(debouncedSearchQuery)} />
+              <CountBadge count={totalItems} label="user" isLoading={isLoading} filtered={Boolean(debouncedSearchQuery) || emailVerified !== 'all'} />
             </div>
 
             {/* Search Pill Input */}
@@ -120,6 +135,30 @@ export default function Users() {
 
         </div>
 
+        {/* Email verification filter */}
+        <div role="tablist" aria-label="Email verification" className="flex w-fit gap-2 rounded-full bg-[#083F92]/10 p-1">
+          {([
+            { value: 'all', label: 'All' },
+            { value: 'verified', label: 'Email verified' },
+            { value: 'unverified', label: 'Not verified' },
+          ] as const).map((tab) => (
+            <button
+              key={tab.value}
+              type="button"
+              role="tab"
+              aria-selected={emailVerified === tab.value}
+              onClick={() => setFilter('emailVerified', tab.value === 'all' ? '' : tab.value)}
+              className={`cursor-pointer rounded-full px-5 py-2 font-poppins text-[13px] font-semibold transition-colors ${
+                emailVerified === tab.value
+                  ? 'bg-[#083F92] text-white shadow-sm'
+                  : 'text-[#083F92] hover:bg-[#083F92]/10'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         {/* Main Table Container Card */}
         <div className="w-full bg-white border border-[#DADADA] rounded-[24px] shadow-sm flex flex-col justify-between overflow-hidden flex-1 relative min-h-[600px] mb-8 pb-20">
 
@@ -142,6 +181,9 @@ export default function Users() {
                   <th className="px-6 py-3 font-semibold w-[140px]">
                     City
                   </th>
+                  <th className="px-6 py-3 font-semibold w-[130px]">
+                    Email Status
+                  </th>
                   <th className="px-6 py-3 font-semibold text-right w-[126px]">Action</th>
                 </tr>
               </thead>
@@ -157,6 +199,7 @@ export default function Users() {
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[40px]" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[160px]" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[120px]" /></td>
+                      <td className="px-6 py-3"><Skeleton className="h-5 w-[90px] rounded-full" /></td>
                       <td className="px-6 py-3"><Skeleton className="h-4 w-[80px] float-right" /></td>
                     </tr>
                   ))
@@ -187,6 +230,9 @@ export default function Users() {
                             {user.city}
                           </div>
                         </td>
+                        <td className="px-6 py-3">
+                          <EmailVerifiedBadge verified={user.emailVerified} />
+                        </td>
                         <td className="px-6 py-3 text-right">
                           <Link
                             href={`/users/${user.originalId}`}
@@ -200,11 +246,11 @@ export default function Users() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={7}>
+                    <td colSpan={8}>
                       <EmptyState
                         icon={UserRound}
                         title="No users found"
-                        description="Try a different search, or clear it to see everyone."
+                        description="Try a different search or filter, or clear them to see everyone."
                       />
                     </td>
                   </tr>

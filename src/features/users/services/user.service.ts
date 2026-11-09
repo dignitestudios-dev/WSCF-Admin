@@ -54,6 +54,11 @@ export interface UserListItem {
     email: string;
     phone?: string | null;
     status: string;
+    /**
+     * Whether the parent has confirmed their email. Optional for parents, so
+     * an unverified account is a normal, working account.
+     */
+    isEmailVerified?: boolean;
     address?: {
       city?: string | null;
       streetAddress?: string | null;
@@ -78,6 +83,9 @@ export interface UserListItem {
     currentPeriodEnd?: string;
   } | null;
 }
+
+/** Narrows the users list by whether the parent has confirmed their email. */
+export type EmailVerifiedFilter = 'all' | 'verified' | 'unverified';
 
 export interface UsersResponse {
   success: boolean;
@@ -136,10 +144,19 @@ export const userService = {
   getUsers: async (
     page: number,
     limit: number,
-    search: string = ''
+    search: string = '',
+    emailVerified: EmailVerifiedFilter = 'all'
   ): Promise<UsersResponse> => {
     const response = await axiosInstance.get<UsersResponse>('/user', {
-      params: { page, limit, search },
+      params: {
+        page,
+        limit,
+        search,
+        // 'all' is the absence of a filter, so it is not sent.
+        ...(emailVerified !== 'all' && {
+          emailVerified: emailVerified === 'verified' ? 'true' : 'false',
+        }),
+      },
     });
     return response.data;
   },

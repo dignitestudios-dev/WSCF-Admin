@@ -1,14 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { userService } from '../services/user.service';
+import { userService, type EmailVerifiedFilter } from '../services/user.service';
 
 export function useUsers(
   page: number,
   limit: number,
   search: string = '',
+  emailVerified: EmailVerifiedFilter = 'all',
 ) {
   return useQuery({
-    queryKey: ['users', { page, limit, search }],
-    queryFn: () => userService.getUsers(page, limit, search),
+    queryKey: ['users', { page, limit, search, emailVerified }],
+    queryFn: () => userService.getUsers(page, limit, search, emailVerified),
     staleTime: 5 * 60 * 1000,
   });
 }

@@ -31,6 +31,7 @@ import { useUserTournamentHistory } from '@/features/tournaments/hooks/use-user-
 import { Pagination } from '@/components/ui/pagination';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
+import { EmailVerifiedBadge } from '@/components/ui/email-verified-badge';
 
 interface TournamentItem {
   id: number;
@@ -115,6 +116,8 @@ export default function UserProfile() {
   const userData = {
     name: profile?.name || "Loading...",
     email: account?.email || "...",
+    // Optional for parents: unverified is a normal, working account.
+    emailVerified: (account as { isEmailVerified?: boolean } | null)?.isEmailVerified,
     // Issued with the player's first membership; none until then. Never a
     // fragment of the database id, which would read as a real member id.
     userId: profile?.membershipId || (profile ? "Not assigned" : "..."),
@@ -258,9 +261,12 @@ export default function UserProfile() {
                         {playerStatus}
                       </span>
                     </div>
-                    <span className="font-poppins font-normal text-[14px] leading-[21px] text-[#DBDBDB] break-words [overflow-wrap:anywhere] min-w-0 max-w-full">
-                      {userData.email}
-                    </span>
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 min-w-0 max-w-full">
+                      <span className="font-poppins font-normal text-[14px] leading-[21px] text-[#DBDBDB] break-words [overflow-wrap:anywhere] min-w-0 max-w-full">
+                        {userData.email}
+                      </span>
+                      <EmailVerifiedBadge verified={userData.emailVerified} />
+                    </div>
                   </>
                 )}
               </div>
