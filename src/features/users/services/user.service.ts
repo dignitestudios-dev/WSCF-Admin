@@ -1,5 +1,18 @@
 import { axiosInstance } from '@/lib/axios';
 
+/** Optional filters for the Master Player File. Empty string = not applied. */
+export interface MasterFileFilters {
+  gradeMin?: string;
+  gradeMax?: string;
+  ratingMin?: string;
+  ratingMax?: string;
+  /** A team id, or 'none' for players on no team. */
+  team?: string;
+  membership?: '' | 'active' | 'expired';
+  rated?: '' | 'rated' | 'unrated';
+  playerStatus?: '' | 'active' | 'inactive';
+}
+
 /**
  * The account behind a player: the parent.
  *
@@ -171,8 +184,13 @@ export const userService = {
     return response.data;
   },
   /** The WinTD player list (Name, ID, Gr, Team, Local, Sigma) as a CSV. */
-  exportMasterPlayerFile: async (): Promise<Blob> => {
+  exportMasterPlayerFile: async (filters: MasterFileFilters = {}): Promise<Blob> => {
+    // Blank filters mean "no filter" and are left off the request.
+    const params = Object.fromEntries(
+      Object.entries(filters).filter(([, value]) => value !== '' && value !== undefined)
+    );
     const response = await axiosInstance.get(`/player/master-file/export`, {
+      params,
       responseType: 'blob'
     });
     return response.data;
