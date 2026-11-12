@@ -6,7 +6,8 @@ import { MasterPlayerFileDialog } from '@/features/users/components/master-playe
 
 /**
  * Opens the Master Player File dialog, where the admin picks any filters and
- * downloads the CSV. Used on the Dashboard and the Users page.
+ * downloads the CSV. Used on the Users page; the Dashboard has a plain download
+ * button that skips the filters.
  */
 export function MasterPlayerFileButton() {
   const [open, setOpen] = useState(false);

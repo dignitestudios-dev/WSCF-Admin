@@ -19,7 +19,7 @@ import { useDashboardKPIs } from '@/features/dashboard/hooks/use-dashboard-kpis'
 // import { Skeleton } from "@/components/ui/skeleton";
 import { useTournaments } from '@/features/tournaments/hooks/use-tournaments';
 import { Skeleton } from "@/components/ui/skeleton";
-import { MasterPlayerFileButton } from '@/features/users/components/master-player-file-button';
+import { MasterPlayerFileDownloadButton } from '@/features/users/components/master-player-file-download-button';
 
 const chartConfig = {
   completed: {
@@ -84,7 +84,7 @@ export default function Dashboard() {
             Dashboard
           </h1>
 
-          <MasterPlayerFileButton />
+          <MasterPlayerFileDownloadButton />
 
           {/* Actions Button Group */}
           {/* <div className="flex items-center gap-[12px] bg-[#083F92]/10 p-2.5 rounded-[100px] shadow-sm shrink-0 max-w-full overflow-x-auto no-scrollbar">
