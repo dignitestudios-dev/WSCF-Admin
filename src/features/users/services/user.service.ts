@@ -170,6 +170,13 @@ export const userService = {
     });
     return response.data;
   },
+  /** The WinTD player list (Name, ID, Gr, Team, Local, Sigma) as a CSV. */
+  exportMasterPlayerFile: async (): Promise<Blob> => {
+    const response = await axiosInstance.get(`/player/master-file/export`, {
+      responseType: 'blob'
+    });
+    return response.data;
+  },
   updateUser: async (id: string, data: any): Promise<any> => {
     const response = await axiosInstance.put(`/user/${id}`, data);
     return response.data;

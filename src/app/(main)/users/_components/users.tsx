@@ -17,6 +17,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { UserRound } from 'lucide-react';
 import { useListParams } from '@/hooks/use-list-params';
 import { Highlight } from '@/components/ui/highlight';
+import { toast } from '@/lib/toast';
 
 interface UserRow {
   userId: string;
@@ -41,6 +42,7 @@ export default function Users() {
   } = useListParams();
   const itemsPerPage = 10;
   const [isExporting, setIsExporting] = useState(false);
+  const [isExportingMaster, setIsExportingMaster] = useState(false);
 
   // Email verification is optional for parents, so the admin can tell who has
   // done it and who has not. Kept in the URL like the page and search.
@@ -57,6 +59,26 @@ export default function Users() {
   const users = usersData?.data?.users || [];
   const totalPages = usersData?.data?.pagination?.totalPages || 1;
   const totalItems = usersData?.data?.pagination?.totalItems;
+
+  const handleMasterFileExport = async () => {
+    try {
+      setIsExportingMaster(true);
+      const blob = await userService.exportMasterPlayerFile();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'master-player-file.csv';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Failed to export master player file:', error);
+      toast.error('Failed to download the Master Player File.');
+    } finally {
+      setIsExportingMaster(false);
+    }
+  };
 
   const handleExport = async () => {
     try {
@@ -119,8 +141,21 @@ export default function Users() {
             </div>
           </div>
 
-          {/* Right Button: Export As CSV */}
-          <button 
+          {/* Right Buttons: Master Player File (WinTD) and Export As CSV */}
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto shrink-0">
+          <button
+            onClick={handleMasterFileExport}
+            disabled={isExportingMaster}
+            className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shrink-0 shadow-sm w-full sm:w-auto justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md">
+              <FileSpreadsheet className="w-5 h-5" />
+            </div>
+            <span className="font-poppins font-medium text-[14px] leading-[20px] tracking-[-0.019em] pr-2">
+              {isExportingMaster ? 'Preparing...' : 'Master Player File'}
+            </span>
+          </button>
+          <button
             onClick={handleExport}
             disabled={isExporting}
             className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shrink-0 shadow-sm w-full sm:w-auto justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
@@ -132,6 +167,7 @@ export default function Users() {
               {isExporting ? 'Exporting...' : 'Export As CSV'}
             </span>
           </button>
+          </div>
 
         </div>
 

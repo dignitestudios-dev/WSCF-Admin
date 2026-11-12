@@ -209,7 +209,7 @@ export default function TeamDetail() {
                   <th className="px-6 py-3 font-semibold">Name</th>
                   <th className="w-[220px] px-6 py-3 font-semibold">Email</th>
                   <th className="w-[110px] px-6 py-3 font-semibold">Grade</th>
-                  <th className="w-[110px] px-6 py-3 font-semibold">Rating</th>
+                  <th className="w-[110px] px-6 py-3 font-semibold">Local</th>
                   <th className="w-[150px] px-6 py-3 font-semibold">Membership ID</th>
                   <th className="w-[110px] px-6 py-3 text-right font-semibold">Action</th>
                 </tr>

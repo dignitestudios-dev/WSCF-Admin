@@ -325,7 +325,7 @@ export default function UserProfile() {
                 <div className="flex items-center md:items-start gap-0 md:gap-3 justify-center md:justify-start">
                   <div className="hidden md:block w-[4px] h-[18px] bg-white rounded-full shrink-0" />
                   <div className="flex flex-col items-center md:items-start text-center md:text-left">
-                    <span className="font-poppins font-normal text-[12px] leading-[18px] text-white/70">Rating</span>
+                    <span className="font-poppins font-normal text-[12px] leading-[18px] text-white/70">Local</span>
                     <div className="flex items-center gap-1.5">
                       <span className="font-poppins font-medium text-[16px] leading-[24px] tracking-[-0.02em]">{userData.rating}</span>
                       {isRatingCleared && (
@@ -444,7 +444,7 @@ export default function UserProfile() {
                         <Star className="w-4 h-4" />
                       </div>
                       <div className="flex flex-col">
-                        <span className="font-poppins font-normal text-[14px] leading-[21px] text-[#797979]">Current Rating</span>
+                        <span className="font-poppins font-normal text-[14px] leading-[21px] text-[#797979]">Current Local Rating</span>
                         <div className="flex items-center gap-2">
                           <span className="font-poppins font-medium text-[20px] leading-[30px] text-[#083F92]">{userData.performance.currentRating}</span>
                           {isRatingCleared && (

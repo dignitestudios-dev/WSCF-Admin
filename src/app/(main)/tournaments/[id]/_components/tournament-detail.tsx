@@ -230,7 +230,7 @@ export default function TournamentDetail() {
                       <th className="px-6 py-3 font-semibold w-[80px]">Grade</th>
                       <th className="px-6 py-3 font-semibold w-[150px]">Selected Division</th>
                       <th className="px-6 py-3 font-semibold w-[140px]">Team</th>
-                      <th className="px-6 py-3 font-semibold w-[70px]">Rating</th>
+                      <th className="px-6 py-3 font-semibold w-[70px]">Local</th>
                       <th className="px-6 py-3 font-semibold w-[190px]">Payment</th>
                       <th className="px-6 py-3 font-semibold text-right w-[126px]">Action</th>
                     </tr>

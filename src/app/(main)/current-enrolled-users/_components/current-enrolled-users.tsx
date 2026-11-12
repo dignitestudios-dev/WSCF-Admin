@@ -163,7 +163,7 @@ export default function CurrentEnrolledUsers() {
                   Team
                 </th>
                 <th className="px-6 py-3 font-semibold w-[90px]">
-                  Rating
+                  Local
                 </th>
                 <th className="px-6 py-3 font-semibold w-[150px]">
                   Selected Division
