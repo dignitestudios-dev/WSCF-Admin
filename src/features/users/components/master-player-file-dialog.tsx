@@ -16,9 +16,7 @@ const EMPTY_FILTERS: MasterFileFilters = {
   ratingMin: '',
   ratingMax: '',
   team: '',
-  membership: '',
   rated: '',
-  playerStatus: '',
 };
 
 const GRADES = [
@@ -39,9 +37,9 @@ interface MasterPlayerFileDialogProps {
 
 /**
  * Lets an admin narrow the Master Player File before downloading it. Every
- * filter is optional; with none set the file holds every player who has ever
- * had a membership. The filtering is done by the server, so the file is exactly
- * what the dialog describes.
+ * filter is optional; with none set the file holds every player with an active
+ * membership. The filtering is done by the server, so the file is exactly what
+ * the dialog describes.
  */
 export function MasterPlayerFileDialog({ open, onOpenChange }: MasterPlayerFileDialogProps) {
   const [filters, setFilters] = useState<MasterFileFilters>(EMPTY_FILTERS);
@@ -204,49 +202,19 @@ export function MasterPlayerFileDialog({ open, onOpenChange }: MasterPlayerFileD
             </select>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="mf-membership" className={labelClass}>Membership</Label>
-              <select
-                id="mf-membership"
-                className={selectClass}
-                value={filters.membership}
-                onChange={(e) => set('membership', e.target.value as MasterFileFilters['membership'])}
-                disabled={isPreparing}
-              >
-                <option value="">Active and expired</option>
-                <option value="active">Active only</option>
-                <option value="expired">Expired only</option>
-              </select>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="mf-rated" className={labelClass}>Rating</Label>
-              <select
-                id="mf-rated"
-                className={selectClass}
-                value={filters.rated}
-                onChange={(e) => set('rated', e.target.value as MasterFileFilters['rated'])}
-                disabled={isPreparing}
-              >
-                <option value="">Rated and unrated</option>
-                <option value="rated">Rated only</option>
-                <option value="unrated">Unrated only</option>
-              </select>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="mf-status" className={labelClass}>Player status</Label>
-              <select
-                id="mf-status"
-                className={selectClass}
-                value={filters.playerStatus}
-                onChange={(e) => set('playerStatus', e.target.value as MasterFileFilters['playerStatus'])}
-                disabled={isPreparing}
-              >
-                <option value="">Active and inactive</option>
-                <option value="active">Active only</option>
-                <option value="inactive">Inactive only</option>
-              </select>
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="mf-rated" className={labelClass}>Rating</Label>
+            <select
+              id="mf-rated"
+              className={selectClass}
+              value={filters.rated}
+              onChange={(e) => set('rated', e.target.value as MasterFileFilters['rated'])}
+              disabled={isPreparing}
+            >
+              <option value="">Rated and unrated</option>
+              <option value="rated">Rated only</option>
+              <option value="unrated">Unrated only</option>
+            </select>
           </div>
         </div>
 

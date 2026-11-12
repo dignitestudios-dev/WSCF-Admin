@@ -8,9 +8,7 @@ export interface MasterFileFilters {
   ratingMax?: string;
   /** A team id, or 'none' for players on no team. */
   team?: string;
-  membership?: '' | 'active' | 'expired';
   rated?: '' | 'rated' | 'unrated';
-  playerStatus?: '' | 'active' | 'inactive';
 }
 
 /**
