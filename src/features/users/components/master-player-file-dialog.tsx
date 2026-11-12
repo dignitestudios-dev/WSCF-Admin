@@ -198,7 +198,7 @@ export function MasterPlayerFileDialog({ open, onOpenChange }: MasterPlayerFileD
               <option value="none">No team</option>
               {teams.map((t) => (
                 <option key={t._id} value={t._id}>
-                  {t.name}{t.code ? ` (${t.code})` : ''}
+                  {t.name ? `${t.name} (${t.code})` : t.code}
                 </option>
               ))}
             </select>

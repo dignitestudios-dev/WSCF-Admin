@@ -12,7 +12,7 @@ import { CountBadge } from '@/components/ui/count-badge';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ActionIconButton, ActionPillButton } from '@/components/ui/action-button';
 import { useDeleteTeam, useTeams } from '@/features/teams/hooks/use-teams';
-import { Team } from '@/features/teams/services/team.service';
+import { Team, teamLabel } from '@/features/teams/services/team.service';
 import { CreateTeamDialog } from '@/features/teams/components/create-team-dialog';
 import { EditTeamDialog } from '@/features/teams/components/edit-team-dialog';
 import { useListParams } from '@/hooks/use-list-params';
@@ -70,7 +70,7 @@ export default function Teams() {
               <SearchInput
                 value={searchQuery}
                 onChangeValue={setSearchQuery}
-                placeholder="Search by team name"
+                placeholder="Search by team code or name"
               />
             </div>
           </div>
@@ -90,8 +90,8 @@ export default function Teams() {
               <thead>
                 <tr className="h-[50px] bg-[#083F92] text-left font-poppins text-[13px] font-semibold text-white">
                   <th className="w-[70px] px-6 py-3 font-semibold">No</th>
+                  <th className="w-[130px] px-6 py-3 font-semibold">Team Code</th>
                   <th className="px-6 py-3 font-semibold">Team Name</th>
-                  <th className="w-[110px] px-6 py-3 font-semibold">Code</th>
                   <th className="w-[140px] px-6 py-3 font-semibold">Members</th>
                   <th className="w-[160px] px-6 py-3 font-semibold">Created</th>
                   <th className="w-[160px] px-6 py-3 text-right font-semibold">Action</th>
@@ -138,20 +138,25 @@ export default function Teams() {
                         <td className="px-6 py-3 font-semibold">
                           {rowNumber.toString().padStart(2, '0')}
                         </td>
-                        <td className="max-w-[320px] px-6 py-3">
-                          <span
-                            title={team.name}
-                            className="block truncate font-semibold text-[#083F92]"
-                          >
-                            <Highlight text={team.name} query={debouncedSearch} />
+                        {/* The code WinTD knows this team by: the team's identifier,
+                            and what appears in the entry files we hand over and
+                            the result files that come back. */}
+                        <td className="px-6 py-3">
+                          <span className="font-mono text-[13px] font-semibold tracking-wide text-[#083F92]">
+                            <Highlight text={team.code || '—'} query={debouncedSearch} />
                           </span>
                         </td>
-                        {/* The code WinTD knows this team by. It appears in the
-                            entry files we hand over and the result files that
-                            come back, so an admin reading WinTD needs it here. */}
-                        <td className="px-6 py-3">
-                          <span className="font-mono text-[12px] tracking-wide text-[#636363]">
-                            {team.code || '—'}
+                        {/* The name is optional, so a dash stands in when there is none. */}
+                        <td className="max-w-[320px] px-6 py-3">
+                          <span
+                            title={team.name || undefined}
+                            className="block truncate font-semibold text-[#181818]"
+                          >
+                            {team.name ? (
+                              <Highlight text={team.name} query={debouncedSearch} />
+                            ) : (
+                              <span className="font-normal text-[#8C8C8C]">—</span>
+                            )}
                           </span>
                         </td>
                         <td className="px-6 py-3">
@@ -170,7 +175,7 @@ export default function Teams() {
                           >
                             <ActionIconButton
                               icon={Pencil}
-                              label="Rename team"
+                              label="Edit team"
                               onClick={() => setTeamToEdit(team)}
                             />
                             <ActionIconButton
@@ -196,7 +201,7 @@ export default function Teams() {
                         </p>
                         <p className="font-poppins text-[13px] text-[#8C8C8C]">
                           {debouncedSearch
-                            ? 'Try a different name.'
+                            ? 'Try a different code or name.'
                             : 'Create a team to start grouping players.'}
                         </p>
                       </div>
@@ -230,7 +235,7 @@ export default function Teams() {
       <ConfirmDialog
         open={Boolean(teamToDelete)}
         onOpenChange={(open) => !open && setTeamToDelete(null)}
-        title={`Delete ${teamToDelete?.name ?? 'team'}?`}
+        title={`Delete ${teamLabel(teamToDelete) || 'team'}?`}
         description={
           teamToDelete?.memberCount
             ? `This team has ${teamToDelete.memberCount} member${

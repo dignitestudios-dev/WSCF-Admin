@@ -18,8 +18,9 @@ interface EditTeamDialogProps {
 }
 
 /**
- * The name is the only editable field — members are managed on the team page.
- * The team code is generated from it, so it changes with the name.
+ * The code and the name are both editable; members are managed on the team page.
+ * The code is the team's identifier and is required; the name is optional, and
+ * clearing it leaves the team known by its code alone.
  */
 export function EditTeamDialog({ open, onOpenChange, team }: EditTeamDialogProps) {
   const { mutateAsync: updateTeam, isPending } = useUpdateTeam();
@@ -32,18 +33,26 @@ export function EditTeamDialog({ open, onOpenChange, team }: EditTeamDialogProps
     resolver: zodResolver(teamSchema),
     // `values` re-syncs whenever the team changes, which is what an effect
     // would otherwise be doing by hand.
-    values: { name: team?.name ?? '' },
+    values: { code: team?.code ?? '', name: team?.name ?? '' },
   });
 
   const onSubmit = async (data: TeamFormData) => {
     if (!team) return;
     try {
-      await updateTeam({ teamId: team._id, name: data.name });
+      await updateTeam({
+        teamId: team._id,
+        code: data.code,
+        // null clears the name; the server keeps it when the field is absent.
+        name: data.name || null,
+      });
       onOpenChange(false);
     } catch {
       // surfaced by the mutation's toast
     }
   };
+
+  const inputClass =
+    'h-[44px] rounded-[24px] border border-[#3D3775] bg-white px-4 text-[14px] font-normal text-[#181818] placeholder:text-[#181818]/40 focus-visible:ring-0 focus-visible:ring-offset-0';
 
   return (
     <Dialog open={open} onOpenChange={(next) => !isPending && onOpenChange(next)}>
@@ -53,7 +62,7 @@ export function EditTeamDialog({ open, onOpenChange, team }: EditTeamDialogProps
       >
         <div className="flex items-start justify-between px-8 pb-0 pt-8">
           <DialogTitle className="font-poppins text-[24px] font-semibold text-[#181818]">
-            Rename Team
+            Edit Team
           </DialogTitle>
           <button
             type="button"
@@ -68,32 +77,49 @@ export function EditTeamDialog({ open, onOpenChange, team }: EditTeamDialogProps
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 px-8 pb-8 pt-6">
           <div className="flex flex-col gap-2">
             <Label
+              htmlFor="edit-team-code"
+              className="font-poppins text-[14px] font-medium text-[#181818]"
+            >
+              Team Code <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="edit-team-code"
+              maxLength={6}
+              autoComplete="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              disabled={isPending}
+              className={`${inputClass} font-mono tracking-wide`}
+              {...register('code')}
+            />
+            {errors.code ? (
+              <p className="font-poppins text-[12px] text-red-500">{errors.code.message}</p>
+            ) : (
+              <p className="font-poppins text-[12px] leading-[18px] text-[#565656]">
+                Exactly 6 letters or digits. The old code keeps working for results files that
+                still carry it.
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label
               htmlFor="edit-team-name"
               className="font-poppins text-[14px] font-medium text-[#181818]"
             >
-              Team Name <span className="text-red-500">*</span>
+              Team Name <span className="font-normal text-[#8C8C8C]">(optional)</span>
             </Label>
             <Input
               id="edit-team-name"
               maxLength={50}
               autoComplete="off"
               disabled={isPending}
-              className="h-[44px] rounded-[24px] border border-[#3D3775] bg-white px-4 text-[14px] font-normal text-[#181818] placeholder:text-[#181818]/40 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className={inputClass}
               {...register('name')}
             />
             {errors.name && (
               <p className="font-poppins text-[12px] text-red-500">{errors.name.message}</p>
             )}
-            {team?.code ? (
-              <p className="font-poppins text-[12px] leading-[18px] text-[#565656]">
-                The team code is generated from the name, so renaming the team gives it a new
-                code. It is{' '}
-                <span className="font-mono font-semibold tracking-wide text-[#181818]">
-                  {team.code}
-                </span>{' '}
-                now.
-              </p>
-            ) : null}
           </div>
 
           <Button

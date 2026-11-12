@@ -17,7 +17,8 @@ import {
   Users as UsersIcon,
   Phone,
   Mail,
-  Award
+  Award,
+  UsersRound
 } from 'lucide-react';
 import { PageTransition } from '@/components/animations/page-transition';
 import Link from 'next/link';
@@ -25,6 +26,8 @@ import { useUserDetails, useDeactivateUser, useActivateUser } from '@/features/u
 import { EditUserDialog } from '@/features/users/components/edit-user-dialog';
 import { EditPlayerRatingDialog } from '@/features/ratings/components/edit-player-rating-dialog';
 import { EditPlayerSigmaDialog } from '@/features/users/components/edit-player-sigma-dialog';
+import { AssignTeamDialog } from '@/features/users/components/assign-team-dialog';
+import { teamLabel } from '@/features/teams/services/team.service';
 import { toast } from '@/lib/toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUserTournamentHistory } from '@/features/tournaments/hooks/use-user-tournament-history';
@@ -53,6 +56,7 @@ export default function UserProfile() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showEditRatingDialog, setShowEditRatingDialog] = useState(false);
   const [showEditSigmaDialog, setShowEditSigmaDialog] = useState(false);
+  const [showAssignTeamDialog, setShowAssignTeamDialog] = useState(false);
 
   const { data: historyData, isLoading: isLoadingHistory } = useUserTournamentHistory(
     id,
@@ -122,7 +126,7 @@ export default function UserProfile() {
     // fragment of the database id, which would read as a real member id.
     userId: profile?.membershipId || (profile ? "Not assigned" : "..."),
     grade: profile?.grade || "N/A",
-    team: profile?.team?.name || "N/A",
+    team: teamLabel(profile?.team) || "N/A",
     rating: profile?.ratingStatus === 'unrated' ? "Unrated" : (profile?.rating?.toString() || "0"),
     // Optional and often unset, so it reads as a dash rather than an empty gap.
     sigma: profile?.sigma || "N/A",
@@ -179,6 +183,19 @@ export default function UserProfile() {
               </div>
               <span className="font-poppins font-medium text-[14px] leading-[20px] tracking-[-0.019em]">
                 Edit
+              </span>
+            </button>
+
+            {/* Assign Team Button */}
+            <button
+              onClick={() => setShowAssignTeamDialog(true)}
+              className="flex items-center gap-2 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm px-5 justify-center shrink-0 cursor-pointer"
+            >
+              <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md shrink-0">
+                <UsersRound className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-poppins font-medium text-[14px] leading-[20px] tracking-[-0.019em]">
+                {profile?.team ? 'Change Team' : 'Assign Team'}
               </span>
             </button>
 
@@ -633,6 +650,14 @@ export default function UserProfile() {
         playerId={profile?._id || id}
         playerName={userData.name}
         currentRating={Number(profile?.rating) || 0}
+      />
+
+      <AssignTeamDialog
+        open={showAssignTeamDialog}
+        onOpenChange={setShowAssignTeamDialog}
+        playerId={profile?._id || id}
+        playerName={userData.name}
+        currentTeam={profile?.team ?? null}
       />
 
       <EditPlayerSigmaDialog

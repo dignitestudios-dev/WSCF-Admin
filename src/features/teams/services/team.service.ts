@@ -2,11 +2,12 @@ import { axiosInstance } from '@/lib/axios';
 
 export interface Team {
   _id: string;
-  name: string;
+  /** Optional: the code is the team's identifier, the name is a courtesy. */
+  name?: string | null;
   /**
-   * The six-character code WinTD knows this team by. It is generated from the
-   * name and follows it: renaming the team gives it a new code (the old one
-   * keeps resolving, so results already on their way back still find the team).
+   * The six-character code WinTD knows this team by. An admin types it in, and it
+   * is what identifies the team. Changing it keeps the old one resolving, so
+   * results already on their way back still find the team.
    */
   code?: string | null;
   /** Only present on the list endpoint, which counts members per team. */
@@ -15,6 +16,15 @@ export interface Team {
   deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+/**
+ * What to call a team on screen: its name when it has one, otherwise its code.
+ * A team never shows up blank, because the name is optional and the code is not.
+ */
+export function teamLabel(team?: { name?: string | null; code?: string | null } | null): string {
+  if (!team) return '';
+  return team.name?.trim() || team.code || '';
 }
 
 export interface TeamPagination {
@@ -129,15 +139,16 @@ export const teamService = {
 
   /** Members are optional — a team can be created empty and filled later. */
   createTeam: async (data: {
-    name: string;
+    code: string;
+    name?: string;
     playerIds?: string[];
   }): Promise<MemberBatchResponse> => {
     const response = await axiosInstance.post<MemberBatchResponse>('/team', data);
     return response.data;
   },
 
-  /** Only the name is editable. */
-  updateTeam: async (teamId: string, data: { name: string }) => {
+  /** Code and name are both editable; `name: null` clears the name. */
+  updateTeam: async (teamId: string, data: { code?: string; name?: string | null }) => {
     const response = await axiosInstance.put(`/team/${teamId}`, data);
     return response.data;
   },

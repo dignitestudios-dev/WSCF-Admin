@@ -28,7 +28,7 @@ export function CreateTeamDialog({ open, onOpenChange }: CreateTeamDialogProps) 
     formState: { errors },
   } = useForm<TeamFormData>({
     resolver: zodResolver(teamSchema),
-    defaultValues: { name: '' },
+    defaultValues: { code: '', name: '' },
   });
 
   // Cleared on the way out rather than on the way in, so there is no effect
@@ -36,7 +36,7 @@ export function CreateTeamDialog({ open, onOpenChange }: CreateTeamDialogProps) 
   const handleOpenChange = (next: boolean) => {
     if (isPending) return;
     if (!next) {
-      reset({ name: '' });
+      reset({ code: '', name: '' });
       setMembers([]);
     }
     onOpenChange(next);
@@ -45,7 +45,9 @@ export function CreateTeamDialog({ open, onOpenChange }: CreateTeamDialogProps) 
   const onSubmit = async (data: TeamFormData) => {
     try {
       await createTeam({
-        name: data.name,
+        code: data.code,
+        // Left out when blank: a team does not need a name.
+        ...(data.name ? { name: data.name } : {}),
         // Omitted entirely when empty — the backend treats a team with no
         // members as perfectly valid.
         ...(members.length > 0 ? { playerIds: members.map((member) => member.id) } : {}),
@@ -78,8 +80,32 @@ export function CreateTeamDialog({ open, onOpenChange }: CreateTeamDialogProps) 
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 px-8 pb-8 pt-6">
           <div className="flex flex-col gap-2">
+            <Label htmlFor="code" className="font-poppins text-[14px] font-medium text-[#181818]">
+              Team Code <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="code"
+              maxLength={6}
+              autoComplete="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              placeholder="e.g. HAFAmi"
+              disabled={isPending}
+              className="h-[44px] rounded-[24px] border border-[#3D3775] bg-white px-4 font-mono text-[14px] font-normal tracking-wide text-[#181818] placeholder:font-poppins placeholder:tracking-normal placeholder:text-[#181818]/40 focus-visible:ring-0 focus-visible:ring-offset-0"
+              {...register('code')}
+            />
+            {errors.code ? (
+              <p className="font-poppins text-[12px] text-red-500">{errors.code.message}</p>
+            ) : (
+              <p className="font-poppins text-[12px] text-[#8C8C8C]">
+                Exactly 6 letters or digits, entered as WinTD shows it. Capital letters are kept.
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2">
             <Label htmlFor="name" className="font-poppins text-[14px] font-medium text-[#181818]">
-              Team Name <span className="text-red-500">*</span>
+              Team Name <span className="font-normal text-[#8C8C8C]">(optional)</span>
             </Label>
             <Input
               id="name"

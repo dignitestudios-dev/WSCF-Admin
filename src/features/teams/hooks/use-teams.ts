@@ -87,15 +87,16 @@ function useTeamMutation<TArgs, TResult>(
 
 export function useCreateTeam() {
   return useTeamMutation(
-    (data: { name: string; playerIds?: string[] }) => teamService.createTeam(data),
+    (data: { code: string; name?: string; playerIds?: string[] }) =>
+      teamService.createTeam(data),
     'Could not create the team'
   );
 }
 
 export function useUpdateTeam() {
   return useTeamMutation(
-    ({ teamId, name }: { teamId: string; name: string }) =>
-      teamService.updateTeam(teamId, { name }),
+    ({ teamId, ...data }: { teamId: string; code?: string; name?: string | null }) =>
+      teamService.updateTeam(teamId, data),
     'Could not update the team'
   );
 }

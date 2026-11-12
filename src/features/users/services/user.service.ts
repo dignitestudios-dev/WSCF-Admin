@@ -86,9 +86,11 @@ export interface UserListItem {
   email: string | null;
   status: string | null;
 
+  /** `name` is what to show: the team's name, or its code when it has none. */
   team?: {
     _id: string;
     name: string;
+    code?: string | null;
   } | null;
   membership?: {
     _id: string;
@@ -124,6 +126,7 @@ export interface ParentDetails {
 export interface TeamSummary {
   _id: string;
   name: string;
+  code?: string | null;
 }
 
 /**

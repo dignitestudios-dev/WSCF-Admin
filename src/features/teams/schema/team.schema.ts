@@ -1,15 +1,19 @@
 import { z } from 'zod';
 
-// Mirrors the backend validator: name is all a team has, and it must be unique
-// among live teams (case-insensitively) — that part is enforced server-side.
+// Mirrors the backend validator. The code is the team's identifier in WinTD and
+// is required; the name is optional (blank means "no name"). Uniqueness of both
+// is enforced server-side.
 export const teamSchema = z.object({
-  name: z
-    .string({ message: 'Team name is required' })
+  code: z
+    .string({ message: 'Team code is required' })
     .trim()
-    .min(1, 'Team name is required')
+    .regex(/^[A-Za-z0-9]{6}$/, 'Team code must be exactly 6 letters or digits'),
+  name: z
+    .string()
+    .trim()
     .max(50, 'Team name cannot exceed 50 characters')
-    .regex(
-      /^[a-zA-Z0-9'.-]+(?: [a-zA-Z0-9'.-]+)*$/,
+    .refine(
+      (value) => value === '' || /^[a-zA-Z0-9'.-]+(?: [a-zA-Z0-9'.-]+)*$/.test(value),
       'Team name can only contain letters, numbers, hyphens, periods, and apostrophes',
     ),
 });

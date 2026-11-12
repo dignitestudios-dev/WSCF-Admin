@@ -19,6 +19,7 @@ import {
   useTeamMembers,
 } from '@/features/teams/hooks/use-teams';
 import { AddMembersDialog } from '@/features/teams/components/add-members-dialog';
+import { teamLabel } from '@/features/teams/services/team.service';
 import { EditTeamDialog } from '@/features/teams/components/edit-team-dialog';
 
 const ITEMS_PER_PAGE = 10;
@@ -128,12 +129,21 @@ export default function TeamDetail() {
               <Skeleton className="h-9 w-[260px]" />
             ) : (
               <h1 className="m-0 max-w-[calc(100vw-150px)] break-words [overflow-wrap:anywhere] font-poppins text-[24px] font-bold leading-[36px] text-[#083F92] md:max-w-[500px]">
-                {team?.name ?? 'Team not found'}
+                {team ? teamLabel(team) : 'Team not found'}
               </h1>
             )}
 
             {!isTeamLoading && team && (
               <p className="font-poppins text-[13px] text-[#8C8C8C]">
+                {team.name && team.code ? (
+                  <>
+                    Code{' '}
+                    <span className="font-mono font-semibold tracking-wide text-[#083F92]">
+                      {team.code}
+                    </span>
+                    {' · '}
+                  </>
+                ) : null}
                 {totalMembers} member{totalMembers === 1 ? '' : 's'}
                 {team.createdAt ? ` · created ${format(new Date(team.createdAt), 'dd MMM yyyy')}` : ''}
               </p>
@@ -150,7 +160,7 @@ export default function TeamDetail() {
               />
               <ActionPillButton
                 icon={Pencil}
-                label="Rename"
+                label="Edit"
                 onClick={() => setIsEditOpen(true)}
               />
               <ActionPillButton
@@ -351,7 +361,7 @@ export default function TeamDetail() {
             open={isAddOpen}
             onOpenChange={setIsAddOpen}
             teamId={teamId}
-            teamName={team.name}
+            teamName={teamLabel(team)}
             existingUserIds={memberUserIds}
           />
 
@@ -377,7 +387,7 @@ export default function TeamDetail() {
       <ConfirmDialog
         open={isDeleteTeamOpen}
         onOpenChange={setIsDeleteTeamOpen}
-        title={`Delete ${team?.name ?? 'team'}?`}
+        title={`Delete ${teamLabel(team) || 'team'}?`}
         description={
           totalMembers
             ? `This team has ${totalMembers} member${
