@@ -137,15 +137,6 @@ export default function TeamDetail() {
 
             {!isTeamLoading && team && (
               <p className="font-poppins text-[13px] text-[#8C8C8C]">
-                {team.name && team.code ? (
-                  <>
-                    Code{' '}
-                    <span className="font-mono font-semibold tracking-wide text-[#083F92]">
-                      {team.code}
-                    </span>
-                    {' · '}
-                  </>
-                ) : null}
                 {totalMembers} member{totalMembers === 1 ? '' : 's'}
                 {team.createdAt ? ` · created ${format(new Date(team.createdAt), 'dd MMM yyyy')}` : ''}
               </p>

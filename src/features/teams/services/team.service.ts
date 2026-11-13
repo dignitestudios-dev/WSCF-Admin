@@ -24,7 +24,9 @@ export interface Team {
  */
 export function teamLabel(team?: { name?: string | null; code?: string | null } | null): string {
   if (!team) return '';
-  return team.name?.trim() || team.code || '';
+  const code = team.code?.trim() || '';
+  const name = team.name?.trim() || '';
+  return code && name ? `${code} (${name})` : code || name;
 }
 
 export interface TeamPagination {
