@@ -62,6 +62,12 @@ export const tournamentService = {
     return response.data;
   },
 
+  /** Admin-only. Sets (or clears, with null) the team recorded on ONE entry. */
+  setParticipantTeam: async (id: string, participantId: string, teamId: string | null): Promise<any> => {
+    const response = await axiosInstance.patch(`/tournament/${id}/participants/${participantId}/team`, { teamId });
+    return response.data;
+  },
+
   deleteTournament: async (id: string): Promise<any> => {
     const response = await axiosInstance.delete(`/tournament/${id}`);
     return response.data;

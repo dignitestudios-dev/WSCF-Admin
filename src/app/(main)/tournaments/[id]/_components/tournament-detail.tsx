@@ -16,12 +16,14 @@ import {
   Calendar,
   GitMerge,
   CreditCard,
-  Clock
+  Clock,
+  Pencil
 } from 'lucide-react';
 import Link from 'next/link';
 import { PageTransition } from '@/components/animations/page-transition';
 import { Pagination } from '@/components/ui/pagination';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { ParticipantTeamDialog } from '@/features/tournaments/components/participant-team-dialog';
 
 export default function TournamentDetail() {
   const params = useParams();
@@ -29,6 +31,8 @@ export default function TournamentDetail() {
   const id = params.id as string;
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  // The entry whose team is being edited.
+  const [participantToEdit, setParticipantToEdit] = useState<{ _id: string; user?: { name?: string }; team?: { _id: string; name?: string } | null } | null>(null);
 
   const { data: response, isLoading } = useGetTournament(id);
   const { data: participantsResponse, isLoading: isParticipantsLoading } = useGetTournamentParticipants(id, currentPage, 10);
@@ -229,7 +233,7 @@ export default function TournamentDetail() {
                       <th className="px-6 py-3 font-semibold w-[120px]">Name</th>
                       <th className="px-6 py-3 font-semibold w-[80px]">Grade</th>
                       <th className="px-6 py-3 font-semibold w-[150px]">Selected Division</th>
-                      <th className="px-6 py-3 font-semibold w-[140px]">Team</th>
+                      <th className="px-6 py-3 font-semibold w-[220px]">Team</th>
                       <th className="px-6 py-3 font-semibold w-[70px]">Local</th>
                       <th className="px-6 py-3 font-semibold w-[190px]">Payment</th>
                       <th className="px-6 py-3 font-semibold text-right w-[126px]">Action</th>
@@ -269,7 +273,20 @@ export default function TournamentDetail() {
                             >
                               {player.division?.name || player.division?.label || 'N/A'}
                             </td>
-                            <td className="px-6 py-3 font-semibold text-black max-w-[150px] truncate" title={player.team?.name}>{player.team?.name || '—'}</td>
+                            <td className="px-6 py-3 font-semibold text-black max-w-[220px]">
+                              <div className="flex items-center gap-2">
+                                <span className="min-w-0 truncate" title={player.team?.name}>{player.team?.name || '—'}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => setParticipantToEdit(player)}
+                                  aria-label={`Edit team for ${player.user?.name || 'this player'}`}
+                                  title="Edit team for this tournament"
+                                  className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#083F92] text-white transition-colors hover:bg-[#062c68] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#083F92]/40"
+                                >
+                                  <Pencil className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </td>
                             <td className="px-6 py-3 font-semibold text-black">{player.playerProfile?.rating || '0'}</td>
                             <td className="px-6 py-3">
                               {/* Covered by an organization's code (links to it),
@@ -330,6 +347,15 @@ export default function TournamentDetail() {
         </div>
 
       </div>
+
+      <ParticipantTeamDialog
+        open={Boolean(participantToEdit)}
+        onOpenChange={(open) => !open && setParticipantToEdit(null)}
+        tournamentId={id}
+        participantId={participantToEdit?._id ?? ''}
+        playerName={participantToEdit?.user?.name || 'Player'}
+        currentTeam={participantToEdit?.team ?? null}
+      />
 
       <ConfirmDialog
         open={showDeleteConfirm}
