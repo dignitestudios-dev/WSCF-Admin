@@ -117,7 +117,7 @@ export default function TeamDetail() {
       <div className="flex h-full w-full flex-col gap-6 font-sans select-none">
         {/* Header */}
         <div className="flex w-full flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-          <div className="flex flex-col gap-2">
+          <div className="flex min-w-0 flex-col gap-2 md:flex-1">
             <button
               type="button"
               onClick={() => router.push('/teams')}
@@ -130,9 +130,16 @@ export default function TeamDetail() {
             {isTeamLoading ? (
               <Skeleton className="h-9 w-[260px]" />
             ) : (
-              <h1 className="m-0 max-w-[calc(100vw-150px)] break-words [overflow-wrap:anywhere] font-poppins text-[24px] font-bold leading-[36px] text-[#083F92] md:max-w-[500px]">
-                {team ? teamLabel(team) : 'Team not found'}
-              </h1>
+              <div className="flex min-w-0 flex-col">
+                <h1 className="m-0 break-words [overflow-wrap:anywhere] font-poppins text-[28px] font-bold leading-[36px] tracking-wide text-[#083F92]">
+                  {team ? team.code || team.name : 'Team not found'}
+                </h1>
+                {team?.code && team.name ? (
+                  <p className="m-0 break-words [overflow-wrap:anywhere] font-poppins text-[16px] font-medium leading-[24px] text-[#4B4B4B]">
+                    {team.name}
+                  </p>
+                ) : null}
+              </div>
             )}
 
             {!isTeamLoading && team && (
@@ -144,7 +151,7 @@ export default function TeamDetail() {
           </div>
 
           {team && (
-            <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
+            <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto md:max-w-[880px] md:shrink-0 md:justify-end">
               <ActionPillButton
                 icon={UserPlus}
                 label="Add Members"
