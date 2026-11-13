@@ -153,6 +153,14 @@ export const teamService = {
     return response.data;
   },
 
+  /** One team's roster as a WinTD CSV (same layout as the Master Player File). */
+  exportTeam: async (teamId: string): Promise<Blob> => {
+    const response = await axiosInstance.get(`/team/${teamId}/export`, {
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
   deleteTeam: async (teamId: string) => {
     const response = await axiosInstance.delete(`/team/${teamId}`);
     return response.data;

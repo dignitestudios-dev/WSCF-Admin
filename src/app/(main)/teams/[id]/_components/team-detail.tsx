@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { format } from 'date-fns';
-import { ChevronLeft, Pencil, Trash2, UserPlus, UsersRound } from 'lucide-react';
+import { ChevronLeft, FileSpreadsheet, Loader2, Pencil, Trash2, UserPlus, UsersRound } from 'lucide-react';
 import { PageTransition } from '@/components/animations/page-transition';
 import { SearchInput } from '@/components/ui/search-input';
 import { Pagination } from '@/components/ui/pagination';
@@ -20,6 +20,7 @@ import {
 } from '@/features/teams/hooks/use-teams';
 import { AddMembersDialog } from '@/features/teams/components/add-members-dialog';
 import { teamLabel } from '@/features/teams/services/team.service';
+import { useTeamExport } from '@/features/teams/hooks/use-team-export';
 import { EditTeamDialog } from '@/features/teams/components/edit-team-dialog';
 
 const ITEMS_PER_PAGE = 10;
@@ -39,6 +40,7 @@ export default function TeamDetail() {
   const [isDeleteTeamOpen, setIsDeleteTeamOpen] = useState(false);
   const [pendingRemoval, setPendingRemoval] = useState<string[] | null>(null);
 
+  const { exportTeam, exportingId } = useTeamExport();
   const { data: detailData, isLoading: isTeamLoading } = useTeamDetails(teamId);
   const { data: membersData, isLoading: areMembersLoading } = useTeamMembers(
     teamId,
@@ -157,6 +159,12 @@ export default function TeamDetail() {
                 label="Add Members"
                 onClick={() => setIsAddOpen(true)}
                 className="flex-1 sm:flex-none"
+              />
+              <ActionPillButton
+                icon={exportingId ? Loader2 : FileSpreadsheet}
+                label={exportingId ? 'Preparing...' : 'Export Team File'}
+                disabled={Boolean(exportingId)}
+                onClick={() => exportTeam(team._id, team.code)}
               />
               <ActionPillButton
                 icon={Pencil}

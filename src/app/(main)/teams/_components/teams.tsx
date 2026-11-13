@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
-import { Pencil, Trash2, UsersRound } from 'lucide-react';
+import { FileSpreadsheet, Loader2, Pencil, Trash2, UsersRound } from 'lucide-react';
 import { PageTransition } from '@/components/animations/page-transition';
 import { SearchInput } from '@/components/ui/search-input';
 import { Pagination } from '@/components/ui/pagination';
@@ -12,6 +12,7 @@ import { CountBadge } from '@/components/ui/count-badge';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ActionIconButton, ActionPillButton } from '@/components/ui/action-button';
 import { useDeleteTeam, useTeams } from '@/features/teams/hooks/use-teams';
+import { useTeamExport } from '@/features/teams/hooks/use-team-export';
 import { Team, teamLabel } from '@/features/teams/services/team.service';
 import { CreateTeamDialog } from '@/features/teams/components/create-team-dialog';
 import { EditTeamDialog } from '@/features/teams/components/edit-team-dialog';
@@ -36,6 +37,7 @@ export default function Teams() {
 
   const { data, isLoading } = useTeams(currentPage, ITEMS_PER_PAGE, debouncedSearch);
   const { mutateAsync: deleteTeam, isPending: isDeleting } = useDeleteTeam();
+  const { exportTeam, exportingId } = useTeamExport();
 
   const teams = data?.data?.teams || [];
   const totalPages = data?.pagination?.totalPages || 1;
@@ -173,6 +175,12 @@ export default function Teams() {
                             className="flex items-center justify-end gap-2"
                             onClick={(event) => event.stopPropagation()}
                           >
+                            <ActionIconButton
+                              icon={exportingId === team._id ? Loader2 : FileSpreadsheet}
+                              label="Export team file"
+                              disabled={Boolean(exportingId)}
+                              onClick={() => exportTeam(team._id, team.code)}
+                            />
                             <ActionIconButton
                               icon={Pencil}
                               label="Edit team"
