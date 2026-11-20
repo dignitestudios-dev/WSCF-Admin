@@ -15,6 +15,13 @@ import type { ResultPreview } from '../services/result.service';
 export function ResultPreviewPanel({ preview }: { preview: ResultPreview }) {
   const totalMatched = preview.divisions.reduce((sum, d) => sum + d.matchedCount, 0);
   const totalUnmatched = preview.divisions.reduce((sum, d) => sum + d.unmatchedCount, 0);
+  // Everyone the files name who is not in our database, so the admin can see
+  // exactly who is being ignored rather than only how many.
+  const unmatchedPlayers = preview.divisions.flatMap((division) =>
+    division.players
+      .filter((player) => !player.matched)
+      .map((player) => ({ name: player.name, division: division.divisionLabel }))
+  );
   const unresolvedTeams = preview.divisions.flatMap((division) =>
     division.teams.filter((team) => !team.resolved)
   );
@@ -51,12 +58,23 @@ export function ResultPreviewPanel({ preview }: { preview: ResultPreview }) {
       {totalUnmatched > 0 ? (
         <div className="flex items-start gap-3 rounded-[12px] border border-[#F5A524]/40 bg-[#FFF7E6] px-4 py-3">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#B54708]" />
-          <p className="font-poppins text-[12px] leading-5 text-[#7A4B00]">
-            <strong>{totalUnmatched} player(s)</strong> in these files are not on our
-            system. They will still appear in the results document, and will be added
-            to the master players file so their rating is waiting if they sign up — but
-            no rating of ours changes for them.
-          </p>
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <p className="font-poppins text-[12px] leading-5 text-[#7A4B00]">
+              <strong>{totalUnmatched} player(s)</strong> in these files were not found
+              in our database. They will still be printed in the results document, but
+              they are ignored otherwise: no profile, rating or history is updated for
+              them and nothing is saved. If a name is only misspelled, fix the player
+              in WinTD and upload again.
+            </p>
+            <ul className="flex flex-col gap-0.5 font-poppins text-[12px] leading-5 text-[#7A4B00]">
+              {unmatchedPlayers.map((player, index) => (
+                <li key={`${player.division}-${player.name}-${index}`} className="break-words">
+                  {player.name}{' '}
+                  <span className="text-[#B54708]/80">({player.division})</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       ) : null}
 

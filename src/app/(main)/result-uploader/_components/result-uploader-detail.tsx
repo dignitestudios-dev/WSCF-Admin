@@ -92,10 +92,25 @@ export default function ResultUploaderDetail({
   const selectedId = tournamentId;
 
   const [director, setDirector] = useState('');
+  const [host, setHost] = useState('');
   const [individualFiles, setIndividualFiles] = useState<StagedFile[]>([]);
   const [teamFiles, setTeamFiles] = useState<StagedFile[]>([]);
-  // One setting for the whole tournament, applied to every division.
-  const [trophies, setTrophies] = useState<TrophyCounts>({ individual: 3, team: 3 });
+  // Each division has its own number of individual and team trophies.
+  const [trophies, setTrophies] = useState<Record<string, TrophyCounts>>({});
+  const trophiesFor = (divisionId: string): TrophyCounts =>
+    trophies[divisionId] ?? { individual: 3, team: 3 };
+  const setTrophy = (
+    divisionId: string,
+    field: keyof TrophyCounts,
+    value: number
+  ) =>
+    setTrophies((current) => ({
+      ...current,
+      [divisionId]: {
+        ...(current[divisionId] ?? { individual: 3, team: 3 }),
+        [field]: Math.max(0, Math.floor(value) || 0),
+      },
+    }));
   const [preview, setPreview] = useState<ResultPreview | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
@@ -217,8 +232,19 @@ export default function ResultUploaderDetail({
    */
   const addFiles = (
     setter: React.Dispatch<React.SetStateAction<StagedFile[]>>,
-    chosen: File[]
+    picked: File[]
   ) => {
+    // Results are read from CSV files only; anything else is refused here, and
+    // again by the server.
+    const rejected = picked.filter((file) => !/\.csv$/i.test(file.name));
+    const chosen = picked.filter((file) => /\.csv$/i.test(file.name));
+    if (rejected.length > 0) {
+      toast.error(
+        `Only CSV files are supported. Not added: ${rejected.map((f) => f.name).join(', ')}`
+      );
+    }
+    if (chosen.length === 0) return;
+
     const duplicates: string[] = [];
 
     setter((current) => {
@@ -278,9 +304,13 @@ export default function ResultUploaderDetail({
   const payload = (overrides: Partial<PublishPayload> = {}): PublishPayload => ({
     individualFiles,
     teamFiles,
-    trophies,
+    // Every paired division is sent with its own counts, defaults included.
+    trophies: Object.fromEntries(
+      pairs.map((pair) => [pair.divisionId, trophiesFor(pair.divisionId)])
+    ),
     divisionLabels,
     director,
+    host,
     excludeWithdrawn,
     highlights,
     attachments,
@@ -648,7 +678,7 @@ export default function ResultUploaderDetail({
                       }
                     />
 
-                    {/* Trophies. One setting for the whole tournament. */}
+                    {/* Trophies, counted per division. */}
                     {pairs.length > 0 ? (
                       <div className="flex flex-col gap-3 rounded-[12px] bg-[#083F92]/10 p-5">
                         <div className="flex flex-col gap-1">
@@ -656,65 +686,53 @@ export default function ResultUploaderDetail({
                             Trophies
                           </h3>
                           <p className="font-poppins text-[11px] leading-4 text-[#636363]">
-                            Applied to every division — 3 individual trophies
-                            means the top 3 of{' '}
-                            {pairs.length === 1
-                              ? 'the section'
-                              : `each of the ${pairs.length} sections`}
-                            , not 3 shared between them.
+                            Set the number of trophies for each division. 3
+                            individual trophies means the top 3 players of that
+                            division.
                           </p>
                         </div>
 
-                        <div className="flex flex-col gap-3 rounded-[12px] border border-[#DADADA] bg-white p-3 sm:flex-row sm:items-center sm:gap-8">
-                          <div className="flex items-center gap-3">
-                            <Label className="font-poppins text-[13px] font-medium text-[#181818]">
-                              Individual
-                            </Label>
-                            <Input
-                              type="number"
-                              min={0}
-                              disabled={isPublishing}
-                              value={trophies.individual}
-                              onChange={(event) =>
-                                setTrophies((current) => ({
-                                  ...current,
-                                  individual: Math.max(
-                                    0,
-                                    Number(event.target.value) || 0
-                                  ),
-                                }))
-                              }
-                              className="h-10 w-[76px] rounded-full border-[#3D3775] px-3 font-poppins"
-                            />
-                            <span className="font-poppins text-[11px] text-[#8C8C8C]">
-                              per division
-                            </span>
-                          </div>
+                        <div className="flex flex-col gap-2">
+                          {pairs.map((pair) => {
+                            const counts = trophiesFor(pair.divisionId);
+                            return (
+                              <div
+                                key={pair.divisionId}
+                                className="flex flex-col gap-3 rounded-[12px] border border-[#DADADA] bg-white p-3 sm:flex-row sm:items-center sm:gap-6"
+                              >
+                                <span className="min-w-0 break-words font-poppins text-[13px] font-semibold text-[#083F92] sm:w-[200px] sm:shrink-0">
+                                  {divisionLabels[pair.divisionId] || 'Division'}
+                                </span>
 
-                          <div className="flex items-center gap-3">
-                            <Label className="font-poppins text-[13px] font-medium text-[#181818]">
-                              Team
-                            </Label>
-                            <Input
-                              type="number"
-                              min={0}
-                              disabled={isPublishing}
-                              value={trophies.team}
-                              onChange={(event) =>
-                                setTrophies((current) => ({
-                                  ...current,
-                                  team: Math.max(
-                                    0,
-                                    Number(event.target.value) || 0
-                                  ),
-                                }))
-                              }
-                              className="h-10 w-[76px] rounded-full border-[#3D3775] px-3 font-poppins"
-                            />
-                            <span className="font-poppins text-[11px] text-[#8C8C8C]">
-                              per division
-                            </span>
-                          </div>
+                                {(
+                                  [
+                                    ['individual', 'Individual'],
+                                    ['team', 'Team'],
+                                  ] as const
+                                ).map(([field, label]) => (
+                                  <div key={field} className="flex items-center gap-3">
+                                    <Label className="font-poppins text-[13px] font-medium text-[#181818]">
+                                      {label}
+                                    </Label>
+                                    <Input
+                                      type="number"
+                                      min={0}
+                                      disabled={isPublishing}
+                                      value={counts[field]}
+                                      onChange={(event) =>
+                                        setTrophy(
+                                          pair.divisionId,
+                                          field,
+                                          Number(event.target.value)
+                                        )
+                                      }
+                                      className="h-10 w-[76px] rounded-full border-[#3D3775] px-3 font-poppins"
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     ) : null}
@@ -780,6 +798,22 @@ export default function ResultUploaderDetail({
                         />
                         <p className="font-poppins text-[11px] text-[#8C8C8C]">
                           Printed on the results document.
+                        </p>
+                      </div>
+
+                      <div className="flex max-w-[420px] flex-col gap-2">
+                        <Label className="font-poppins text-[13px] font-medium text-[#181818]">
+                          Tournament Host (optional)
+                        </Label>
+                        <Input
+                          value={host}
+                          disabled={isPublishing}
+                          placeholder="Host school or organisation"
+                          onChange={(event) => setHost(event.target.value)}
+                          className="h-11 rounded-full border-[#3D3775] px-4 font-poppins"
+                        />
+                        <p className="font-poppins text-[11px] text-[#8C8C8C]">
+                          Saved with the results. Not printed on the document.
                         </p>
                       </div>
 

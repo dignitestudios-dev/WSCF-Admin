@@ -36,10 +36,10 @@ export interface PlayerHighlight {
 }
 
 /**
- * How many trophies the tournament awards.
+ * How many trophies one division awards.
  *
- * Set once and applied to every division: three individual trophies means the
- * top three of each section, not three shared out across the whole event.
+ * Set per division, because the number varies from section to section: three
+ * individual trophies means the top three of that section.
  */
 export interface TrophyCounts {
   individual: number;
@@ -110,6 +110,7 @@ export interface PublishedResults {
   seasonParticipantCount: number;
   seasonLabel: string;
   tournamentDirector: string | null;
+  tournamentHost?: string | null;
   publishedAt: string | null;
   /** queued and processing both mean "still working". */
   status: 'queued' | 'processing' | 'published' | 'failed';
@@ -170,15 +171,17 @@ function buildFormData({
   trophies,
   divisionLabels,
   director,
+  host,
   excludeWithdrawn,
   highlights,
   attachments,
 }: {
   individualFiles: StagedFile[];
   teamFiles: StagedFile[];
-  trophies: TrophyCounts;
+  trophies: Record<string, TrophyCounts>;
   divisionLabels: Record<string, string>;
   director?: string;
+  host?: string;
   excludeWithdrawn: boolean;
   highlights: PlayerHighlight[];
   attachments: StagedAttachment[];
@@ -192,6 +195,8 @@ function buildFormData({
       pairs.map((pair) => ({
         divisionId: pair.divisionId,
         divisionLabel: divisionLabels[pair.divisionId] ?? '',
+        individualTrophyCount: trophies[pair.divisionId]?.individual ?? 0,
+        teamTrophyCount: trophies[pair.divisionId]?.team ?? 0,
       }))
     )
   );
@@ -205,9 +210,8 @@ function buildFormData({
   });
 
   if (director) form.append('tournamentDirector', director);
+  if (host) form.append('tournamentHost', host);
 
-  form.append('individualTrophyCount', String(trophies.individual));
-  form.append('teamTrophyCount', String(trophies.team));
   form.append('excludeWithdrawn', String(excludeWithdrawn));
   form.append('highlights', JSON.stringify(highlights));
 
@@ -222,9 +226,11 @@ function buildFormData({
 export interface PublishPayload {
   individualFiles: StagedFile[];
   teamFiles: StagedFile[];
-  trophies: TrophyCounts;
+  /** Keyed by division id. */
+  trophies: Record<string, TrophyCounts>;
   divisionLabels: Record<string, string>;
   director?: string;
+  host?: string;
   excludeWithdrawn: boolean;
   highlights: PlayerHighlight[];
   attachments: StagedAttachment[];

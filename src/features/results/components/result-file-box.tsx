@@ -61,7 +61,7 @@ export function ResultFileBox({
           ref={inputRef}
           type="file"
           multiple
-          accept=".csv,.txt"
+          accept=".csv"
           className="hidden"
           onChange={(event) => {
             const chosen = Array.from(event.target.files ?? []);
