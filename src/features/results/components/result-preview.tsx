@@ -13,7 +13,9 @@ import type { ResultPreview } from '../services/result.service';
  * have already been replaced.
  */
 export function ResultPreviewPanel({ preview }: { preview: ResultPreview }) {
-  const totalMatched = preview.divisions.reduce((sum, d) => sum + d.matchedCount, 0);
+  // Every player the individual files list, withdrawn ones included.
+  const totalInFiles = preview.divisions.reduce((sum, d) => sum + d.playerCount, 0);
+  const totalMatched =preview.divisions.reduce((sum, d) => sum + d.matchedCount, 0);
   const totalUnmatched = preview.divisions.reduce((sum, d) => sum + d.unmatchedCount, 0);
   // Everyone the files name who is not in our database, so the admin can see
   // exactly who is being ignored rather than only how many.
@@ -33,8 +35,9 @@ export function ResultPreviewPanel({ preview }: { preview: ResultPreview }) {
   return (
     <div className="flex flex-col gap-5">
       {/* The header figures that will be printed on the document. */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
         {[
+          { label: 'Players in files', value: totalInFiles },
           { label: 'Participants', value: preview.participantCount },
           {
             label: `Season ${preview.seasonLabel}`,
