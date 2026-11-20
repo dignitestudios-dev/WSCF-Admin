@@ -46,6 +46,23 @@ import {
 } from '@/features/results/services/result.service';
 
 /**
+ * A fingerprint of everything that shapes the results document: the files, the
+ * trophies, the options, the notes and the director. The host and the colours
+ * are left out — the host is never printed and the colours are fixed once the
+ * draft is built.
+ */
+const signatureOf = (p: PublishPayload): string =>
+  JSON.stringify({
+    ind: p.individualFiles.map((f) => [f.id, f.divisionId]),
+    team: p.teamFiles.map((f) => [f.id, f.divisionId]),
+    trophies: p.trophies,
+    director: p.director ?? '',
+    excludeWithdrawn: p.excludeWithdrawn,
+    highlights: p.highlights,
+    attachments: p.attachments.map((a) => a.id),
+  });
+
+/**
  * A division is called whatever the admin named it. The grade span and rating
  * bound are registration rules, and the people reading the standings do not
  * need them.
@@ -112,7 +129,21 @@ export default function ResultUploaderDetail({
       },
     }));
   const [preview, setPreview] = useState<ResultPreview | null>(null);
+  // The review draft: the colours it was drawn in (sent back at publish so the
+  // approved document is the one produced), a viewable copy of it, and a
+  // fingerprint of everything that shaped it.
+  const [palette, setPalette] = useState<string[] | null>(null);
+  const [draftUrl, setDraftUrl] = useState<string | null>(null);
+  const [previewSignature, setPreviewSignature] = useState<string | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
+  // Frees the previous draft whenever it is replaced, and on leaving the page.
+  useEffect(
+    () => () => {
+      if (draftUrl) URL.revokeObjectURL(draftUrl);
+    },
+    [draftUrl]
+  );
 
   // Withdrawals are left off by default, which is what the sheets WSCF has
   // always handed out do.
@@ -209,6 +240,9 @@ export default function ResultUploaderDetail({
   const resetPreview = () => {
     setPreview(null);
     setHighlights([]);
+    setPalette(null);
+    setDraftUrl(null);
+    setPreviewSignature(null);
   };
 
   const divisionLabels = useMemo(
@@ -311,11 +345,20 @@ export default function ResultUploaderDetail({
     divisionLabels,
     director,
     host,
+    palette,
     excludeWithdrawn,
     highlights,
     attachments,
     ...overrides,
   });
+
+  // Anything that changes the document the admin is reviewing. If this no
+  // longer matches what the draft was built from, the draft is out of date and
+  // publishing stays shut until it is refreshed.
+  const isDraftStale =
+    preview !== null &&
+    previewSignature !== null &&
+    previewSignature !== signatureOf(payload());
 
   // Every staged file must know its division, and every division must have
   // both halves — otherwise something the admin chose would be silently
@@ -331,11 +374,26 @@ export default function ResultUploaderDetail({
     pairs.length > 0 && unassignedCount === 0 && incompletePairs === 0;
 
   const handlePreview = async (overrides: Partial<PublishPayload> = {}) => {
+    const sent = payload(overrides);
     const response = await runPreview({
       tournamentId: selectedId as string,
-      payload: payload(overrides),
+      payload: sent,
     });
     setPreview(response.data);
+    setPalette(response.data.palette ?? null);
+
+    // The draft arrives as base64; a blob URL lets the browser's own PDF
+    // viewer show it without another request.
+    try {
+      const bytes = Uint8Array.from(atob(response.data.draftPdf), (c) =>
+        c.charCodeAt(0)
+      );
+      setDraftUrl(
+        URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }))
+      );
+    } catch {
+      setDraftUrl(null);
+    }
 
     // A note can only survive if its player is still going to be printed —
     // toggling withdrawals off can take a tagged player off the document.
@@ -344,7 +402,11 @@ export default function ResultUploaderDetail({
         division.players.filter((p) => !p.hidden).map((p) => p.name)
       )
     );
-    setHighlights((current) => current.filter((entry) => printable.has(entry.name)));
+    const keptHighlights = sent.highlights.filter((entry) =>
+      printable.has(entry.name)
+    );
+    setHighlights(keptHighlights);
+    setPreviewSignature(signatureOf({ ...sent, highlights: keptHighlights }));
   };
 
   /**
@@ -890,6 +952,71 @@ export default function ResultUploaderDetail({
                             onChange={setHighlights}
                             disabled={isPublishing}
                           />
+
+                          {/* The review: the actual document, built the way
+                              publishing will build it, after the standings
+                              and the highlights above have been settled. */}
+                          <div className="flex flex-col gap-3 rounded-[24px] border border-[#DADADA] bg-white p-5">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                              <div className="flex min-w-0 flex-col">
+                                <span className="font-poppins text-[15px] font-bold text-[#083F92]">
+                                  Review the results document
+                                </span>
+                                <span className="font-poppins text-[11px] leading-4 text-[#636363]">
+                                  This is exactly what will be published. Check it
+                                  against the standings above.
+                                </span>
+                              </div>
+
+                              {draftUrl ? (
+                                <a
+                                  href={draftUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="shrink-0 font-poppins text-[12px] font-semibold text-[#083F92] underline"
+                                >
+                                  Open in a new tab
+                                </a>
+                              ) : null}
+                            </div>
+
+                            {isDraftStale ? (
+                              <div className="flex flex-col gap-3 rounded-[12px] border border-[#F5A524]/40 bg-[#FFF7E6] px-4 py-3 sm:flex-row sm:items-center">
+                                <AlertTriangle className="h-4 w-4 shrink-0 text-[#B54708]" />
+                                <p className="min-w-0 flex-1 font-poppins text-[12px] leading-5 text-[#7A4B00]">
+                                  You changed something since this document was
+                                  built. Update it to review the latest version
+                                  before publishing.
+                                </p>
+                                <button
+                                  type="button"
+                                  disabled={isPreviewing || isPublishing}
+                                  onClick={() => handlePreview()}
+                                  className="flex h-[36px] shrink-0 cursor-pointer items-center justify-center gap-2 rounded-[100px] border border-[#083F92] bg-white px-4 font-poppins text-[12px] font-semibold text-[#083F92] hover:bg-[#083F92]/5 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                  {isPreviewing ? (
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                  ) : null}
+                                  Update document
+                                </button>
+                              </div>
+                            ) : null}
+
+                            {draftUrl ? (
+                              <iframe
+                                src={draftUrl}
+                                title="Results document draft"
+                                className={`h-[70vh] min-h-[480px] w-full rounded-[12px] border border-[#DADADA] ${
+                                  isDraftStale ? 'opacity-50' : ''
+                                }`}
+                              />
+                            ) : (
+                              <p className="font-poppins text-[12px] text-[#8C8C8C]">
+                                The document could not be shown here. You can still
+                                publish; it is generated from the same data.
+                              </p>
+                            )}
+                          </div>
                         </div>
                       ) : null}
 
@@ -917,14 +1044,18 @@ export default function ResultUploaderDetail({
                           </span>
                           <span className="font-poppins text-[11px] leading-4 text-[#636363]">
                             {preview
-                              ? "Replaces ratings and generates the document. This cannot be undone."
+                              ? isDraftStale
+                                ? "Update the document above first, so what you review is what gets published."
+                                : "Replaces ratings and generates the document. This cannot be undone."
                               : "Available once the files have been checked."}
                           </span>
                         </div>
 
                         <button
                           type="button"
-                          disabled={!canSubmit || !preview || isPublishing}
+                          disabled={
+                            !canSubmit || !preview || isDraftStale || isPublishing
+                          }
                           onClick={() => setIsConfirmOpen(true)}
                           className="flex h-[44px] shrink-0 cursor-pointer items-center justify-center gap-2 rounded-[100px] bg-[#083F92] px-5 font-poppins text-[14px] font-semibold text-white shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                         >

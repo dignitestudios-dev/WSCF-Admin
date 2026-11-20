@@ -92,6 +92,10 @@ export interface PreviewDivision {
 }
 
 export interface ResultPreview {
+  /** The draft results document, base64. Built exactly as publishing builds it. */
+  draftPdf: string;
+  /** The highlight colours the draft uses; sent back so publishing keeps them. */
+  palette: string[];
   /** The extra PDFs, opened and counted. */
   attachments: { name: string; pageCount: number }[];
   tournament: { _id: string; title: string; date: string };
@@ -172,6 +176,7 @@ function buildFormData({
   divisionLabels,
   director,
   host,
+  palette,
   excludeWithdrawn,
   highlights,
   attachments,
@@ -182,6 +187,7 @@ function buildFormData({
   divisionLabels: Record<string, string>;
   director?: string;
   host?: string;
+  palette?: string[] | null;
   excludeWithdrawn: boolean;
   highlights: PlayerHighlight[];
   attachments: StagedAttachment[];
@@ -211,6 +217,7 @@ function buildFormData({
 
   if (director) form.append('tournamentDirector', director);
   if (host) form.append('tournamentHost', host);
+  if (palette && palette.length > 0) form.append('palette', JSON.stringify(palette));
 
   form.append('excludeWithdrawn', String(excludeWithdrawn));
   form.append('highlights', JSON.stringify(highlights));
@@ -231,6 +238,7 @@ export interface PublishPayload {
   divisionLabels: Record<string, string>;
   director?: string;
   host?: string;
+  palette?: string[] | null;
   excludeWithdrawn: boolean;
   highlights: PlayerHighlight[];
   attachments: StagedAttachment[];
