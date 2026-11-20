@@ -6,11 +6,28 @@ import { Menu } from 'lucide-react';
 import { NotificationBell } from './notification-bell';
 import Image from 'next/image';
 
+// The staging API is the testing environment. Judged from the same variable the
+// axios client uses, so the banner is on exactly when the panel is talking to it.
+const IS_STAGING = (process.env.NEXT_PUBLIC_API_URL || '').includes(
+  'api.staging.wisconsinscholasticchess.org'
+);
+
 export function AdminLayout({ children }: { children: ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex w-screen h-screen bg-white p-2 sm:p-3 lg:p-4 gap-2 sm:gap-3 lg:gap-4 overflow-hidden font-sans select-none">
+    <div className="flex flex-col w-screen h-screen bg-white">
+      {IS_STAGING && (
+        <div
+          role="status"
+          className="shrink-0 bg-[#F5A524] px-4 py-2 text-center font-poppins text-[12px] font-semibold leading-4 text-[#3B2600] sm:text-[13px]"
+        >
+          TESTING MODE: you are on the staging environment. Data here is test data
+          and nothing you do affects the live site.
+        </div>
+      )}
+
+    <div className="flex flex-1 min-h-0 w-full bg-white p-2 sm:p-3 lg:p-4 gap-2 sm:gap-3 lg:gap-4 overflow-hidden font-sans select-none">
       
       {/* Sidebar - Desktop static, Mobile slide-over drawer */}
       <div 
@@ -74,6 +91,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
         </div>
 
       </main>
+    </div>
     </div>
   );
 }
