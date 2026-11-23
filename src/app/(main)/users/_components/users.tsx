@@ -7,10 +7,10 @@ import {
 import { SearchInput } from '@/components/ui/search-input';
 import Link from 'next/link';
 import { PageTransition } from '@/components/animations/page-transition';
-import { Pagination } from '@/components/ui/pagination';
+import { InfiniteScrollFooter } from '@/components/ui/infinite-scroll-footer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CountBadge } from '@/components/ui/count-badge';
-import { useUsers } from '@/features/users/hooks/use-users';
+import { useInfiniteUsers } from '@/features/users/hooks/use-users';
 import { userService, type EmailVerifiedFilter } from '@/features/users/services/user.service';
 import { EmailVerifiedBadge } from '@/components/ui/email-verified-badge';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -32,15 +32,12 @@ export default function Users() {
   // Page and search live in the URL, so a filtered list survives opening a
   // user and coming back — and can be bookmarked or shared.
   const {
-    page: currentPage,
-    setPage: setCurrentPage,
     searchInput: searchQuery,
     setSearchInput: setSearchQuery,
     search: debouncedSearchQuery,
     getFilter,
     setFilter,
   } = useListParams();
-  const itemsPerPage = 10;
   const [isExporting, setIsExporting] = useState(false);
 
   // Email verification is optional for parents, so the admin can tell who has
@@ -49,15 +46,15 @@ export default function Users() {
   const emailVerified: EmailVerifiedFilter =
     rawVerified === 'verified' || rawVerified === 'unverified' ? rawVerified : 'all';
 
-  const { data: usersData, isLoading } = useUsers(
-    currentPage,
-    itemsPerPage,
-    debouncedSearchQuery,
-    emailVerified
-  );
-  const users = usersData?.data?.users || [];
-  const totalPages = usersData?.data?.pagination?.totalPages || 1;
-  const totalItems = usersData?.data?.pagination?.totalItems;
+  const {
+    data: usersData,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteUsers(debouncedSearchQuery, emailVerified);
+  const users = usersData?.pages.flatMap((page) => page.data?.users ?? []) ?? [];
+  const totalItems = usersData?.pages[0]?.data?.pagination?.totalItems;
 
   const handleExport = async () => {
     try {
@@ -96,15 +93,15 @@ export default function Users() {
 
   return (
     <PageTransition>
-      <div className="flex flex-col gap-6 w-full h-full font-sans select-none">
+      <div data-fit-screen className="flex flex-col gap-3 w-full h-full font-sans select-none">
 
         {/* Top Header Controls */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
 
           {/* Left Title + Search pill bar */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full sm:max-w-[500px]">
-            <div className="flex flex-col items-start gap-1 shrink-0">
-              <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full sm:max-w-[680px]">
+            <div className="flex items-center gap-3 shrink-0">
+              <h1 className="font-poppins font-bold sm:text-[30px] text-[28px] sm:leading-[40px] leading-[36px] text-[#083F92] m-0">
                 Users
               </h1>
               <CountBadge count={totalItems} label="user" isLoading={isLoading} filtered={Boolean(debouncedSearchQuery) || emailVerified !== 'all'} />
@@ -126,7 +123,7 @@ export default function Users() {
           <button
             onClick={handleExport}
             disabled={isExporting}
-            className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shrink-0 shadow-sm w-full sm:w-auto justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[56px] shrink-0 shadow-sm w-full sm:w-auto justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md">
               <FileSpreadsheet className="w-5 h-5" />
@@ -164,14 +161,14 @@ export default function Users() {
         </div>
 
         {/* Main Table Container Card */}
-        <div className="w-full bg-white border border-[#DADADA] rounded-[24px] shadow-sm flex flex-col justify-between overflow-hidden flex-1 relative min-h-[600px] mb-8 pb-20">
+        <div className="w-full bg-white border border-[#DADADA] rounded-[24px] shadow-sm flex flex-col justify-between overflow-hidden flex-1 relative min-h-[360px]">
 
           {/* Scrollable Table Area */}
-          <div className="overflow-x-auto w-full">
+          <div className="overflow-auto w-full flex-1 min-h-0 app-scroll">
             <table className="w-full border-collapse">
 
               {/* Table Header */}
-              <thead>
+              <thead className="sticky top-0 z-10">
                 <tr className="bg-[#083F92] text-white text-left h-[50px] font-poppins font-semibold text-[13px]">
                   <th className="px-6 py-3 font-semibold w-[100px]">UserId</th>
                   <th className="px-6 py-3 font-semibold w-[130px]">First Name</th>
@@ -240,7 +237,7 @@ export default function Users() {
                         <td className="px-6 py-3 text-right">
                           <Link
                             href={`/users/${user.originalId}`}
-                            className="font-semibold underline hover:opacity-80 transition-opacity tracking-[-0.02em]"
+                            className="font-semibold underline hover:opacity-80 transition-opacity tracking-[-0.02em] whitespace-nowrap"
                           >
                             View Profile
                           </Link>
@@ -262,17 +259,17 @@ export default function Users() {
               </tbody>
 
             </table>
+            {!isLoading && (
+            <InfiniteScrollFooter
+            hasNextPage={Boolean(hasNextPage)}
+            isFetchingNextPage={isFetchingNextPage}
+            fetchNextPage={fetchNextPage}
+            itemCount={mappedUsers.length}
+            label="user"
+            />
+            )}
           </div>
 
-          {/* Floating Pagination Bar (Bottom Right) */}
-          {totalPages > 1 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-              className="absolute right-[24px] bottom-[16px]"
-            />
-          )}
 
         </div>
 

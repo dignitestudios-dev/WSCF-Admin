@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Award, Ban } from 'lucide-react';
 import { SearchInput } from '@/components/ui/search-input';
 import { PageTransition } from '@/components/animations/page-transition';
-import { Pagination } from '@/components/ui/pagination';
+import { InfiniteScrollFooter } from '@/components/ui/infinite-scroll-footer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CountBadge } from '@/components/ui/count-badge';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -13,7 +13,7 @@ import { Highlight } from '@/components/ui/highlight';
 import { useListParams } from '@/hooks/use-list-params';
 import {
   useAssignRating,
-  useRatingRequests,
+  useInfiniteRatingRequests,
 } from '@/features/ratings/hooks/use-ratings';
 import { AssignRatingDialog } from '@/features/ratings/components/assign-rating-dialog';
 import type { RatingRequestPlayer } from '@/features/ratings/services/rating.service';
@@ -52,14 +52,10 @@ function getPrimaryParentInfo(user: RatingRequestPlayer['userId']) {
 
 export default function RatingRequests() {
   const {
-    page: currentPage,
-    setPage: setCurrentPage,
     searchInput: searchQuery,
     setSearchInput: setSearchQuery,
     search: debouncedSearchQuery,
   } = useListParams();
-
-  const itemsPerPage = 10;
 
   const [playerToAssign, setPlayerToAssign] = useState<RatingRequestPlayer | null>(
     null
@@ -67,17 +63,12 @@ export default function RatingRequests() {
   const [playerToLeaveUnrated, setPlayerToLeaveUnrated] =
     useState<RatingRequestPlayer | null>(null);
 
-  const { data, isLoading } = useRatingRequests(
-    currentPage,
-    itemsPerPage,
-    debouncedSearchQuery,
-    'pending'
-  );
+  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    useInfiniteRatingRequests(debouncedSearchQuery, 'pending');
   const { mutateAsync: assign, isPending: isSaving } = useAssignRating();
 
-  const players = data?.data?.players || [];
-  const totalPages = data?.pagination?.totalPages || 1;
-  const totalItems = data?.pagination?.totalItems;
+  const players = data?.pages.flatMap((page) => page.data?.players ?? []) ?? [];
+  const totalItems = data?.pages[0]?.pagination?.totalItems;
 
   const confirmNoRating = async () => {
     if (!playerToLeaveUnrated) return;
@@ -97,12 +88,12 @@ export default function RatingRequests() {
 
   return (
     <PageTransition>
-      <div className="flex flex-col gap-6 w-full h-full font-sans select-none">
+      <div data-fit-screen className="flex flex-col gap-3 w-full h-full font-sans select-none">
         {/* Top Header Controls */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full sm:max-w-[620px]">
-            <div className="flex flex-col items-start gap-1 shrink-0">
-              <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0">
+            <div className="flex items-center gap-3 shrink-0">
+              <h1 className="font-poppins font-bold sm:text-[30px] text-[28px] sm:leading-[40px] leading-[36px] text-[#083F92] m-0">
                 Rating Requests
               </h1>
               <CountBadge
@@ -124,10 +115,10 @@ export default function RatingRequests() {
         </div>
 
         {/* Main Table Container Card */}
-        <div className="w-full bg-white border border-[#DADADA] rounded-[24px] shadow-sm flex flex-col justify-between overflow-hidden flex-1 relative min-h-[600px] mb-8 pb-20">
-          <div className="overflow-x-auto w-full">
+        <div className="w-full bg-white border border-[#DADADA] rounded-[24px] shadow-sm flex flex-col justify-between overflow-hidden flex-1 relative min-h-[360px]">
+          <div className="overflow-auto w-full flex-1 min-h-0 app-scroll">
             <table className="w-full border-collapse">
-              <thead>
+              <thead className="sticky top-0 z-10">
                 <tr className="bg-[#083F92] text-white text-left h-[50px] font-poppins font-semibold text-[13px]">
                   <th className="px-6 py-3 font-semibold w-[130px]">Member ID</th>
                   <th className="px-6 py-3 font-semibold w-auto">Player</th>
@@ -249,16 +240,17 @@ export default function RatingRequests() {
                 )}
               </tbody>
             </table>
+            {!isLoading && (
+            <InfiniteScrollFooter
+            hasNextPage={Boolean(hasNextPage)}
+            isFetchingNextPage={isFetchingNextPage}
+            fetchNextPage={fetchNextPage}
+            itemCount={players.length}
+            label="player"
+            />
+            )}
           </div>
 
-          {totalPages > 1 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-              className="absolute right-[24px] bottom-[16px]"
-            />
-          )}
         </div>
       </div>
 

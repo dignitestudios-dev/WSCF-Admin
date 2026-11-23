@@ -1,6 +1,7 @@
 'use client';
 
-import { AlertTriangle, FileText, Info, Trophy, Users } from 'lucide-react';
+import { FileText, Trophy, Users } from 'lucide-react';
+import { ResultReportPanel } from './result-report';
 import type { ResultPreview } from '../services/result.service';
 
 /**
@@ -13,100 +14,11 @@ import type { ResultPreview } from '../services/result.service';
  * have already been replaced.
  */
 export function ResultPreviewPanel({ preview }: { preview: ResultPreview }) {
-  // Every player the individual files list, withdrawn ones included.
-  const totalInFiles = preview.divisions.reduce((sum, d) => sum + d.playerCount, 0);
-  const totalMatched =preview.divisions.reduce((sum, d) => sum + d.matchedCount, 0);
-  const totalUnmatched = preview.divisions.reduce((sum, d) => sum + d.unmatchedCount, 0);
-  // Everyone the files name who is not in our database, so the admin can see
-  // exactly who is being ignored rather than only how many.
-  const unmatchedPlayers = preview.divisions.flatMap((division) =>
-    division.players
-      .filter((player) => !player.matched)
-      .map((player) => ({ name: player.name, division: division.divisionLabel }))
-  );
-  const unresolvedTeams = preview.divisions.flatMap((division) =>
-    division.teams.filter((team) => !team.resolved)
-  );
-  const totalWithdrawn = preview.divisions.reduce(
-    (sum, division) => sum + (division.playerCount - division.printedCount),
-    0
-  );
-
   return (
     <div className="flex flex-col gap-5">
-      {/* The header figures that will be printed on the document. */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-        {[
-          { label: 'Players in files', value: totalInFiles },
-          { label: 'Participants', value: preview.participantCount },
-          {
-            label: `Season ${preview.seasonLabel}`,
-            value: preview.seasonParticipantCount.toLocaleString('en-US'),
-          },
-          { label: 'Players matched', value: totalMatched },
-          { label: 'Not matched', value: totalUnmatched },
-        ].map((item) => (
-          <div
-            key={item.label}
-            className="flex flex-col gap-1 rounded-[12px] border border-[#DADADA] bg-white px-4 py-3"
-          >
-            <span className="font-poppins text-[11px] text-[#8C8C8C]">{item.label}</span>
-            <span className="font-poppins text-[20px] font-bold text-[#083F92]">
-              {item.value}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {totalUnmatched > 0 ? (
-        <div className="flex items-start gap-3 rounded-[12px] border border-[#F5A524]/40 bg-[#FFF7E6] px-4 py-3">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#B54708]" />
-          <div className="flex min-w-0 flex-col gap-1.5">
-            <p className="font-poppins text-[12px] leading-5 text-[#7A4B00]">
-              <strong>{totalUnmatched} player(s)</strong> in these files were not found
-              in our database. They will still be printed in the results document, but
-              they are ignored otherwise: no profile, rating or history is updated for
-              them and nothing is saved. If a name is only misspelled, fix the player
-              in WinTD and upload again.
-            </p>
-            <ul className="flex flex-col gap-0.5 font-poppins text-[12px] leading-5 text-[#7A4B00]">
-              {unmatchedPlayers.map((player, index) => (
-                <li key={`${player.division}-${player.name}-${index}`} className="break-words">
-                  {player.name}{' '}
-                  <span className="text-[#B54708]/80">({player.division})</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      ) : null}
-
-      {totalWithdrawn > 0 ? (
-        <div className="flex items-start gap-3 rounded-[12px] border border-[#083F92]/20 bg-[#083F92]/5 px-4 py-3">
-          <Info className="mt-0.5 h-4 w-4 shrink-0 text-[#083F92]" />
-          <p className="font-poppins text-[12px] leading-5 text-[#3D3775]">
-            <strong>{totalWithdrawn} player(s)</strong> withdrew and will not be
-            printed on the document. Their results are still recorded and their
-            ratings still updated, and the trophies below go to the first places
-            that do appear.
-          </p>
-        </div>
-      ) : null}
-
-      {unresolvedTeams.length > 0 ? (
-        <div className="flex items-start gap-3 rounded-[12px] border border-[#F5A524]/40 bg-[#FFF7E6] px-4 py-3">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#B54708]" />
-          <p className="font-poppins text-[12px] leading-5 text-[#7A4B00]">
-            <strong>{unresolvedTeams.length} team(s)</strong> could not be matched to a
-            team, so the document will print their code (
-            {unresolvedTeams
-              .slice(0, 4)
-              .map((team) => team.teamCode)
-              .join(', ')}
-            {unresolvedTeams.length > 4 ? '…' : ''}) instead of a name.
-          </p>
-        </div>
-      ) : null}
+      {/* Counts and the cards for anyone who needs a second look; the same
+          panel is shown again once the results are published. */}
+      <ResultReportPanel report={preview.report} />
 
       {preview.attachments.length > 0 ? (
         <div className="flex flex-col gap-2 rounded-[12px] border border-[#DADADA] bg-white px-5 py-4">

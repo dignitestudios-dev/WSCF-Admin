@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 import { ChevronLeft, FileSpreadsheet, Loader2, Pencil, Trash2, UserPlus, UsersRound } from 'lucide-react';
 import { PageTransition } from '@/components/animations/page-transition';
 import { SearchInput } from '@/components/ui/search-input';
-import { Pagination } from '@/components/ui/pagination';
+import { InfiniteScrollFooter } from '@/components/ui/infinite-scroll-footer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ActionIconButton, ActionPillButton } from '@/components/ui/action-button';
@@ -16,14 +16,12 @@ import {
   useDeleteTeam,
   useRemoveTeamMembers,
   useTeamDetails,
-  useTeamMembers,
+  useInfiniteTeamMembers,
 } from '@/features/teams/hooks/use-teams';
 import { AddMembersDialog } from '@/features/teams/components/add-members-dialog';
 import { teamLabel } from '@/features/teams/services/team.service';
 import { useTeamExport } from '@/features/teams/hooks/use-team-export';
 import { EditTeamDialog } from '@/features/teams/components/edit-team-dialog';
-
-const ITEMS_PER_PAGE = 10;
 
 export default function TeamDetail() {
   const params = useParams();
@@ -32,7 +30,6 @@ export default function TeamDetail() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 500);
-  const [currentPage, setCurrentPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -42,20 +39,23 @@ export default function TeamDetail() {
 
   const { exportTeam, exportingId } = useTeamExport();
   const { data: detailData, isLoading: isTeamLoading } = useTeamDetails(teamId);
-  const { data: membersData, isLoading: areMembersLoading } = useTeamMembers(
-    teamId,
-    currentPage,
-    ITEMS_PER_PAGE,
-    debouncedSearch
-  );
+  const {
+    data: membersData,
+    isLoading: areMembersLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteTeamMembers(teamId, debouncedSearch);
 
   const { mutateAsync: removeMembers, isPending: isRemoving } = useRemoveTeamMembers();
   const { mutateAsync: deleteTeam, isPending: isDeletingTeam } = useDeleteTeam();
 
   const team = detailData?.data?.team;
-  const members = useMemo(() => membersData?.data?.members || [], [membersData]);
-  const totalPages = membersData?.pagination?.totalPages || 1;
-  const totalMembers = membersData?.pagination?.totalItems ?? team?.memberCount ?? 0;
+  const members = useMemo(
+    () => membersData?.pages.flatMap((page) => page.data?.members ?? []) ?? [],
+    [membersData]
+  );
+  const totalMembers = membersData?.pages[0]?.pagination?.totalItems ?? team?.memberCount ?? 0;
 
   const memberUserIds = members
     .map((member) => member._id)
@@ -86,10 +86,6 @@ export default function TeamDetail() {
       await removeMembers({ teamId, playerIds: pendingRemoval });
       setSelectedIds((current) => current.filter((id) => !pendingRemoval.includes(id)));
       setPendingRemoval(null);
-      // The page may no longer exist once the last rows on it are gone.
-      if (members.length === pendingRemoval.length && currentPage > 1) {
-        setCurrentPage((page) => page - 1);
-      }
     } catch {
       // surfaced by the mutation's toast
     }
@@ -114,7 +110,7 @@ export default function TeamDetail() {
 
   return (
     <PageTransition>
-      <div className="flex h-full w-full flex-col gap-6 font-sans select-none">
+      <div data-fit-screen className="flex h-full w-full flex-col gap-3 font-sans select-none">
         {/* Header */}
         <div className="flex w-full flex-col items-start justify-between gap-4 md:flex-row md:items-center">
           <div className="flex min-w-0 flex-col gap-2 md:flex-1">
@@ -180,7 +176,7 @@ export default function TeamDetail() {
         </div>
 
         {/* Roster */}
-        <div className="relative mb-8 flex min-h-[560px] w-full flex-1 flex-col justify-between overflow-hidden rounded-[24px] border border-[#DADADA] bg-white pb-20 shadow-sm">
+        <div className="relative flex min-h-[360px] w-full flex-1 flex-col justify-between overflow-hidden rounded-[24px] border border-[#DADADA] bg-white shadow-sm">
           <div className="flex flex-col gap-4 border-b border-[#DADADA]/40 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
             {/* The total sits on the section heading, so it is visible while
                 scrolling the roster rather than only in the page header. */}
@@ -201,21 +197,20 @@ export default function TeamDetail() {
                 value={searchQuery}
                 onChangeValue={(value) => {
                   setSearchQuery(value);
-                  setCurrentPage(1);
                 }}
                 placeholder="Search by first name, last name or member ID"
               />
             </div>
           </div>
 
-          <div className="w-full flex-1 overflow-x-auto">
+          <div className="w-full min-h-0 flex-1 overflow-auto app-scroll">
             <table className="w-full border-collapse">
-              <thead>
+              <thead className="sticky top-0 z-10">
                 <tr className="h-[50px] bg-[#083F92] text-left font-poppins text-[13px] font-semibold text-white">
                   <th className="w-[56px] px-6 py-3">
                     <input
                       type="checkbox"
-                      aria-label="Select all members on this page"
+                      aria-label="Select all loaded members"
                       checked={allOnPageSelected}
                       onChange={toggleAllOnPage}
                       disabled={members.length === 0}
@@ -342,20 +337,21 @@ export default function TeamDetail() {
                 )}
               </tbody>
             </table>
+
+            {!areMembersLoading && members.length > 0 && (
+              <InfiniteScrollFooter
+                hasNextPage={Boolean(hasNextPage)}
+                isFetchingNextPage={isFetchingNextPage}
+                fetchNextPage={fetchNextPage}
+                itemCount={members.length}
+                label="member"
+              />
+            )}
           </div>
 
-          {!areMembersLoading && members.length > 0 && (
-            <div className="absolute bottom-0 left-0 flex w-full items-center justify-between gap-4 border-t border-[#DADADA]/40 bg-white px-6 py-4">
-              <span className="font-poppins text-[13px] text-[#8C8C8C]">
-                {selectedIds.length > 0
-                  ? `${selectedIds.length} selected`
-                  : `${totalMembers} member${totalMembers === 1 ? '' : 's'}`}
-              </span>
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
+          {selectedIds.length > 0 && (
+            <div className="w-full border-t border-[#DADADA]/40 bg-white px-6 py-3 font-poppins text-[13px] text-[#8C8C8C]">
+              {selectedIds.length} selected
             </div>
           )}
         </div>

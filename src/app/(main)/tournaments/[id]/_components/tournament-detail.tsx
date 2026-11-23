@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useGetTournament } from '@/features/tournaments/hooks/use-get-tournament';
-import { useGetTournamentParticipants } from '@/features/tournaments/hooks/use-get-tournament-participants';
+import { useInfiniteTournamentParticipants } from '@/features/tournaments/hooks/use-get-tournament-participants';
 import { WinTdExportCard } from '@/features/results/components/wintd-export-card';
 import { useDeleteTournament } from '@/features/tournaments/hooks/use-delete-tournament';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { PageTransition } from '@/components/animations/page-transition';
-import { Pagination } from '@/components/ui/pagination';
+import { InfiniteScrollFooter } from '@/components/ui/infinite-scroll-footer';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ParticipantTeamDialog } from '@/features/tournaments/components/participant-team-dialog';
 
@@ -30,12 +30,17 @@ export default function TournamentDetail() {
   const router = useRouter();
   const id = params.id as string;
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   // The entry whose team is being edited.
   const [participantToEdit, setParticipantToEdit] = useState<{ _id: string; user?: { name?: string }; team?: { _id: string; name?: string } | null } | null>(null);
 
   const { data: response, isLoading } = useGetTournament(id);
-  const { data: participantsResponse, isLoading: isParticipantsLoading } = useGetTournamentParticipants(id, currentPage, 10);
+  const {
+    data: participantsResponse,
+    isLoading: isParticipantsLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteTournamentParticipants(id);
   const { mutate: deleteTournament, isPending: isDeleting } = useDeleteTournament();
   const tournament = response?.data?.tournament;
 
@@ -90,9 +95,9 @@ export default function TournamentDetail() {
     );
   }
 
-  const registeredPlayers = participantsResponse?.data?.participants || [];
-  const totalItems = participantsResponse?.pagination?.totalItems || 0;
-  const totalPages = participantsResponse?.pagination?.totalPages || 1;
+  const registeredPlayers: any[] =
+    participantsResponse?.pages.flatMap((page) => page.data?.participants ?? []) ?? [];
+  const totalItems = participantsResponse?.pages[0]?.pagination?.totalItems || 0;
 
   return (
     <PageTransition>
@@ -220,14 +225,16 @@ export default function TournamentDetail() {
             </div>
 
             {/* Inner Sub-Table White Card Container */}
-            <div className="w-full bg-white border border-[#DADADA] rounded-[24px] shadow-sm flex flex-col justify-between overflow-hidden relative min-h-[400px] pb-20">
+            <div className="w-full bg-white border border-[#DADADA] rounded-[24px] shadow-sm flex flex-col justify-between overflow-hidden relative min-h-[400px]">
 
               {/* Scrollable Table Area */}
-              <div className="overflow-x-auto w-full">
+              {/* The list scrolls inside this box, so the details and the
+                  heading above stay in place while the roster is read. */}
+              <div className="overflow-auto w-full max-h-[70vh] app-scroll">
                 <table className="w-full border-collapse min-w-[960px]">
 
                   {/* Table Header */}
-                  <thead>
+                  <thead className="sticky top-0 z-10">
                     <tr className="bg-[#083F92] text-white text-left h-[50px] font-poppins font-semibold text-[13px]">
                       <th className="px-6 py-3 font-semibold w-[120px]">User ID</th>
                       <th className="px-6 py-3 font-semibold w-[120px]">Name</th>
@@ -328,17 +335,17 @@ export default function TournamentDetail() {
                   </tbody>
 
                 </table>
+              {!isParticipantsLoading && (
+                  <InfiniteScrollFooter
+                    hasNextPage={Boolean(hasNextPage)}
+                    isFetchingNextPage={isFetchingNextPage}
+                    fetchNextPage={fetchNextPage}
+                    itemCount={registeredPlayers.length}
+                    label="participant"
+                  />
+                )}
               </div>
 
-              {/* Floating Pagination Bar (Bottom Right) */}
-              {totalPages > 1 && (
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={setCurrentPage}
-                  className="absolute right-[24px] bottom-[16px]"
-                />
-              )}
 
             </div>
 

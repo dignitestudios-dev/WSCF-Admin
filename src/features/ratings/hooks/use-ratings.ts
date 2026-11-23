@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/lib/toast';
 import { ratingService } from '../services/rating.service';
+import { LIST_BATCH_SIZE, useInfiniteList } from '@/hooks/use-infinite-list';
 
 export function useRatingRequests(
   page = 1,
@@ -23,6 +24,29 @@ export function useRatingRequests(
       return response;
     },
     refetchInterval: 10000, // Poll every 10 seconds in the background
+    refetchOnWindowFocus: true,
+  });
+}
+
+export function useInfiniteRatingRequests(
+  search = '',
+  status: 'pending' | 'assigned' | 'unrated' = 'pending'
+) {
+  const queryClient = useQueryClient();
+
+  return useInfiniteList({
+    queryKey: ['rating-requests', 'infinite', { search, status }],
+    fetchPage: async (page) => {
+      const response = await ratingService.getRatingRequests(page, LIST_BATCH_SIZE, search, status);
+      // Keeps the sidebar's pending badge in step with the list on screen.
+      if (page === 1 && status === 'pending' && !search && response?.pagination?.totalItems !== undefined) {
+        queryClient.setQueryData(['rating-requests', 'pending-count'], {
+          pagination: { totalItems: response.pagination.totalItems },
+        });
+      }
+      return response;
+    },
+    refetchInterval: 10000,
     refetchOnWindowFocus: true,
   });
 }

@@ -8,6 +8,8 @@ import {
   type UpdateCouponPayload,
 } from '../services/coupon.service';
 
+import { LIST_BATCH_SIZE, useInfiniteList } from '@/hooks/use-infinite-list';
+
 const errorMessage = (error: any, fallback: string) =>
   error?.response?.data?.message || error?.message || fallback;
 
@@ -22,6 +24,13 @@ export function useCoupons(
     // filter would show the previous result.
     queryKey: ['coupons', page, limit, search, status],
     queryFn: () => couponService.getCoupons(page, limit, search, status),
+  });
+}
+
+export function useInfiniteCoupons(search = '', status?: CouponListStatus) {
+  return useInfiniteList({
+    queryKey: ['coupons', 'infinite', { search, status }],
+    fetchPage: (page) => couponService.getCoupons(page, LIST_BATCH_SIZE, search, status),
   });
 }
 

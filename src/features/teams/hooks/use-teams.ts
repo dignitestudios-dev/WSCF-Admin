@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/lib/toast';
 import { MemberBatchResponse, teamService } from '../services/team.service';
+import { LIST_BATCH_SIZE, useInfiniteList } from '@/hooks/use-infinite-list';
 import {
   collectMemberMoves,
   collectMemberProblems,
@@ -25,6 +26,21 @@ export function useTeams(page: number, limit: number, search = '') {
   return useQuery({
     queryKey: [teamKeys.list, { page, limit, search }],
     queryFn: () => teamService.getTeams(page, limit, search),
+  });
+}
+
+export function useInfiniteTeams(search = '') {
+  return useInfiniteList({
+    queryKey: [teamKeys.list, 'infinite', { search }],
+    fetchPage: (page) => teamService.getTeams(page, LIST_BATCH_SIZE, search),
+  });
+}
+
+export function useInfiniteTeamMembers(teamId: string, search = '') {
+  return useInfiniteList({
+    queryKey: [teamKeys.members, teamId, 'infinite', { search }],
+    fetchPage: (page) => teamService.getTeamMembers(teamId, page, LIST_BATCH_SIZE, search),
+    enabled: Boolean(teamId),
   });
 }
 

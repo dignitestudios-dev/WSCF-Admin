@@ -137,3 +137,50 @@
     display: none;  /* Chrome, Safari and Opera */
   }
 }
+/* On the list screens the bell floats over the top-right corner instead of
+   taking a row of its own, so the table below gets that height. */
+main:has([data-fit-screen]) > .bell-strip {
+  position: absolute;
+  top: 12px;
+  right: 24px;
+  padding: 0;
+  z-index: 30;
+}
+main:has([data-fit-screen]) > div:has([data-fit-screen]) {
+  padding-top: 12px;
+}
+@media (min-width: 1024px) {
+  /* Keep the page's own top-right buttons clear of the floating bell. */
+  [data-fit-screen] > div:first-child {
+    padding-right: 64px;
+  }
+}
+
+/* Scroll boxes inside the admin: a thin, light scrollbar with no track and no
+   arrow buttons. Uses the standard properties, which Chrome, Edge and Firefox
+   all honour. (Chrome ignores the ::-webkit-scrollbar rules as soon as either
+   standard property is set, so the two are kept apart below.) */
+.app-scroll {
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(8, 63, 146, 0.28) transparent;
+}
+
+/* Older Safari, which has no scrollbar-width: the same look by pseudo-element. */
+@supports not (scrollbar-width: thin) {
+  .app-scroll::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .app-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .app-scroll::-webkit-scrollbar-thumb {
+    background-color: rgba(8, 63, 146, 0.28);
+    border-radius: 999px;
+  }
+  .app-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(8, 63, 146, 0.5);
+  }
+}

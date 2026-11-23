@@ -7,11 +7,11 @@ import {
 } from 'lucide-react';
 import { SearchInput } from '@/components/ui/search-input';
 import Link from 'next/link';
-import { Pagination } from '@/components/ui/pagination';
+import { InfiniteScrollFooter } from '@/components/ui/infinite-scroll-footer';
 import { PageTransition } from '@/components/animations/page-transition';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { toast } from '@/lib/toast';
-import { useMemberships, useExportMemberships } from '@/features/memberships/hooks/use-memberships';
+import { useInfiniteMemberships, useExportMemberships } from '@/features/memberships/hooks/use-memberships';
 import { useSendIndividualNotification } from '@/features/notifications/hooks/use-send-notification';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CountBadge } from '@/components/ui/count-badge';
@@ -46,8 +46,6 @@ interface Member {
 
 export default function Membership() {
   const {
-    page: currentPage,
-    setPage: setCurrentPage,
     searchInput: searchQuery,
     setSearchInput: setSearchQuery,
     search: debouncedSearchQuery,
@@ -55,11 +53,15 @@ export default function Membership() {
   const [sortField, setSortField] = useState<'status' | 'lastActive' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   
-  const itemsPerPage = 10;
-  const { data: membershipsData, isLoading } = useMemberships(currentPage, itemsPerPage, debouncedSearchQuery);
-  const members = membershipsData?.data || [];
-  const totalPages = membershipsData?.pagination?.totalPages || 1;
-  const totalItems = membershipsData?.pagination?.totalItems;
+  const {
+    data: membershipsData,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteMemberships(debouncedSearchQuery);
+  const members = membershipsData?.pages.flatMap((page) => page.data ?? []) ?? [];
+  const totalItems = membershipsData?.pages[0]?.pagination?.totalItems;
 
   const { mutateAsync: exportMemberships, isPending: isExporting } = useExportMemberships();
 
@@ -143,7 +145,7 @@ export default function Membership() {
 
   return (
     <PageTransition>
-      <div className="flex flex-col gap-6 w-full h-full font-sans select-none pb-12">
+      <div data-fit-screen className="flex flex-col gap-3 w-full h-full font-sans select-none">
         
         {/* Top Header & Export Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
@@ -151,7 +153,7 @@ export default function Membership() {
           {/* Left Title + Search pill bar */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full sm:max-w-[700px]">
             <div className="flex flex-col shrink-0">
-              <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0">
+              <h1 className="font-poppins font-bold sm:text-[30px] text-[28px] sm:leading-[40px] leading-[36px] text-[#083F92] m-0">
                 Membership
               </h1>
               <p className="font-poppins font-medium text-[12px] leading-[18px] text-[#787878] m-0">
@@ -183,7 +185,7 @@ export default function Membership() {
             <button 
               onClick={handleExport}
               disabled={isExporting}
-              className="flex items-center gap-2 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-full md:w-[174px] justify-center shrink-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[56px] shadow-sm w-full md:w-[174px] justify-center shrink-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md shrink-0">
                 <FileSpreadsheet className="w-5 h-5" />
@@ -196,14 +198,14 @@ export default function Membership() {
         </div>
 
         {/* Table Main Container */}
-        <div className="w-full bg-white border border-[#DADADA] rounded-[24px] shadow-sm flex flex-col overflow-hidden">
+        <div className="w-full bg-white border border-[#DADADA] rounded-[24px] shadow-sm flex flex-col overflow-hidden flex-1 min-h-[360px]">
           
           {/* Scrollable Table Area */}
-          <div className="overflow-x-auto w-full">
+          <div className="overflow-auto w-full flex-1 min-h-0 app-scroll">
             <table className="w-full border-collapse">
               
               {/* Table Header */}
-              <thead>
+              <thead className="sticky top-0 z-10">
                 <tr className="bg-[#083F92] text-white text-left h-[50px] font-poppins font-semibold text-[13px]">
                   <th className="px-6 py-3 font-semibold w-[120px]">UserId</th>
                   <th className="px-6 py-3 font-semibold w-[200px]">Member Name</th>
@@ -311,20 +313,19 @@ export default function Membership() {
               </tbody>
 
             </table>
+            {!isLoading && (
+            <InfiniteScrollFooter
+            hasNextPage={Boolean(hasNextPage)}
+            isFetchingNextPage={isFetchingNextPage}
+            fetchNextPage={fetchNextPage}
+            itemCount={members.length}
+            label="member"
+            />
+            )}
           </div>
 
         </div>
 
-        {/* Pagination Row */}
-        {totalPages > 1 && (
-          <div className="flex justify-end items-center w-full mt-4">
-            <Pagination 
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
-          </div>
-        )}
 
         {/* Send Notification Dialog */}
         <Dialog open={!!notifyingMember} onOpenChange={(open) => !open && setNotifyingMember(null)}>

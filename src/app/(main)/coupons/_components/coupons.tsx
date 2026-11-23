@@ -6,14 +6,14 @@ import { Plus, Edit, Ban, Star, Archive, ArchiveRestore, Eye, TicketPercent } fr
 import { EmptyState } from '@/components/ui/empty-state';
 import { SearchInput } from '@/components/ui/search-input';
 import { PageTransition } from '@/components/animations/page-transition';
-import { Pagination } from '@/components/ui/pagination';
+import { InfiniteScrollFooter } from '@/components/ui/infinite-scroll-footer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CountBadge } from '@/components/ui/count-badge';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ActionIconButton } from '@/components/ui/action-button';
 import {
   useArchiveCoupon,
-  useCoupons,
+  useInfiniteCoupons,
   useRestoreCoupon,
   useUpdateCoupon,
 } from '@/features/coupons/hooks/use-coupons';
@@ -53,15 +53,12 @@ function statusOf(coupon: Coupon) {
 
 export default function Coupons() {
   const {
-    page: currentPage,
-    setPage: setCurrentPage,
     searchInput: searchQuery,
     setSearchInput: setSearchQuery,
     search: debouncedSearchQuery,
     getFilter,
     setFilter,
   } = useListParams({ defaultFilters: { status: 'active' } });
-  const itemsPerPage = 10;
 
   const status = (getFilter('status') || 'active') as CouponListStatus;
   const isArchivedTab = status === 'archived';
@@ -73,19 +70,14 @@ export default function Coupons() {
   const [couponToArchive, setCouponToArchive] = useState<Coupon | null>(null);
   const [couponToRestore, setCouponToRestore] = useState<Coupon | null>(null);
 
-  const { data, isLoading } = useCoupons(
-    currentPage,
-    itemsPerPage,
-    debouncedSearchQuery,
-    status
-  );
+  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    useInfiniteCoupons(debouncedSearchQuery, status);
   const { mutateAsync: updateCoupon, isPending: isToggling } = useUpdateCoupon();
   const { mutateAsync: archiveCoupon, isPending: isArchiving } = useArchiveCoupon();
   const { mutateAsync: restoreCoupon, isPending: isRestoring } = useRestoreCoupon();
 
-  const coupons = data?.data?.coupons || [];
-  const totalPages = data?.pagination?.totalPages || 1;
-  const totalItems = data?.pagination?.totalItems;
+  const coupons = data?.pages.flatMap((page) => page.data?.coupons ?? []) ?? [];
+  const totalItems = data?.pages[0]?.pagination?.totalItems;
 
   const confirmToggle = async () => {
     if (!couponToToggle) return;
@@ -125,11 +117,11 @@ export default function Coupons() {
 
   return (
     <PageTransition>
-      <div className="flex flex-col gap-6 w-full h-full font-sans select-none">
+      <div data-fit-screen className="flex flex-col gap-3 w-full h-full font-sans select-none">
         {/* Top Header Controls */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full sm:max-w-none">
-            <div className="flex flex-col items-start gap-1 shrink-0">
+            <div className="flex items-center gap-3 shrink-0">
               <h1 className="font-poppins font-bold sm:text-[34px] text-[26px] sm:leading-[52px] leading-[34px] text-[#083F92] m-0">
                 Coupons &amp; Organizations
               </h1>
@@ -152,7 +144,7 @@ export default function Coupons() {
 
           <button
             onClick={() => setIsCreateOpen(true)}
-            className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shrink-0 shadow-sm w-full sm:w-auto justify-center cursor-pointer"
+            className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[56px] shrink-0 shadow-sm w-full sm:w-auto justify-center cursor-pointer"
           >
             <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md">
               <Plus className="w-5 h-5 stroke-[3]" />
@@ -183,10 +175,10 @@ export default function Coupons() {
         </div>
 
         {/* Main Table Container Card */}
-        <div className="w-full bg-white border border-[#DADADA] rounded-[24px] shadow-sm flex flex-col justify-between overflow-hidden flex-1 relative min-h-[600px] mb-8 pb-20">
-          <div className="overflow-x-auto w-full">
+        <div className="w-full bg-white border border-[#DADADA] rounded-[24px] shadow-sm flex flex-col justify-between overflow-hidden flex-1 relative min-h-[360px]">
+          <div className="overflow-auto w-full flex-1 min-h-0 app-scroll">
             <table className="w-full min-w-[820px] border-collapse">
-              <thead>
+              <thead className="sticky top-0 z-10">
                 <tr className="bg-[#083F92] text-white text-left h-[50px] font-poppins font-semibold text-[13px]">
                   <th className="px-6 py-3 font-semibold w-auto">Organization</th>
                   <th className="px-6 py-3 font-semibold w-[170px]">Code</th>
@@ -333,16 +325,17 @@ export default function Coupons() {
                 )}
               </tbody>
             </table>
+            {!isLoading && (
+            <InfiniteScrollFooter
+            hasNextPage={Boolean(hasNextPage)}
+            isFetchingNextPage={isFetchingNextPage}
+            fetchNextPage={fetchNextPage}
+            itemCount={coupons.length}
+            label="coupon"
+            />
+            )}
           </div>
 
-          {totalPages > 1 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-              className="absolute right-[24px] bottom-[16px]"
-            />
-          )}
         </div>
       </div>
 

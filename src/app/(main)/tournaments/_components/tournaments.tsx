@@ -13,10 +13,10 @@ import {
 import { SearchInput } from '@/components/ui/search-input';
 import { PageTransition } from '@/components/animations/page-transition';
 import Link from 'next/link';
-import { Pagination } from '@/components/ui/pagination';
+import { InfiniteScrollFooter } from '@/components/ui/infinite-scroll-footer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CountBadge } from '@/components/ui/count-badge';
-import { useTournaments, useMarkTournamentCompleted } from '@/features/tournaments/hooks/use-tournaments';
+import { useInfiniteTournaments, useMarkTournamentCompleted } from '@/features/tournaments/hooks/use-tournaments';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useDeleteTournament } from '@/features/tournaments/hooks/use-delete-tournament';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -28,8 +28,6 @@ export default function Tournaments() {
   // Page, search and the status tab all live in the URL, so returning from a
   // tournament lands back on the same filtered page.
   const {
-    page: currentPage,
-    setPage: setCurrentPage,
     searchInput: searchQuery,
     setSearchInput: setSearchQuery,
     search: debouncedSearchQuery,
@@ -44,8 +42,6 @@ export default function Tournaments() {
     | 'completed';
   const setActiveTab = (tab: string) => setFilter('status', tab);
 
-  const itemsPerPage = 10;
-
   const statusParam = activeTab === 'All' ? undefined : activeTab;
 
   // Completion is manual and one-way, so it asks first.
@@ -59,11 +55,17 @@ export default function Tournaments() {
 
   const [tournamentToDelete, setTournamentToDelete] = useState<any>(null);
 
-  const { data: tournamentsData, isLoading, isFetching } = useTournaments(currentPage, itemsPerPage, debouncedSearchQuery, statusParam);
+  const {
+    data: tournamentsData,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteTournaments(debouncedSearchQuery, statusParam);
 
-  const tournaments = tournamentsData?.data?.tournaments || [];
-  const totalPages = tournamentsData?.pagination?.totalPages || 1;
-  const totalItems = tournamentsData?.pagination?.totalItems;
+  const tournaments =
+    tournamentsData?.pages.flatMap((page) => page.data?.tournaments ?? []) ?? [];
+  const totalItems = tournamentsData?.pages[0]?.pagination?.totalItems;
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('en-US', {
@@ -76,15 +78,15 @@ export default function Tournaments() {
 
   return (
     <PageTransition>
-      <div className="flex flex-col gap-6 w-full h-full font-sans select-none">
+      <div data-fit-screen className="flex flex-col gap-3 w-full h-full font-sans select-none">
         
         {/* Top Header Controls */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
           
           {/* Left Title + Search pill bar */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full sm:max-w-[500px]">
-            <div className="flex flex-col items-start gap-1 shrink-0">
-              <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full sm:max-w-[680px]">
+            <div className="flex items-center gap-3 shrink-0">
+              <h1 className="font-poppins font-bold sm:text-[30px] text-[28px] sm:leading-[40px] leading-[36px] text-[#083F92] m-0">
                 Tournaments
               </h1>
               <CountBadge
@@ -108,7 +110,7 @@ export default function Tournaments() {
           {/* Right Button: Add Tournament */}
           <Link
             href="/tournaments/create"
-            className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shrink-0 shadow-sm w-full sm:w-auto justify-center cursor-pointer"
+            className="flex items-center gap-2.5 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[56px] shrink-0 shadow-sm w-full sm:w-auto justify-center cursor-pointer"
           >
             <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md">
               <Plus className="w-5 h-5" />
@@ -141,13 +143,13 @@ export default function Tournaments() {
         </div>
 
         {/* Main List Container Card */}
-        <div className="w-full bg-white border border-[#DADADA] rounded-[24px] shadow-sm flex flex-col justify-between overflow-hidden flex-1 relative min-h-[640px] p-6 mb-8 pb-20">
+        <div className="w-full bg-white border border-[#DADADA] rounded-[24px] shadow-sm flex flex-col justify-between overflow-hidden flex-1 relative min-h-[360px] p-6">
           
           {/* Tournament List Stack */}
-          <div className="flex flex-col gap-3 w-full">
-            {isLoading || isFetching ? (
+          <div className="flex flex-col gap-3 w-full flex-1 min-h-0 overflow-y-auto pr-1 app-scroll">
+            {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <div key={`skeleton-${i}`} className="w-full min-h-[107px] py-4 md:py-0 bg-white border border-[#083F92]/30 rounded-[12px] flex flex-col md:flex-row md:items-center justify-between px-6 gap-4 min-w-0 overflow-hidden">
+                <div key={`skeleton-${i}`} className="w-full shrink-0 min-h-[107px] py-4 md:py-0 bg-white border border-[#083F92]/30 rounded-[12px] flex flex-col md:flex-row md:items-center justify-between px-6 gap-4 min-w-0 overflow-hidden">
                   <div className="flex items-center gap-4 min-w-0 flex-1">
                     <Skeleton className="w-[40px] h-[40px] rounded-full shrink-0" />
                     <div className="flex flex-col gap-2 min-w-0 flex-1">
@@ -167,7 +169,7 @@ export default function Tournaments() {
                 <Link 
                   key={t._id}
                   href={`/tournaments/${t._id}`}
-                  className="w-full min-h-[107px] py-4 md:py-0 bg-white border border-[#083F92]/30 rounded-[12px] shadow-[0px_4px_4px_rgba(0,0,0,0.05)] hover:shadow-[0px_4px_4px_rgba(0,0,0,0.1)] transition-all duration-150 flex flex-col md:flex-row md:items-center justify-between px-6 cursor-pointer gap-4 min-w-0 overflow-hidden"
+                  className="w-full shrink-0 min-h-[107px] py-4 md:py-0 bg-white border border-[#083F92]/30 rounded-[12px] shadow-[0px_4px_4px_rgba(0,0,0,0.05)] hover:shadow-[0px_4px_4px_rgba(0,0,0,0.1)] transition-all duration-150 flex flex-col md:flex-row md:items-center justify-between px-6 cursor-pointer gap-4 min-w-0 overflow-hidden"
                 >
                   {/* Left Card Details */}
                   <div className="flex items-start md:items-center gap-4 min-w-0 flex-1">
@@ -269,17 +271,16 @@ export default function Tournaments() {
                 />
               </div>
             )}
+            {!isLoading && (
+              <InfiniteScrollFooter
+                hasNextPage={Boolean(hasNextPage)}
+                isFetchingNextPage={isFetchingNextPage}
+                fetchNextPage={fetchNextPage}
+                itemCount={tournaments.length}
+                label="tournament"
+              />
+            )}
           </div>
-
-          {/* Floating Pagination Bar (Bottom Right) */}
-          {totalPages > 1 && (
-            <Pagination 
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-              className="absolute right-[24px] bottom-[16px]"
-            />
-          )}
 
         </div>
 

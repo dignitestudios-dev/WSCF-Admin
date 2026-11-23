@@ -91,7 +91,28 @@ export interface PreviewDivision {
   teams: PreviewTeam[];
 }
 
+/** The review of an upload; saved with the published results so it can be read again. */
+export interface ReviewReport {
+  playersInFiles: number;
+  matchedCount: number;
+  notMatchedCount: number;
+  withdrawnCount: number;
+  /** Entries beyond the first for a player listed more than once. */
+  repeatedCount?: number;
+  participantCount: number;
+  seasonParticipantCount: number;
+  seasonLabel: string;
+  /** In our system, found by name, but not registered for this tournament. */
+  notRegistered: { name: string; division: string }[];
+  /** Not in our system; ignored apart from the printed document. */
+  notFound: { name: string; division: string }[];
+  /** Listed again in the files; only the first entry counts. */
+  repeated?: { name: string; division: string }[];
+  unresolvedTeams: { teamCode: string; division: string }[];
+}
+
 export interface ResultPreview {
+  report: ReviewReport;
   /** The draft results document, base64. Built exactly as publishing builds it. */
   draftPdf: string;
   /** The highlight colours the draft uses; sent back so publishing keeps them. */
@@ -115,6 +136,8 @@ export interface PublishedResults {
   seasonLabel: string;
   tournamentDirector: string | null;
   tournamentHost?: string | null;
+  /** Absent on results published before the review was kept. */
+  report?: ReviewReport | null;
   publishedAt: string | null;
   /** queued and processing both mean "still working". */
   status: 'queued' | 'processing' | 'published' | 'failed';

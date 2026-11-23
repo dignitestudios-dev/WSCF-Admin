@@ -1,11 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/lib/toast';
 import { tournamentService } from '../services/tournament.service';
+import { LIST_BATCH_SIZE, useInfiniteList } from '@/hooks/use-infinite-list';
 
 export function useTournaments(page: number, limit: number, search: string, status?: string) {
   return useQuery({
     queryKey: ['tournaments', page, limit, search, status],
     queryFn: () => tournamentService.getTournaments(page, limit, search, status),
+  });
+}
+
+export function useInfiniteTournaments(search: string, status?: string) {
+  return useInfiniteList({
+    queryKey: ['tournaments', 'infinite', { search, status }],
+    fetchPage: (page) =>
+      tournamentService.getTournaments(page, LIST_BATCH_SIZE, search, status),
   });
 }
 

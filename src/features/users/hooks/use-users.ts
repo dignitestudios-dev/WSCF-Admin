@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userService, type EmailVerifiedFilter } from '../services/user.service';
+import { LIST_BATCH_SIZE, useInfiniteList } from '@/hooks/use-infinite-list';
 
 export function useUsers(
   page: number,
@@ -11,6 +12,16 @@ export function useUsers(
     queryKey: ['users', { page, limit, search, emailVerified }],
     queryFn: () => userService.getUsers(page, limit, search, emailVerified),
     staleTime: 5 * 60 * 1000,
+  });
+}
+
+/** The users list, a batch at a time as it is scrolled. */
+export function useInfiniteUsers(search: string = '', emailVerified: EmailVerifiedFilter = 'all') {
+  return useInfiniteList({
+    // Under 'users' so the mutations that invalidate ['users'] refresh it too.
+    queryKey: ['users', 'infinite', { search, emailVerified }],
+    fetchPage: (page) =>
+      userService.getUsers(page, LIST_BATCH_SIZE, search, emailVerified),
   });
 }
 

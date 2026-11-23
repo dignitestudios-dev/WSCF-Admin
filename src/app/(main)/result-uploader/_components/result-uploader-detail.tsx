@@ -27,6 +27,7 @@ import {
   ResultFileBox,
   type DivisionOption,
 } from '@/features/results/components/result-file-box';
+import { ResultReportPanel } from '@/features/results/components/result-report';
 import { ResultPreviewPanel } from '@/features/results/components/result-preview';
 import { PlayerHighlightPanel } from '@/features/results/components/player-highlight-panel';
 import { AttachmentBox } from '@/features/results/components/attachment-box';
@@ -623,6 +624,12 @@ export default function ResultUploaderDetail({
                     </div>
                   ))}
                 </div>
+
+                {/* The review the admin saw before publishing, kept with the
+                    results. Results published before it was saved have none. */}
+                {published?.report ? (
+                  <ResultReportPanel report={published.report} published />
+                ) : null}
 
                 {published?.pdfUrl ? (
                   <div className="flex flex-col gap-3">

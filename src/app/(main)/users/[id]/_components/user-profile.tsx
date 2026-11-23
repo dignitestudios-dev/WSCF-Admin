@@ -30,8 +30,8 @@ import { AssignTeamDialog } from '@/features/users/components/assign-team-dialog
 import { teamLabel } from '@/features/teams/services/team.service';
 import { toast } from '@/lib/toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useUserTournamentHistory } from '@/features/tournaments/hooks/use-user-tournament-history';
-import { Pagination } from '@/components/ui/pagination';
+import { useInfiniteUserTournamentHistory } from '@/features/tournaments/hooks/use-user-tournament-history';
+import { InfiniteScrollFooter } from '@/components/ui/infinite-scroll-footer';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { EmailVerifiedBadge } from '@/components/ui/email-verified-badge';
@@ -51,22 +51,20 @@ export default function UserProfile() {
   const id = params?.id as string;
   const [activeTab, setActiveTab] = useState<'basic' | 'tournaments'>('basic');
   const [tournamentFilter, setTournamentFilter] = useState<'Upcoming' | 'Completed'>('Upcoming');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showEditRatingDialog, setShowEditRatingDialog] = useState(false);
   const [showEditSigmaDialog, setShowEditSigmaDialog] = useState(false);
   const [showAssignTeamDialog, setShowAssignTeamDialog] = useState(false);
 
-  const { data: historyData, isLoading: isLoadingHistory } = useUserTournamentHistory(
-    id,
-    tournamentFilter.toLowerCase(),
-    currentPage,
-    itemsPerPage
-  );
+  const {
+    data: historyData,
+    isLoading: isLoadingHistory,
+    hasNextPage: hasMoreHistory,
+    isFetchingNextPage: isFetchingMoreHistory,
+    fetchNextPage: fetchMoreHistory,
+  } = useInfiniteUserTournamentHistory(id, tournamentFilter.toLowerCase());
 
-  const historyList = historyData?.data?.history || [];
-  const totalPages = historyData?.pagination?.totalPages || 1;
+  const historyList = historyData?.pages.flatMap((page) => page.data?.history ?? []) ?? [];
 
   const { data, isLoading } = useUserDetails(id);
   // Resolved below once the row loads: deactivation applies to the account,
@@ -548,7 +546,6 @@ export default function UserProfile() {
                         key={filterVal}
                         onClick={() => {
                           setTournamentFilter(filterVal);
-                          setCurrentPage(1);
                         }}
                         className={`px-6 h-[44px] rounded-[100px] border-4 border-[#F4F4F4] font-poppins font-semibold text-[14px] leading-[19px] flex items-center justify-center transition-all ${isActive
                           ? 'bg-[#083F92] text-white border-transparent'
@@ -561,7 +558,9 @@ export default function UserProfile() {
                   })}
                 </div>
 
-                {/* Sub Tournaments cards stack */}
+                {/* The list scrolls inside this box so the profile header and
+                    the tabs above stay on screen. */}
+                <div className="w-full max-h-[65vh] overflow-y-auto pr-1 app-scroll">
                 <div className="flex flex-col gap-3 w-full">
                   {isLoadingHistory ? (
                     <div className="text-center py-8 text-[#787878] font-poppins">Loading tournaments...</div>
@@ -616,17 +615,17 @@ export default function UserProfile() {
                     <EmptyState icon={Trophy} title="Nothing in this status" description="This player has no tournaments here yet." />
                   )}
                 </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex justify-end mt-4">
-                    <Pagination
-                      currentPage={currentPage}
-                      totalPages={totalPages}
-                      onPageChange={setCurrentPage}
-                    />
-                  </div>
+                {!isLoadingHistory && (
+                  <InfiniteScrollFooter
+                    hasNextPage={Boolean(hasMoreHistory)}
+                    isFetchingNextPage={isFetchingMoreHistory}
+                    fetchNextPage={fetchMoreHistory}
+                    itemCount={historyList.length}
+                    label="tournament"
+                  />
                 )}
+                </div>
+
 
               </div>
             )}

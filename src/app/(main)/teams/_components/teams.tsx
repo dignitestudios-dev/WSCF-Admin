@@ -6,12 +6,12 @@ import { format } from 'date-fns';
 import { FileSpreadsheet, Loader2, Pencil, Trash2, UsersRound } from 'lucide-react';
 import { PageTransition } from '@/components/animations/page-transition';
 import { SearchInput } from '@/components/ui/search-input';
-import { Pagination } from '@/components/ui/pagination';
+import { InfiniteScrollFooter } from '@/components/ui/infinite-scroll-footer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CountBadge } from '@/components/ui/count-badge';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ActionIconButton, ActionPillButton } from '@/components/ui/action-button';
-import { useDeleteTeam, useTeams } from '@/features/teams/hooks/use-teams';
+import { useDeleteTeam, useInfiniteTeams } from '@/features/teams/hooks/use-teams';
 import { useTeamExport } from '@/features/teams/hooks/use-team-export';
 import { Team, teamLabel } from '@/features/teams/services/team.service';
 import { CreateTeamDialog } from '@/features/teams/components/create-team-dialog';
@@ -19,13 +19,10 @@ import { EditTeamDialog } from '@/features/teams/components/edit-team-dialog';
 import { useListParams } from '@/hooks/use-list-params';
 import { Highlight } from '@/components/ui/highlight';
 
-const ITEMS_PER_PAGE = 10;
 
 export default function Teams() {
   const router = useRouter();
   const {
-    page: currentPage,
-    setPage: setCurrentPage,
     searchInput: searchQuery,
     setSearchInput: setSearchQuery,
     search: debouncedSearch,
@@ -35,22 +32,19 @@ export default function Teams() {
   const [teamToEdit, setTeamToEdit] = useState<Team | null>(null);
   const [teamToDelete, setTeamToDelete] = useState<Team | null>(null);
 
-  const { data, isLoading } = useTeams(currentPage, ITEMS_PER_PAGE, debouncedSearch);
+  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    useInfiniteTeams(debouncedSearch);
   const { mutateAsync: deleteTeam, isPending: isDeleting } = useDeleteTeam();
   const { exportTeam, exportingId } = useTeamExport();
 
-  const teams = data?.data?.teams || [];
-  const totalPages = data?.pagination?.totalPages || 1;
-  const totalItems = data?.pagination?.totalItems;
+  const teams = data?.pages.flatMap((page) => page.data?.teams ?? []) ?? [];
+  const totalItems = data?.pages[0]?.pagination?.totalItems;
 
   const handleDelete = async () => {
     if (!teamToDelete) return;
     try {
       await deleteTeam(teamToDelete._id);
       setTeamToDelete(null);
-      // Deleting the last row of the last page would otherwise strand the view
-      // on a page that no longer exists.
-      if (teams.length === 1 && currentPage > 1) setCurrentPage((page) => page - 1);
     } catch {
       // surfaced by the mutation's toast
     }
@@ -58,12 +52,12 @@ export default function Teams() {
 
   return (
     <PageTransition>
-      <div className="flex h-full w-full flex-col gap-6 font-sans select-none">
+      <div data-fit-screen className="flex h-full w-full flex-col gap-3 font-sans select-none">
         {/* Header: title, search, create */}
         <div className="flex w-full flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-          <div className="flex w-full flex-col gap-4 sm:max-w-[500px] sm:flex-row sm:items-center sm:gap-6">
+          <div className="flex w-full flex-col gap-4 sm:max-w-[680px] sm:flex-row sm:items-center sm:gap-6">
             <div className="flex shrink-0 flex-col items-start gap-1">
-              <h1 className="m-0 font-poppins text-[28px] font-bold leading-[36px] text-[#083F92] sm:text-[42px] sm:leading-[63px]">
+              <h1 className="m-0 font-poppins text-[28px] font-bold leading-[36px] text-[#083F92] sm:text-[30px] sm:leading-[40px]">
                 Teams
               </h1>
               <CountBadge count={totalItems} label="team" isLoading={isLoading} filtered={Boolean(debouncedSearch)} />
@@ -86,10 +80,10 @@ export default function Teams() {
         </div>
 
         {/* Table */}
-        <div className="relative mb-8 flex min-h-[600px] w-full flex-1 flex-col justify-between overflow-hidden rounded-[24px] border border-[#DADADA] bg-white pb-20 shadow-sm">
-          <div className="w-full overflow-x-auto">
+        <div className="relative flex min-h-[360px] w-full flex-1 flex-col justify-between overflow-hidden rounded-[24px] border border-[#DADADA] bg-white shadow-sm">
+          <div className="w-full min-h-0 flex-1 overflow-auto app-scroll">
             <table className="w-full border-collapse">
-              <thead>
+              <thead className="sticky top-0 z-10">
                 <tr className="h-[50px] bg-[#083F92] text-left font-poppins text-[13px] font-semibold text-white">
                   <th className="w-[70px] px-6 py-3 font-semibold">No</th>
                   <th className="w-[130px] px-6 py-3 font-semibold">Team Code</th>
@@ -127,7 +121,7 @@ export default function Teams() {
                 ) : teams.length > 0 ? (
                   teams.map((team, index) => {
                     const isEven = index % 2 !== 0;
-                    const rowNumber = (currentPage - 1) * ITEMS_PER_PAGE + index + 1;
+                    const rowNumber = index + 1;
 
                     return (
                       <tr
@@ -218,17 +212,17 @@ export default function Teams() {
                 )}
               </tbody>
             </table>
+            {!isLoading && (
+            <InfiniteScrollFooter
+            hasNextPage={Boolean(hasNextPage)}
+            isFetchingNextPage={isFetchingNextPage}
+            fetchNextPage={fetchNextPage}
+            itemCount={teams.length}
+            label="team"
+            />
+            )}
           </div>
 
-          {!isLoading && teams.length > 0 && (
-            <div className="absolute bottom-0 left-0 flex w-full items-center justify-end gap-4 border-t border-[#DADADA]/40 bg-white px-6 py-4">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
-            </div>
-          )}
         </div>
       </div>
 

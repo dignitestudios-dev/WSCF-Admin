@@ -6,10 +6,10 @@ import {
 } from 'lucide-react';
 import { SearchInput } from '@/components/ui/search-input';
 import Link from 'next/link';
-import { Pagination } from '@/components/ui/pagination';
+import { InfiniteScrollFooter } from '@/components/ui/infinite-scroll-footer';
 import { useDebounce } from '@/hooks/use-debounce';
-import { useTournaments } from '@/features/tournaments/hooks/use-tournaments';
-import { useGetTournamentParticipants } from '@/features/tournaments/hooks/use-get-tournament-participants';
+import { useInfiniteTournaments } from '@/features/tournaments/hooks/use-tournaments';
+import { useInfiniteTournamentParticipants } from '@/features/tournaments/hooks/use-get-tournament-participants';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CountBadge } from '@/components/ui/count-badge';
@@ -23,8 +23,6 @@ import { Highlight } from '@/components/ui/highlight';
 
 export default function CurrentEnrolledUsers() {
   const {
-    page: currentPage,
-    setPage: setCurrentPage,
     searchInput: searchQuery,
     setSearchInput: setSearchQuery,
     search: debouncedSearchQuery,
@@ -35,17 +33,30 @@ export default function CurrentEnrolledUsers() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [tournamentSearch, setTournamentSearch] = useState('');
   const debouncedTournamentSearch = useDebounce(tournamentSearch, 500);
-  const [tournamentPage, setTournamentPage] = useState(1);
 
-  const { data: tournamentsData, isLoading: isTournamentsLoading } = useTournaments(tournamentPage, 10, debouncedTournamentSearch);
-  const tournaments = tournamentsData?.data?.tournaments || [];
-  const totalTournamentPages = tournamentsData?.pagination?.totalPages || 1;
+  const {
+    data: tournamentsData,
+    isLoading: isTournamentsLoading,
+    hasNextPage: hasMoreTournaments,
+    isFetchingNextPage: isFetchingMoreTournaments,
+    fetchNextPage: fetchMoreTournaments,
+  } = useInfiniteTournaments(debouncedTournamentSearch);
+  const tournaments =
+    tournamentsData?.pages.flatMap((page) => page.data?.tournaments ?? []) ?? [];
 
-  const { data: participantsData, isLoading: isParticipantsLoading } = useGetTournamentParticipants(selectedTournamentId, currentPage, 10, debouncedSearchQuery);
-  const participants = participantsData?.data?.participants || [];
-  const totalPages = participantsData?.pagination?.totalPages || 1;
+  const {
+    data: participantsData,
+    isLoading: isParticipantsLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteTournamentParticipants(selectedTournamentId, debouncedSearchQuery);
+  const participants: any[] =
+    participantsData?.pages.flatMap((page) => page.data?.participants ?? []) ?? [];
   // Nothing to count until a tournament has been picked.
-  const totalParticipants = selectedTournamentId ? participantsData?.pagination?.totalItems : undefined;
+  const totalParticipants = selectedTournamentId
+    ? participantsData?.pages[0]?.pagination?.totalItems
+    : undefined;
 
   // In case selectedTournament is not in the current paginated list, we could store it separately.
   // But for now, we'll try to find it, or we could just save its title in state.
@@ -84,17 +95,16 @@ export default function CurrentEnrolledUsers() {
   const handleSelectTournament = (id: string, title: string) => {
     setSelectedTournamentId(id);
     setSelectedTournamentTitle(title);
-    setCurrentPage(1);
     setIsDialogOpen(false);
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full h-full font-sans select-none pb-12">
+    <div data-fit-screen className="flex flex-col gap-3 w-full h-full font-sans select-none">
       
       {/* Top Title & Action Button Row */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
         <div className="flex flex-col items-start gap-1">
-          <h1 className="font-poppins font-bold sm:text-[42px] text-[28px] sm:leading-[63px] leading-[36px] text-[#083F92] m-0">
+          <h1 className="font-poppins font-bold sm:text-[30px] text-[28px] sm:leading-[40px] leading-[36px] text-[#083F92] m-0">
             Current Enrolled Users
           </h1>
           <CountBadge
@@ -109,7 +119,7 @@ export default function CurrentEnrolledUsers() {
         <button 
           onClick={handleExportCSV}
           disabled={isExporting}
-          className="flex items-center gap-2 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[72px] shadow-sm w-full md:w-[174px] justify-center shrink-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-[15px] py-[15px] bg-[#083F92]/10 hover:bg-[#083F92]/15 text-[#000000] rounded-[100px] transition-colors focus:outline-none h-[56px] shadow-sm w-full md:w-[174px] justify-center shrink-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <div className="w-[42px] h-[42px] bg-[#083F92] rounded-full flex items-center justify-center text-white relative shadow-md shrink-0">
             <FileSpreadsheet className="w-5 h-5" />
@@ -145,14 +155,14 @@ export default function CurrentEnrolledUsers() {
       </div>
 
       {/* Table Main Container */}
-      <div className="w-full bg-white border border-[#DADADA] rounded-[24px] shadow-sm flex flex-col overflow-hidden">
+      <div className="w-full bg-white border border-[#DADADA] rounded-[24px] shadow-sm flex flex-col overflow-hidden flex-1 min-h-[360px]">
         
         {/* Scrollable Table Area */}
-        <div className="overflow-x-auto w-full min-h-[400px]">
+        <div className="overflow-auto w-full flex-1 min-h-0 app-scroll">
           <table className="w-full border-collapse">
             
             {/* Table Header */}
-            <thead>
+            <thead className="sticky top-0 z-10">
               <tr className="bg-[#083F92] text-white text-left h-[50px] font-poppins font-semibold text-[13px]">
                 <th className="px-6 py-3 font-semibold w-[100px]">UserId</th>
                 <th className="px-6 py-3 font-semibold w-[120px]">Name</th>
@@ -253,20 +263,19 @@ export default function CurrentEnrolledUsers() {
             </tbody>
 
           </table>
+          {selectedTournamentId && !isParticipantsLoading && (
+          <InfiniteScrollFooter
+          hasNextPage={Boolean(hasNextPage)}
+          isFetchingNextPage={isFetchingNextPage}
+          fetchNextPage={fetchNextPage}
+          itemCount={participants.length}
+          label="participant"
+          />
+          )}
         </div>
 
       </div>
 
-      {/* Pagination Row */}
-      {totalPages > 1 && (
-        <div className="flex justify-end items-center w-full mt-4">
-          <Pagination 
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-          />
-        </div>
-      )}
 
       {/* Tournament Selection Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -287,7 +296,7 @@ export default function CurrentEnrolledUsers() {
               />
             </div>
 
-            <div className="flex flex-col gap-2 overflow-y-auto min-h-[300px] flex-1">
+            <div className="flex flex-col gap-2 overflow-y-auto min-h-[300px] flex-1 app-scroll">
               {isTournamentsLoading ? (
                 Array.from({ length: 4 }).map((_, i) => (
                   <div key={`skel-${i}`} className="flex items-center justify-between gap-4 p-4 bg-[#083F92]/5 rounded-[12px] w-full">
@@ -313,17 +322,17 @@ export default function CurrentEnrolledUsers() {
                   </div>
                 ))
               )}
-            </div>
 
-            {totalTournamentPages > 1 && (
-              <div className="flex justify-end shrink-0 pt-4 border-t border-[#EEEEEE]">
-                <Pagination 
-                  currentPage={tournamentPage}
-                  totalPages={totalTournamentPages}
-                  onPageChange={setTournamentPage}
+              {!isTournamentsLoading && (
+                <InfiniteScrollFooter
+                  hasNextPage={Boolean(hasMoreTournaments)}
+                  isFetchingNextPage={isFetchingMoreTournaments}
+                  fetchNextPage={fetchMoreTournaments}
+                  itemCount={tournaments.length}
+                  label="tournament"
                 />
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
