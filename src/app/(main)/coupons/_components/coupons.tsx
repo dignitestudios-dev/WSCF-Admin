@@ -120,8 +120,8 @@ export default function Coupons() {
       <div data-fit-screen className="flex flex-col gap-3 w-full h-full font-sans select-none">
         {/* Top Header Controls */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 w-full sm:max-w-none">
-            <div className="flex items-center gap-3 shrink-0">
+          <div className="flex min-w-0 w-full flex-1 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-3">
+            <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
               <h1 className="font-poppins font-bold sm:text-[34px] text-[26px] sm:leading-[52px] leading-[34px] text-[#083F92] m-0">
                 Coupons &amp; Organizations
               </h1>

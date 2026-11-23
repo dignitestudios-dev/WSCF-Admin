@@ -51,7 +51,7 @@ export function Sidebar({ onClose }: SidebarProps) {
   ];
 
   const generalNav = [
-    { name: 'Push Notifications', href: '/notifications', icon: Bell },
+    { name: 'Announcements', href: '/notifications', icon: Bell },
     { name: 'Logout', href: '/logout', icon: LogOut },
   ];
 
