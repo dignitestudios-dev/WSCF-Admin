@@ -61,7 +61,7 @@ export function ResultFileBox({
           ref={inputRef}
           type="file"
           multiple
-          accept=".csv"
+          accept=".csv,.xlsx"
           className="hidden"
           onChange={(event) => {
             const chosen = Array.from(event.target.files ?? []);
@@ -170,7 +170,7 @@ export function ResultFileBox({
               {files.length > 0 ? 'Add more files' : 'Upload files'}
             </span>
             <span className="font-poppins text-[11px] font-normal text-[#636363]">
-              CSV — select several at once
+              CSV or XLSX (one format only) — select several at once
             </span>
           </div>
         </button>

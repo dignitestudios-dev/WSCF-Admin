@@ -269,15 +269,33 @@ export default function ResultUploaderDetail({
     setter: React.Dispatch<React.SetStateAction<StagedFile[]>>,
     picked: File[]
   ) => {
-    // Results are read from CSV files only; anything else is refused here, and
-    // again by the server.
-    const rejected = picked.filter((file) => !/\.csv$/i.test(file.name));
-    const chosen = picked.filter((file) => /\.csv$/i.test(file.name));
-    if (rejected.length > 0) {
+    // Results are read from CSV or XLSX files, and every file in one upload
+    // must share a format. Checked here and again by the server.
+    const formatOf = (name: string) =>
+      /\.csv$/i.test(name) ? 'csv' : /\.xlsx$/i.test(name) ? 'xlsx' : null;
+
+    const unsupported = picked.filter((file) => !formatOf(file.name));
+    if (unsupported.length > 0) {
       toast.error(
-        `Only CSV files are supported. Not added: ${rejected.map((f) => f.name).join(', ')}`
+        `Only CSV (.csv) or Excel (.xlsx) files are supported. Not added: ${unsupported.map((f) => f.name).join(', ')}`
       );
     }
+
+    const supported = picked.filter((file) => formatOf(file.name));
+    const staged = [...individualFiles, ...teamFiles];
+    const required = staged.length
+      ? formatOf(staged[0].file.name)
+      : supported.length
+        ? formatOf(supported[0].name)
+        : null;
+
+    const mismatched = supported.filter((f) => formatOf(f.name) !== required);
+    if (mismatched.length > 0) {
+      toast.error(
+        `All files must be the same format (${required?.toUpperCase()}). Not added: ${mismatched.map((f) => f.name).join(', ')}`
+      );
+    }
+    const chosen = supported.filter((f) => formatOf(f.name) === required);
     if (chosen.length === 0) return;
 
     const duplicates: string[] = [];
