@@ -58,6 +58,7 @@ const signatureOf = (p: PublishPayload): string =>
     team: p.teamFiles.map((f) => [f.id, f.divisionId]),
     trophies: p.trophies,
     director: p.director ?? '',
+    seasonParticipantCount: p.seasonParticipantCount ?? null,
     excludeWithdrawn: p.excludeWithdrawn,
     highlights: p.highlights,
     attachments: p.attachments.map((a) => a.id),
@@ -111,6 +112,7 @@ export default function ResultUploaderDetail({
 
   const [director, setDirector] = useState('');
   const [host, setHost] = useState('');
+  const [seasonParticipantCount, setSeasonParticipantCount] = useState('');
   const [individualFiles, setIndividualFiles] = useState<StagedFile[]>([]);
   const [teamFiles, setTeamFiles] = useState<StagedFile[]>([]);
   // Each division has its own number of individual and team trophies.
@@ -354,6 +356,13 @@ export default function ResultUploaderDetail({
   };
 
 
+  const parsedSeasonParticipantCount =
+    seasonParticipantCount.trim() !== '' &&
+    Number.isInteger(Number(seasonParticipantCount)) &&
+    Number(seasonParticipantCount) >= 0
+      ? Number(seasonParticipantCount)
+      : undefined;
+
   const payload = (overrides: Partial<PublishPayload> = {}): PublishPayload => ({
     individualFiles,
     teamFiles,
@@ -364,6 +373,7 @@ export default function ResultUploaderDetail({
     divisionLabels,
     director,
     host,
+    seasonParticipantCount: parsedSeasonParticipantCount,
     palette,
     excludeWithdrawn,
     highlights,
@@ -425,7 +435,18 @@ export default function ResultUploaderDetail({
       printable.has(entry.name)
     );
     setHighlights(keptHighlights);
-    setPreviewSignature(signatureOf({ ...sent, highlights: keptHighlights }));
+    const effectiveSeasonCount =
+      sent.seasonParticipantCount ?? response.data.seasonParticipantCount;
+    if (sent.seasonParticipantCount === undefined) {
+      setSeasonParticipantCount(String(response.data.seasonParticipantCount));
+    }
+    setPreviewSignature(
+      signatureOf({
+        ...sent,
+        seasonParticipantCount: effectiveSeasonCount,
+        highlights: keptHighlights,
+      })
+    );
   };
 
   /**
@@ -901,6 +922,30 @@ export default function ResultUploaderDetail({
                         />
                         <p className="font-poppins text-[11px] text-[#8C8C8C]">
                           Saved with the results. Not printed on the document.
+                        </p>
+                      </div>
+
+                      <div className="flex max-w-[420px] flex-col gap-2">
+                        <Label className="font-poppins text-[13px] font-medium text-[#181818]">
+                          Season Participants
+                          {preview?.seasonLabel ? ` (${preview.seasonLabel})` : ' (to date)'}
+                        </Label>
+                        <Input
+                          type="number"
+                          min={0}
+                          step={1}
+                          value={seasonParticipantCount}
+                          disabled={isPublishing}
+                          placeholder="Auto-calculated on file check"
+                          onChange={(event) =>
+                            setSeasonParticipantCount(event.target.value)
+                          }
+                          className="h-11 rounded-full border-[#3D3775] px-4 font-poppins"
+                        />
+                        <p className="font-poppins text-[11px] text-[#8C8C8C]">
+                          Auto-counted from registrations up to this tournament. Edit to
+                          override the number printed on the PDF (leave blank to
+                          auto-calculate).
                         </p>
                       </div>
 

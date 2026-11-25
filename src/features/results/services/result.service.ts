@@ -199,6 +199,7 @@ function buildFormData({
   divisionLabels,
   director,
   host,
+  seasonParticipantCount,
   palette,
   excludeWithdrawn,
   highlights,
@@ -210,6 +211,7 @@ function buildFormData({
   divisionLabels: Record<string, string>;
   director?: string;
   host?: string;
+  seasonParticipantCount?: number;
   palette?: string[] | null;
   excludeWithdrawn: boolean;
   highlights: PlayerHighlight[];
@@ -240,6 +242,9 @@ function buildFormData({
 
   if (director) form.append('tournamentDirector', director);
   if (host) form.append('tournamentHost', host);
+  if (typeof seasonParticipantCount === 'number') {
+    form.append('seasonParticipantCount', String(seasonParticipantCount));
+  }
   if (palette && palette.length > 0) form.append('palette', JSON.stringify(palette));
 
   form.append('excludeWithdrawn', String(excludeWithdrawn));
@@ -261,6 +266,7 @@ export interface PublishPayload {
   divisionLabels: Record<string, string>;
   director?: string;
   host?: string;
+  seasonParticipantCount?: number;
   palette?: string[] | null;
   excludeWithdrawn: boolean;
   highlights: PlayerHighlight[];
