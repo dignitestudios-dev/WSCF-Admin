@@ -307,6 +307,13 @@ export const resultService = {
     return response.data;
   },
 
+  getSeasonCount: async (
+    tournamentId: string
+  ): Promise<{ data: { seasonParticipantCount: number; seasonLabel: string } }> => {
+    const response = await axiosInstance.get(`/result/${tournamentId}/season-count`);
+    return response.data;
+  },
+
   /**
    * The entry list for one division, ready to import into WinTD.
    *

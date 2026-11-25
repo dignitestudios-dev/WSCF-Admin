@@ -24,6 +24,17 @@ export function usePublishedResults(tournamentId: string | null) {
   });
 }
 
+export function useSeasonParticipantCount(
+  tournamentId: string | null,
+  enabled = true
+) {
+  return useQuery({
+    queryKey: ['results', tournamentId, 'season-count'],
+    queryFn: () => resultService.getSeasonCount(tournamentId as string),
+    enabled: Boolean(tournamentId) && enabled,
+  });
+}
+
 export function usePreviewResults() {
   return useMutation({
     mutationFn: ({

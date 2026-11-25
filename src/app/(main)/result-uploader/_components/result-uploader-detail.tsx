@@ -35,6 +35,7 @@ import {
   usePreviewResults,
   usePublishResults,
   usePublishedResults,
+  useSeasonParticipantCount,
 } from '@/features/results/hooks/use-results';
 import {
   pairFilesByDivision,
@@ -113,6 +114,7 @@ export default function ResultUploaderDetail({
   const [director, setDirector] = useState('');
   const [host, setHost] = useState('');
   const [seasonParticipantCount, setSeasonParticipantCount] = useState('');
+  const [seasonCountEdited, setSeasonCountEdited] = useState(false);
   const [individualFiles, setIndividualFiles] = useState<StagedFile[]>([]);
   const [teamFiles, setTeamFiles] = useState<StagedFile[]>([]);
   // Each division has its own number of individual and team trophies.
@@ -164,6 +166,15 @@ export default function ResultUploaderDetail({
 
   const { data: publishedData } = usePublishedResults(selectedId);
   const published = publishedData?.data?.results ?? null;
+
+  const { data: seasonData } = useSeasonParticipantCount(selectedId, !published);
+
+  useEffect(() => {
+    const count = seasonData?.data?.seasonParticipantCount;
+    if (typeof count === 'number' && !seasonCountEdited) {
+      setSeasonParticipantCount(String(count));
+    }
+  }, [seasonData, seasonCountEdited]);
 
   const isWorking =
     published?.status === 'queued' || published?.status === 'processing';
@@ -928,7 +939,9 @@ export default function ResultUploaderDetail({
                       <div className="flex max-w-[420px] flex-col gap-2">
                         <Label className="font-poppins text-[13px] font-medium text-[#181818]">
                           Season Participants
-                          {preview?.seasonLabel ? ` (${preview.seasonLabel})` : ' (to date)'}
+                          {preview?.seasonLabel || seasonData?.data?.seasonLabel
+                            ? ` (${preview?.seasonLabel || seasonData?.data?.seasonLabel})`
+                            : ' (to date)'}
                         </Label>
                         <Input
                           type="number"
@@ -936,10 +949,11 @@ export default function ResultUploaderDetail({
                           step={1}
                           value={seasonParticipantCount}
                           disabled={isPublishing}
-                          placeholder="Auto-calculated on file check"
-                          onChange={(event) =>
-                            setSeasonParticipantCount(event.target.value)
-                          }
+                          placeholder="Loading..."
+                          onChange={(event) => {
+                            setSeasonCountEdited(true);
+                            setSeasonParticipantCount(event.target.value);
+                          }}
                           className="h-11 rounded-full border-[#3D3775] px-4 font-poppins"
                         />
                         <p className="font-poppins text-[11px] text-[#8C8C8C]">
